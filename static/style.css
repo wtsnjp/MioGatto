@@ -1,0 +1,81 @@
+/*
+
+Style for MioGatto
+
+Author: Takuto ASAKURA <takuto at is.s.u-tokyo.ac.jp>
+Version: 2021-03-26
+
+*/
+
+.main {
+    display: block;
+    width: 660px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.main mi {
+    cursor: pointer;
+}
+
+.sidebar-box {
+    background: #dcefff;
+}
+
+.sidebar-box-title {
+    font-size: 120%;
+    font-family: sans-serif;
+    background: #5fb3f5;
+    padding: 4px;
+    color: #FFF;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+.sidebar-box-body {
+    max-height: calc(100vh - 9em);  /* FIXME: shouldn't be a magic number */
+    overflow: auto;
+}
+
+.sidebar-box p {
+    padding: 4px 4px;
+    margin: 0;
+}
+
+.sidebar-box div.keep input {
+    display: block;
+    float: left;
+}
+
+.sidebar-box div.keep span.keep {
+    display: block;
+    overflow: hidden;
+}
+
+.container {
+    margin: 0 auto;
+    width: 1000px;
+    display: -webkit-flex;
+    display: flex;
+}
+
+.sidebar {
+    width: 320px;
+}
+
+.sidebar-item {
+    /* background-color: #e4b6b6; */
+    padding: 10px;
+    height: 95vh;
+    position: sticky;
+    top: 10px;
+    bottom: 10px;
+    z-index: 1;
+}
+
+.select-menu {
+    display: none;
+    list-style: none;
+    position: absolute;
+    background: #fff;
+}
