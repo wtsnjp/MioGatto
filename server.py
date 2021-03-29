@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # libraries
-from flask import Flask, request
+from flask import Flask, request, redirect
 import os
 import sys
 import re
@@ -143,6 +143,17 @@ def generate_html(paper_id, data_anno, tree):
     return html.decode('utf-8')
 
 
+def save_data(data_anno, anno_json):
+    with open(anno_json, 'w') as f:
+        json.dump(data_anno,
+                  f,
+                  ensure_ascii=False,
+                  indent=4,
+                  sort_keys=True,
+                  separators=(',', ': '))
+        f.write('\n')
+
+
 def main():
     # the web app
     app = Flask(__name__)
@@ -165,48 +176,45 @@ def main():
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
-        if request.method == 'POST':
-            res = request.form
-            updated = False
-
-            if res.get('action', '') == 'concept':
-                data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(
-                    res['concept'])
-                updated = True
-
-            elif res.get('action', '') == 'sog::add':
-                start_id, stop_id = res['start_id'], res['stop_id']
-                cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
-
-                # TODO: validate the span range
-                if not [start_id, stop_id] in cur_sog:
-                    cur_sog.append([start_id, stop_id])
-
-                updated = True
-
-            elif res.get('action', '') == 'sog::delete':
-                start_id, stop_id = res['start_id'], res['stop_id']
-                cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
-
-                cur_sog.remove([start_id, stop_id])
-
-                updated = True
-
-            else:
-                app.logger.warning('Received unknown action')
-
-            # if any update, save it
-            if updated:
-                with open(anno_json, 'w') as f:
-                    json.dump(data_anno,
-                              f,
-                              ensure_ascii=False,
-                              indent=4,
-                              sort_keys=True,
-                              separators=(',', ': '))
-                    f.write('\n')
-
         return generate_html(paper_id, data_anno, tree)
+
+    @app.route('/_concept', methods=['POST'])
+    def action_concept():
+        # register and save data_anno
+        res = request.form
+        data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
+        save_data(data_anno, anno_json)
+
+        # redirect
+        return redirect('/')
+
+    @app.route('/_add_sog', methods=['POST'])
+    def action_add_sog():
+        res = request.form
+        start_id, stop_id = res['start_id'], res['stop_id']
+        cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
+
+        # TODO: validate the span range
+        if not [start_id, stop_id] in cur_sog:
+            cur_sog.append([start_id, stop_id])
+
+        save_data(data_anno, anno_json)
+
+        # redirect
+        return redirect('/')
+
+    @app.route('/_delete_sog', methods=['POST'])
+    def action_delete_sog():
+        res = request.form
+        start_id, stop_id = res['start_id'], res['stop_id']
+        cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
+
+        cur_sog.remove([start_id, stop_id])
+
+        save_data(data_anno, anno_json)
+
+        # redirect
+        return redirect('/')
 
     @app.route('/mcdict.json', methods=['GET'])
     def mcdict_json():

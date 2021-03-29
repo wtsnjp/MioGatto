@@ -185,8 +185,7 @@ $(function() {
     let title = '<div class="sidebar-box-title">' + mi_id + '</div>'
 
     // construct the form with the candidate list
-    let hidden = `<input type="hidden" name="action" value="concept">
-<input type="hidden" name="mi_id" value="${mi_id}" />`;
+    let hidden = `<input type="hidden" name="mi_id" value="${mi_id}" />`;
     let radios = '';
 
     for(let concept_id in concept_cand) {
@@ -222,12 +221,13 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     //console.log(anno_box_content);
 
     // write the content
-    $('#anno-box').html(anno_box_content)
+    $('#anno-box').html(anno_box_content);
 
     // buttons by jquery-ui
     $('.sidebar-box input[type=submit]').button();
     $('.sidebar-box input[type=submit]').click(function() {
       localStorage['scroll_top'] = $(window).scrollTop();
+      $('#form-' + mi_id.escape_selector()).attr('action', '/_concept');
       $('#form-' + mi_id.escape_selector()).submit();
     });
 
@@ -331,13 +331,12 @@ $(function() {
 
         // post the data
         let post_data = {
-          'action': 'sog::add',
           'mi_id': sessionStorage['mi_id'],
           'start_id': start_id,
           'stop_id': stop_id
         };
 
-        $.when($.post('/', post_data))
+        $.when($.post('/_add_sog', post_data))
         .done(function() {
           // remove selection and the button
           selected_text.empty();
@@ -366,13 +365,12 @@ $(function() {
       function() {
         // post the data
         let post_data = {
-          'action': 'sog::delete',
           'mi_id': e.getAttribute('data-sog-mi'),
           'start_id': e.getAttribute('data-sog-start'),
           'stop_id': e.getAttribute('data-sog-stop'),
         };
 
-        $.when($.post('/', post_data))
+        $.when($.post('/_delete_sog', post_data))
         .done(function() {
           // remove selection and the button
           selected_text.empty();
