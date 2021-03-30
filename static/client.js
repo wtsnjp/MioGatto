@@ -143,6 +143,9 @@ $(function() {
     let idf = get_idf($('#' + s.mi_id.escape_selector()));
     let concept = get_concept(idf);
 
+    // no hilight if no concept has been asigned
+    if (concept == undefined) continue;
+
     // highlight it!
     sog_nodes.css('background-color', concept.color);
     sog_nodes.attr({
