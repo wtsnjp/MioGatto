@@ -70,7 +70,6 @@ Version: 2021-03-26
     position: sticky;
     top: 10px;
     bottom: 10px;
-    z-index: 1;
 }
 
 .select-menu {
@@ -78,4 +77,5 @@ Version: 2021-03-26
     list-style: none;
     position: absolute;
     background: #fff;
+    z-index: 1;
 }
