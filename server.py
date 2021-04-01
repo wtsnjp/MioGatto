@@ -246,7 +246,7 @@ def main():
                           separators=(',', ': '))
 
     app.debug = True
-    app.run(host='0.0.0.0', port=4100)
+    app.run(host='localhost', port=4100)
 
 
 if __name__ == '__main__':

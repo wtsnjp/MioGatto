@@ -42,7 +42,7 @@ On the other hand, the annotation data is not included in this repository due to
 Herein, `<paper id>` denotes the arXiv ID of the paper to annotate.
 
 1. Start the server: `python server.py <paper id>`
-2. Access to <http://0.0.0.0:4100/> with your browser.
+2. Access to <http://localhost:4100/> with your browser.
 3. Annotation with the Web interface.
 
 ### Annotation procedure
