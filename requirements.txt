@@ -1,8 +1,8 @@
 docopt==0.6.2
 Flask==1.1.2
-lxml==4.5.1
+lxml==4.6.3
 matplotlib==3.2.1
 numpy==1.19.0rc2
-PyYAML==5.3.1
+PyYAML==5.4.1
 seaborn==0.10.1
 sklearn==0.0
