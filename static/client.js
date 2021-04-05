@@ -304,6 +304,18 @@ $(function() {
         'top' : page_y - 55
       }).fadeIn(200).css('display', 'flex');
 
+      // ----- Action SoG add -----
+      let mi_id = sessionStorage['mi_id'];
+
+      // show it only if an mi with concept annotation selected
+      $('.select-menu .sog-add').css('display', 'none');
+      if(mi_id != undefined) {
+        let idf = get_idf($('#' + mi_id.escape_selector()));
+        let concept = get_concept(idf);
+        if(concept != undefined)
+          $('.select-menu .sog-add').css('display', 'inherit');
+      }
+
       // use jquery-ui
       $('.select-menu input[type=submit]').button();
 
@@ -334,7 +346,7 @@ $(function() {
 
         // post the data
         let post_data = {
-          'mi_id': sessionStorage['mi_id'],
+          'mi_id': mi_id,
           'start_id': start_id,
           'stop_id': stop_id
         };
@@ -353,7 +365,7 @@ $(function() {
         })
       });
 
-      // the delete function
+      // ----- Action SoG delete -----
       let e = selected_text.anchorNode.parentElement
 
       // show it only if SoG is selected
