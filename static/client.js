@@ -378,6 +378,8 @@ $(function() {
       $('.select-menu .sog-del').off('click');
       $('.select-menu .sog-del').on('click',
       function() {
+        localStorage['scroll_top'] = $(window).scrollTop();
+
         // post the data
         let post_data = {
           'mi_id': e.getAttribute('data-sog-mi'),
