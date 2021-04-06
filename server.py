@@ -182,8 +182,10 @@ def main():
     def action_concept():
         # register and save data_anno
         res = request.form
-        data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
-        save_data(data_anno, anno_json)
+
+        if res.get('concept'):
+            data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
+            save_data(data_anno, anno_json)
 
         # redirect
         return redirect('/')
