@@ -227,7 +227,6 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     $('#anno-box').html(anno_box_content);
 
     // buttons by jquery-ui
-    console.log($(`#form-${mi_id.escape_selector()} input:checked`).length > 0);
     $('.sidebar-box input[type=submit]').button();
     $('.sidebar-box input[type=submit]').click(function() {
       localStorage['scroll_top'] = $(window).scrollTop();

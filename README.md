@@ -23,9 +23,9 @@ In case you don't want to install the dependencies into your system, please cons
 All the components of MioGatto is included in this repository:
 
 * `lib/` contains the project library.
+* `server/` contains the implementation of the server.
 * `static/` contains the implementation of the client.
 * `tools/` contains our utility Python scripts.
-* `server.py` is the implementation of the server.
 
 ### Files not in this repository
 
@@ -41,7 +41,7 @@ On the other hand, the annotation data is not included in this repository due to
 
 Herein, `<paper id>` denotes the arXiv ID of the paper to annotate.
 
-1. Start the server: `python server.py <paper id>`
+1. Start the server: `python -m server <paper id>`
 2. Access to <http://localhost:4100/> with your browser.
 3. Annotation with the Web interface.
 
@@ -66,7 +66,7 @@ The Python scripts under the `tools` directory are mostly for the developers for
 The basic usage will be shown with:
 
 ```
-$ python tools/preprocess.py -h
+$ python -m tools.preprocess -h
 ```
 
 ### The analyser
@@ -74,19 +74,19 @@ $ python tools/preprocess.py -h
 To calculate agreements between the gold data and data by annotators, execute:
 
 ```
-$ python tools/analyzer.py --agreement=./annotators/<annotator>/<paper id>_anno.json <paper id>
+$ python -m tools.analyzer --agreement=./annotators/<annotator>/<paper id>_anno.json <paper id>
 ```
 
 For the basic analyses for gold data, execute:
 
 ```
-$ python tools/analyzer.py <paper id>
+$ python -m tools.analyzer <paper id>
 ```
 
 Some supplemental files including graph images will be saved in the `results` directory as default. All available options will be shown with:
 
 ```
-$ python tools/analyzer.py -h
+$ python -m tools.analyzer -h
 ```
 
 ## License
