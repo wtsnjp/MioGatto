@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
+PROG_NAME = "server.py"
+HELP = """The server implementation for MioGatto
+
+Usage:
+    {p} [options] ID
+
+Options:
+    -d, --debug        Run in the debug mode
+    -p, --port=NUM     Port number [default: 4100]
+
+    -h, --help         Show this screen and exit
+    -V, --version      Show version
+""".format(p=PROG_NAME)
+VERSION = "0.1.0"
+REV_DATE = "2021-04-07"
 
 # libraries
 from flask import Flask, request, redirect
-import os
-import sys
 import re
 import json
 import yaml
 import lxml.html
+from docopt import docopt
 from copy import deepcopy
 
 
@@ -154,11 +168,93 @@ def save_data(data_anno, anno_json):
         f.write('\n')
 
 
-def main():
-    # the web app
-    app = Flask(__name__)
+# the web app
+app = Flask(__name__)
 
-    paper_id = sys.argv[1]
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return generate_html(paper_id, data_anno, tree)
+
+
+@app.route('/_concept', methods=['POST'])
+def action_concept():
+    # register and save data_anno
+    res = request.form
+
+    if res.get('concept'):
+        data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
+        save_data(data_anno, anno_json)
+
+    # redirect
+    return redirect('/')
+
+
+@app.route('/_add_sog', methods=['POST'])
+def action_add_sog():
+    res = request.form
+    start_id, stop_id = res['start_id'], res['stop_id']
+    cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
+
+    # TODO: validate the span range
+    if not [start_id, stop_id] in cur_sog:
+        cur_sog.append([start_id, stop_id])
+
+    save_data(data_anno, anno_json)
+
+    # redirect
+    return redirect('/')
+
+
+@app.route('/_delete_sog', methods=['POST'])
+def action_delete_sog():
+    res = request.form
+    start_id, stop_id = res['start_id'], res['stop_id']
+    cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
+
+    cur_sog.remove([start_id, stop_id])
+
+    save_data(data_anno, anno_json)
+
+    # redirect
+    return redirect('/')
+
+
+@app.route('/mcdict.json', methods=['GET'])
+def mcdict_json():
+    with open(mcdict_yaml) as f:
+        data_mcdict = yaml.load(f, Loader=yaml.FullLoader)
+    mcdict = convert_mcdict(data_mcdict)
+    return json.dumps(mcdict,
+                      ensure_ascii=False,
+                      indent=4,
+                      sort_keys=True,
+                      separators=(',', ': '))
+
+
+@app.route('/sog.json', methods=['GET'])
+def sog_json():
+    res = {'sog': []}
+
+    for mi_id, anno in data_anno['mi_anno'].items():
+        for sog in anno['sog']:
+            res['sog'].append({
+                'mi_id': mi_id,
+                'start_id': sog[0],
+                'stop_id': sog[1]
+            })
+
+    return json.dumps(res,
+                      ensure_ascii=False,
+                      indent=4,
+                      sort_keys=True,
+                      separators=(',', ': '))
+
+
+def main():
+    # parse options
+    args = docopt(HELP, version=VERSION)
+    paper_id = args['ID']
 
     # dirs and files
     source_html = './sources/{}.html'.format(paper_id)
@@ -174,81 +270,9 @@ def main():
     # parse html
     tree = lxml.html.parse(source_html)
 
-    @app.route('/', methods=['GET', 'POST'])
-    def index():
-        return generate_html(paper_id, data_anno, tree)
-
-    @app.route('/_concept', methods=['POST'])
-    def action_concept():
-        # register and save data_anno
-        res = request.form
-
-        if res.get('concept'):
-            data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
-            save_data(data_anno, anno_json)
-
-        # redirect
-        return redirect('/')
-
-    @app.route('/_add_sog', methods=['POST'])
-    def action_add_sog():
-        res = request.form
-        start_id, stop_id = res['start_id'], res['stop_id']
-        cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
-
-        # TODO: validate the span range
-        if not [start_id, stop_id] in cur_sog:
-            cur_sog.append([start_id, stop_id])
-
-        save_data(data_anno, anno_json)
-
-        # redirect
-        return redirect('/')
-
-    @app.route('/_delete_sog', methods=['POST'])
-    def action_delete_sog():
-        res = request.form
-        start_id, stop_id = res['start_id'], res['stop_id']
-        cur_sog = data_anno['mi_anno'][res['mi_id']]['sog']
-
-        cur_sog.remove([start_id, stop_id])
-
-        save_data(data_anno, anno_json)
-
-        # redirect
-        return redirect('/')
-
-    @app.route('/mcdict.json', methods=['GET'])
-    def mcdict_json():
-        with open(mcdict_yaml) as f:
-            data_mcdict = yaml.load(f, Loader=yaml.FullLoader)
-        mcdict = convert_mcdict(data_mcdict)
-        return json.dumps(mcdict,
-                          ensure_ascii=False,
-                          indent=4,
-                          sort_keys=True,
-                          separators=(',', ': '))
-
-    @app.route('/sog.json', methods=['GET'])
-    def sog_json():
-        res = {'sog': []}
-
-        for mi_id, anno in data_anno['mi_anno'].items():
-            for sog in anno['sog']:
-                res['sog'].append({
-                    'mi_id': mi_id,
-                    'start_id': sog[0],
-                    'stop_id': sog[1]
-                })
-
-        return json.dumps(res,
-                          ensure_ascii=False,
-                          indent=4,
-                          sort_keys=True,
-                          separators=(',', ': '))
-
-    app.debug = True
-    app.run(host='localhost', port=4100)
+    # run the app
+    app.debug = args['--debug']
+    app.run(host='localhost', port=args['--port'])
 
 
 if __name__ == '__main__':
