@@ -6,11 +6,13 @@ Usage:
     {p} [options] ID
 
 Options:
-    -d, --debug        Run in the debug mode
-    -p, --port=NUM     Port number [default: 4100]
+    -a, --annotator=NAME  Annotator name
 
-    -h, --help         Show this screen and exit
-    -V, --version      Show version
+    -d, --debug           Run in the debug mode
+    -p, --port=NUM        Port number [default: 4100]
+
+    -h, --help            Show this screen and exit
+    -V, --version         Show version
 """.format(p=PROG_NAME)
 VERSION = "0.1.0"
 REV_DATE = "2021-04-08"
@@ -144,11 +146,17 @@ def save_data(data_anno, anno_json):
 app = Flask(__name__)
 
 
-def routing_functions(paper_id):
+def routing_functions(paper_id, annotator):
     # dirs and files
     source_html = './sources/{}.html'.format(paper_id)
-    anno_json = './data/{}_anno.json'.format(paper_id)
-    mcdict_yaml = './data/{}_mcdict.yaml'.format(paper_id)
+
+    if type(annotator) == str:
+        data_dir = 'annotators/{}'.format(annotator)
+    else:
+        data_dir = 'data'
+
+    anno_json = './{}/{}_anno.json'.format(data_dir, paper_id)
+    mcdict_yaml = './{}/{}_mcdict.yaml'.format(data_dir, paper_id)
 
     # initialize the annotation data
     with open(anno_json) as f:
@@ -238,10 +246,11 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
     paper_id = args['ID']
+    annotator = args['--annotator']
 
     # run the app
     app.debug = args['--debug']
-    routing_functions(paper_id)
+    routing_functions(paper_id, annotator)
     app.run(host='localhost', port=args['--port'])
 
 
