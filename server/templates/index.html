@@ -23,13 +23,19 @@
 <div class="sidebar">
 <div class="sidebar-item">
 <div class="sidebar-box">
-<div class="sidebar-box-title">Document Information</div>
+<div class="sidebar-box-title">MioGatto v{{ version }}</div>
 <div class="sidebar-box-body">
-  <p>paper ID: {{ paper_id }}</p>
-  <p>progress: {{ progress }}</p>
+  <p>Dev. revision: {{ rev_date }}</p>
+  <p>Paper ID: {{ paper_id }}</p>
+  <p>Annotator: {{ annotator }}</p>
 </div>
+<div class="sidebar-box-title">Progress</div>
+<div class="sidebar-box-body">
+  <p>Concepts: {{ p_concept }}</p>
+  <p>Sources: {{ nof_sog }}</p>
 </div>
 <div id="anno-box" class="sidebar-box">
+</div>
 </div>
 </div>
 </div>

@@ -13,7 +13,7 @@ Options:
     -V, --version      Show version
 """.format(p=PROG_NAME)
 VERSION = "0.1.0"
-REV_DATE = "2021-04-07"
+REV_DATE = "2021-04-08"
 
 # libraries
 from flask import Flask, request, redirect, render_template, Markup
@@ -105,17 +105,27 @@ def generate_html(paper_id, data_anno, tree):
     # progress info
     nof_anno = len(mi_anno)
     nof_done = sum(1 for v in mi_anno.values() if not v['concept_id'] is None)
-    progress = '{}/{} ({:.2f}%)'.format(nof_done, nof_anno,
-                                        nof_done / nof_anno * 100)
+    p_concept = '{}/{} ({:.2f}%)'.format(nof_done, nof_anno,
+                                         nof_done / nof_anno * 100)
 
+    nof_sog = 0
+    for anno in mi_anno.values():
+        for sog in anno['sog']:
+            nof_sog += 1
+
+    # construction
     title = root.xpath('//head/title')[0].text
     body = root.xpath('body')[0]
     main_content = etree.tostring(body, method='html', encoding=str)
 
     return render_template('index.html',
                            title=title,
+                           version=VERSION,
+                           rev_date=REV_DATE,
                            paper_id=paper_id,
-                           progress=progress,
+                           annotator=data_anno.get('annotator', 'unknown'),
+                           p_concept=p_concept,
+                           nof_sog=nof_sog,
                            main_content=Markup(main_content))
 
 
