@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ title }}</title>
+<script type="text/javascript" src="/static/vendor/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/style.css">
+<script type="text/javascript" src="/static/client.js"></script>
+</head>
+
+<body>
+<div class="container">
+
+<main class="main">
+<div class="select-menu">
+<input class="sog-add" type="submit" value="Add source">
+<input class="sog-del" type="submit" value="Delete source">
+</div>
+{{ main_content }}
+</main>
+
+<div class="sidebar">
+<div class="sidebar-item">
+<div class="sidebar-box">
+<div class="sidebar-box-title">Document Information</div>
+<div class="sidebar-box-body">
+  <p>paper ID: {{ paper_id }}</p>
+  <p>progress: {{ progress }}</p>
+</div>
+</div>
+<div id="anno-box" class="sidebar-box">
+</div>
+</div>
+</div>
+
+</div>
+</body>
+</html>

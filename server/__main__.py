@@ -16,11 +16,12 @@ VERSION = "0.1.0"
 REV_DATE = "2021-04-07"
 
 # libraries
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template, Markup
 import re
 import json
 import yaml
 import lxml.html
+from lxml import etree
 from docopt import docopt
 from copy import deepcopy
 
@@ -107,54 +108,15 @@ def generate_html(paper_id, data_anno, tree):
     progress = '{}/{} ({:.2f}%)'.format(nof_done, nof_anno,
                                         nof_done / nof_anno * 100)
 
-    # add script and styles to the head
-    extra_head_raw = '''
-<script type="text/javascript" src="/static/vendor/jquery-3.4.1.min.js"></script>
-<script type="text/javascript" src="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.css">
-<link rel="stylesheet" href="/static/style.css">
-<script type="text/javascript" src="/static/client.js"></script>
-'''
-    head = root.xpath('head')[0]
-    extra_head = list(lxml.html.fromstring(extra_head_raw).xpath('head')[0])
-    head.extend(extra_head)
-
-    # add the annotation sidebar
+    title = root.xpath('//head/title')[0].text
     body = root.xpath('body')[0]
-    main_content = list(body)
+    main_content = etree.tostring(body, method='html', encoding=str)
 
-    container_raw = '''
-<div class="container">
-<main class="main">
-<div class="select-menu">
-<input class="sog-add" type="submit" value="Add source">
-<input class="sog-del" type="submit" value="Delete source">
-</div>
-</main>
-<div class="sidebar">
-<div class="sidebar-item">
-<div class="sidebar-box">
-<div class="sidebar-box-title">Document Information</div>
-    <div class="sidebar-box-body">
-    <p>paper ID: {}</p>
-    <p>progress: {}</p>
-    </div>
-</div>
-<div id="anno-box" class="sidebar-box">
-</div>
-</div>
-</div>
-</div>
-'''.format(paper_id, progress)
-    container = lxml.html.fromstring(container_raw)
-    main = list(container)[0]
-    main.extend(main_content)
-    body.append(container)
-
-    # finalize
-    html = lxml.html.tostring(copied_tree, pretty_print=True, encoding='utf-8')
-
-    return html.decode('utf-8')
+    return render_template('index.html',
+                           title=title,
+                           paper_id=paper_id,
+                           progress=progress,
+                           main_content=Markup(main_content))
 
 
 def save_data(data_anno, anno_json):
@@ -191,19 +153,18 @@ def routing_functions(paper_id):
     def index():
         return generate_html(paper_id, data_anno, tree)
 
-
     @app.route('/_concept', methods=['POST'])
     def action_concept():
         # register and save data_anno
         res = request.form
 
         if res.get('concept'):
-            data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(res['concept'])
+            data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(
+                res['concept'])
             save_data(data_anno, anno_json)
 
         # redirect
         return redirect('/')
-
 
     @app.route('/_add_sog', methods=['POST'])
     def action_add_sog():
@@ -220,7 +181,6 @@ def routing_functions(paper_id):
         # redirect
         return redirect('/')
 
-
     @app.route('/_delete_sog', methods=['POST'])
     def action_delete_sog():
         res = request.form
@@ -234,7 +194,6 @@ def routing_functions(paper_id):
         # redirect
         return redirect('/')
 
-
     @app.route('/mcdict.json', methods=['GET'])
     def mcdict_json():
         with open(mcdict_yaml) as f:
@@ -245,7 +204,6 @@ def routing_functions(paper_id):
                           indent=4,
                           sort_keys=True,
                           separators=(',', ': '))
-
 
     @app.route('/sog.json', methods=['GET'])
     def sog_json():
