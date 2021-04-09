@@ -1,4 +1,4 @@
-// index.js for pilot annotation
+// client.js for MioGatto
 
 // --------------------------
 // utility
