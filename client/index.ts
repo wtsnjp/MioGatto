@@ -1,4 +1,26 @@
-// client.js for MioGatto
+// the MioGatto client
+'use strict';
+
+// --------------------------
+// Type declaration
+// --------------------------
+
+interface String {
+  escape_selector(): string;
+  hex_encode(): string;
+}
+
+interface Identifier {
+  hex: string;
+  var: string;
+  concept: number;
+}
+
+interface Source {
+  mi_id: string;
+  start_id: string;
+  stop_id: string;
+}
 
 // --------------------------
 // utility
@@ -11,14 +33,14 @@ String.prototype.escape_selector = function() {
 
 // convert UTF-8 string to hex string
 String.prototype.hex_encode = function() {
-  let arr = Array.from((new TextEncoder('utf-8')).encode(this)).map(
+  let arr = Array.from((new TextEncoder()).encode(this)).map(
     v => v.toString(16));
   return arr.join('');
 }
 
 // construct the idf dict from a mi element
 function get_idf(elem) {
-  let idf = {};
+  let idf = {} as Identifier;
   idf.hex = elem.text().hex_encode();
   idf.var = 'default';
 
@@ -115,7 +137,7 @@ $(function() {
 // --------------------------
 
 // load sog from the external json file
-let sog = {};
+let sog = {} as {sog: Source[]};
 $.ajax({
   url: '/sog.json',
   dataType: 'json',
@@ -285,17 +307,15 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 // --------------------------
 
 $(function() {
-  let page_x;
-  let page_y;
+  let page_x: number;
+  let page_y: number;
 
   function get_selected() {
-    let t = '';
+    let t: Selection;
     if(window.getSelection) {
       t = window.getSelection();
     } else if(document.getSelection) {
       t = document.getSelection();
-    } else if(document.selection) {
-      t = document.selection.createRange().text;
     }
     return t;
   }
@@ -303,7 +323,7 @@ $(function() {
   $(document).bind('mouseup', function() {
     let selected_text = get_selected();
 
-    if(selected_text != '') {
+    if(selected_text.type == 'Range') {
       $('.select-menu').css({
         'left': page_x + 5,
         'top' : page_y - 55
@@ -335,16 +355,16 @@ $(function() {
 
         if(start_node.className == 'gd_word') {
           start_id= start_node.id;
-        } else if(start_node.nextSibling.className == 'gd_word') {
-          start_id = start_node.nextSibling.id;
+        } else if(start_node.nextElementSibling.className == 'gd_word') {
+          start_id = start_node.nextElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
         }
 
         if(stop_node.className == 'gd_word') {
           stop_id = stop_node.id;
-        } else if(stop_node.previousSibling.className == 'gd_word') {
-          stop_id = stop_node.previousSibling.id;
+        } else if(stop_node.previousElementSibling.className == 'gd_word') {
+          stop_id = stop_node.previousElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
         }
