@@ -33,7 +33,7 @@ Version: 2021-03-26
 }
 
 .sidebar-box-body {
-    max-height: calc(100vh - 15em);  /* FIXME: shouldn't be a magic number */
+    max-height: calc(100vh - 18em);  /* FIXME: shouldn't be a magic number */
     overflow: auto;
 }
 
