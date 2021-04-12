@@ -195,14 +195,14 @@ $(function() {
       let concept = concept_cand[concept_id];
 
       let check = (concept_id == idf.concept) ? 'checked' : '';
-      let input = `<input type="radio" name="concept" value="${concept_id}" ${check} />`;
+      let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" ${check} />`;
 
       let args_info = 'NONE';
       if(concept.args_type.length > 0) {
         args_info = concept.args_type.join(', ');
       }
 
-      let item = `${input}<span class="keep"><label>
+      let item = `${input}<span class="keep"><label for="c${concept_id}">
 ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 </label></span>`
       radios += item;
