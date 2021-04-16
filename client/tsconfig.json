@@ -2,14 +2,7 @@
   "compilerOptions": {
     "target": "ES2019",
     "outDir": "./dist",
-    //"strict": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
-    //"strictNullChecks": true,
-    "strictFunctionTypes": true,
-    //"strictPropertyInitialization": true,
+    "strict": true,
     "skipLibCheck": true
   },
   "include": ["./index.ts"]

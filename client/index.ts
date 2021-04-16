@@ -8,7 +8,7 @@
 interface Identifier {
   hex: string;
   var: string;
-  concept: number;
+  concept?: number;
 }
 
 interface Concept {
@@ -56,11 +56,8 @@ function get_idf(elem: JQuery<any>) {
   }
 
   let concept_cand = elem.data('math-concept');
-  if(concept_cand != undefined) {
+  if(concept_cand != undefined)
     idf.concept = Number(concept_cand);
-  } else {
-    idf.concept = undefined;
-  }
 
   return idf;
 }
@@ -102,13 +99,11 @@ for(let idf_hex in mcdict) {
 
 // accessors
 function get_concept(idf: Identifier) {
-  if(mcdict[idf.hex] != undefined &&
-    mcdict[idf.hex][idf.var] != undefined &&
-    mcdict[idf.hex][idf.var][idf.concept] != undefined &&
-    mcdict[idf.hex][idf.var][idf.concept].description != undefined)
+  if(idf.concept != undefined) {
     return mcdict[idf.hex][idf.var][idf.concept];
-  else
+  } else {
     return undefined;
+  }
 }
 
 function get_concept_cand(idf: Identifier) {
@@ -123,7 +118,7 @@ function get_concept_cand(idf: Identifier) {
 function give_color(target: JQuery) {
   let idf = get_idf(target);
   let concept = get_concept(idf);
-  if(concept != undefined) {
+  if(concept != undefined && concept.color != undefined) {
     target.attr('mathcolor', concept.color);
   }
 }
@@ -168,7 +163,8 @@ $(function() {
     let concept = get_concept(idf);
 
     // no hilight if no concept has been asigned
-    if (concept == undefined) continue;
+    if (concept == undefined || concept.color == undefined)
+      continue;
 
     // highlight it!
     sog_nodes.css('background-color', concept.color);
@@ -191,7 +187,12 @@ $(function() {
     items: '[data-math-concept]',
     content: function() {
       let idf = get_idf($(this));
-      return get_concept(idf).description;
+      let concept = get_concept(idf);
+      if(concept != undefined) {
+        return concept.description;
+      } else {
+        return '(No description)';
+      }
     },
     open: function(event, ui) {
       $('mi').each(function() {
@@ -269,17 +270,18 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     })
   }
 
-  function show_anno_box(elem: JQuery) {
+  function show_anno_box(mi: JQuery) {
     // highlight the selected element
-    elem.attr('style', 'border: dotted 2px #000000; padding: 10px;');
+    mi.attr('style', 'border: dotted 2px #000000; padding: 10px;');
 
     // prepare idf and get candidate concepts
-    let idf = get_idf(elem);
+    let idf = get_idf(mi);
     let concept_cand = get_concept_cand(idf);
 
     // draw the annotation box
-    if(concept_cand != undefined)
-      draw_anno_box(elem.attr('id'), idf, concept_cand);
+    let mi_id = mi.attr('id');
+    if(concept_cand != undefined && mi_id != undefined)
+      draw_anno_box(mi_id, idf, concept_cand);
   }
 
   $('mi').click(function() {
@@ -313,7 +315,7 @@ $(function() {
   let page_y: number;
 
   function get_selected() {
-    let t: Selection;
+    let t;
     if(window.getSelection) {
       t = window.getSelection();
     } else if(document.getSelection) {
@@ -325,7 +327,7 @@ $(function() {
   $(document).bind('mouseup', function() {
     let selected_text = get_selected();
 
-    if(selected_text.type == 'Range') {
+    if(selected_text != undefined && selected_text.type == 'Range') {
       $('.select-menu').css({
         'left': page_x + 5,
         'top' : page_y - 55
@@ -351,13 +353,16 @@ $(function() {
       $('.select-menu .sog-add').on('click',
       function() {
         localStorage['scroll_top'] = $(window).scrollTop();
-        let start_node = selected_text.anchorNode.parentElement;
-        let stop_node = selected_text.focusNode.parentElement;
+        let start_node = selected_text?.anchorNode?.parentElement;
+        let stop_node = selected_text?.focusNode?.parentElement;
+        if(start_node == undefined || stop_node == undefined)
+          return;
+
         let start_id, stop_id
 
         if(start_node.className == 'gd_word') {
           start_id= start_node.id;
-        } else if(start_node.nextElementSibling.className == 'gd_word') {
+        } else if(start_node.nextElementSibling?.className == 'gd_word') {
           start_id = start_node.nextElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
@@ -365,7 +370,7 @@ $(function() {
 
         if(stop_node.className == 'gd_word') {
           stop_id = stop_node.id;
-        } else if(stop_node.previousElementSibling.className == 'gd_word') {
+        } else if(stop_node.previousElementSibling?.className == 'gd_word') {
           stop_id = stop_node.previousElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
@@ -381,7 +386,8 @@ $(function() {
         $.when($.post('/_add_sog', post_data))
         .done(function() {
           // remove selection and the button
-          selected_text.empty();
+          if(selected_text != undefined)
+            selected_text.empty();
           $('.select-menu').fadeOut(200);
 
           // reload the page
@@ -393,10 +399,10 @@ $(function() {
       });
 
       // ----- Action SoG delete -----
-      let e = selected_text.anchorNode.parentElement
+      let e = selected_text.anchorNode?.parentElement
 
       // show it only if SoG is selected
-      if(e.getAttribute('data-sog-mi') != undefined) {
+      if(e?.getAttribute('data-sog-mi') != undefined) {
         $('.select-menu .sog-del').css('display', 'inherit');
       } else {
         $('.select-menu .sog-del').css('display', 'none');
@@ -406,6 +412,11 @@ $(function() {
       $('.select-menu .sog-del').on('click',
       function() {
         localStorage['scroll_top'] = $(window).scrollTop();
+
+        // make sure e exists
+        // Note: the button is shown only if it exists
+        if(e == undefined)
+          return;
 
         // post the data
         let post_data = {
@@ -417,7 +428,8 @@ $(function() {
         $.when($.post('/_delete_sog', post_data))
         .done(function() {
           // remove selection and the button
-          selected_text.empty();
+          if(selected_text != undefined)
+            selected_text.empty();
           $('.select-menu').fadeOut(200);
 
           // reload the page
