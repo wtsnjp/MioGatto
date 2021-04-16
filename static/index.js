@@ -4,18 +4,18 @@
 // utility
 // --------------------------
 // escape for jQuery selector
-String.prototype.escape_selector = function () {
-    return this.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
-};
+function escape_selector(raw) {
+    return raw.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
+}
 // convert UTF-8 string to hex string
-String.prototype.hex_encode = function () {
-    let arr = Array.from((new TextEncoder()).encode(this)).map(v => v.toString(16));
+function hex_encode(str) {
+    let arr = Array.from((new TextEncoder()).encode(str)).map(v => v.toString(16));
     return arr.join('');
-};
+}
 // construct the idf dict from a mi element
 function get_idf(elem) {
     let idf = {};
-    idf.hex = elem.text().hex_encode();
+    idf.hex = hex_encode(elem.text());
     idf.var = 'default';
     let var_cand = elem.attr('mathvariant');
     if (var_cand != undefined) {
@@ -114,15 +114,15 @@ $(function () {
         // Note: this code is somehow very tricky but it works
         let sog_nodes;
         if (s.start_id == s.stop_id) {
-            sog_nodes = $('#' + s.start_id.escape_selector());
+            sog_nodes = $('#' + escape_selector(s.start_id));
         }
         else {
-            let start_node = $('#' + s.start_id.escape_selector());
-            let stop_node = $('#' + s.stop_id.escape_selector());
-            sog_nodes = start_node.nextUntil('#' + s.stop_id.escape_selector()).addBack().add(stop_node);
+            let start_node = $('#' + escape_selector(s.start_id));
+            let stop_node = $('#' + escape_selector(s.stop_id));
+            sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
         }
         // get the concept for the SoG
-        let idf = get_idf($('#' + s.mi_id.escape_selector()));
+        let idf = get_idf($('#' + escape_selector(s.mi_id)));
         let concept = get_concept(idf);
         // no hilight if no concept has been asigned
         if (concept == undefined)
@@ -168,7 +168,7 @@ $(function () {
         let radios = '';
         for (let concept_id in concept_cand) {
             let concept = concept_cand[concept_id];
-            let check = (concept_id == idf.concept) ? 'checked' : '';
+            let check = (Number(concept_id) == idf.concept) ? 'checked' : '';
             let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" ${check} />`;
             let args_info = 'NONE';
             if (concept.args_type.length > 0) {
@@ -196,9 +196,9 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         $('.sidebar-box input[type=submit]').button();
         $('.sidebar-box input[type=submit]').click(function () {
             localStorage['scroll_top'] = $(window).scrollTop();
-            if ($(`#form-${mi_id.escape_selector()} input:checked`).length > 0) {
-                $('#form-' + mi_id.escape_selector()).attr('action', '/_concept');
-                $('#form-' + mi_id.escape_selector()).submit();
+            if ($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
+                $('#form-' + escape_selector(mi_id)).attr('action', '/_concept');
+                $('#form-' + escape_selector(mi_id)).submit();
             }
             else {
                 alert('Please select a concept.');
@@ -223,7 +223,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         // if already selected, remove it
         let old_mi_id = sessionStorage.getItem('mi_id');
         if (old_mi_id != undefined) {
-            $('#' + old_mi_id.escape_selector()).removeAttr('style');
+            $('#' + escape_selector(old_mi_id)).removeAttr('style');
         }
         // store id of the currently selected mi
         sessionStorage['mi_id'] = $(this).attr('id');
@@ -234,7 +234,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     $(window).scrollTop(localStorage['scroll_top']);
     let mi_id = sessionStorage['mi_id'];
     if (mi_id != undefined) {
-        show_anno_box($('#' + mi_id.escape_selector()));
+        show_anno_box($('#' + escape_selector(mi_id)));
     }
 });
 // --------------------------
@@ -265,7 +265,7 @@ $(function () {
             // show it only if an mi with concept annotation selected
             $('.select-menu .sog-add').css('display', 'none');
             if (mi_id != undefined) {
-                let idf = get_idf($('#' + mi_id.escape_selector()));
+                let idf = get_idf($('#' + escape_selector(mi_id)));
                 let concept = get_concept(idf);
                 if (concept != undefined)
                     $('.select-menu .sog-add').css('display', 'inherit');

@@ -5,15 +5,17 @@
 // Type declaration
 // --------------------------
 
-interface String {
-  escape_selector(): string;
-  hex_encode(): string;
-}
-
 interface Identifier {
   hex: string;
   var: string;
   concept: number;
+}
+
+interface Concept {
+  args_type: string[];
+  arity: number;
+  description: string;
+  color?: string;
 }
 
 interface Source {
@@ -27,21 +29,21 @@ interface Source {
 // --------------------------
 
 // escape for jQuery selector
-String.prototype.escape_selector = function() {
-  return this.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
+function escape_selector(raw: string) {
+  return raw.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
 }
 
 // convert UTF-8 string to hex string
-String.prototype.hex_encode = function() {
-  let arr = Array.from((new TextEncoder()).encode(this)).map(
+function hex_encode(str: string) {
+  let arr = Array.from((new TextEncoder()).encode(str)).map(
     v => v.toString(16));
   return arr.join('');
 }
 
 // construct the idf dict from a mi element
-function get_idf(elem) {
+function get_idf(elem: JQuery<any>) {
   let idf = {} as Identifier;
-  idf.hex = elem.text().hex_encode();
+  idf.hex = hex_encode(elem.text());
   idf.var = 'default';
 
   let var_cand = elem.attr('mathvariant');
@@ -68,7 +70,7 @@ function get_idf(elem) {
 // --------------------------
 
 // load from the external json file
-let mcdict = {};
+let mcdict = {} as {[key: string]: {[key: string]: Concept[]}};
 $.ajax({
   url: '/mcdict.json',
   dataType: 'json',
@@ -99,7 +101,7 @@ for(let idf_hex in mcdict) {
 }
 
 // accessors
-function get_concept(idf) {
+function get_concept(idf: Identifier) {
   if(mcdict[idf.hex] != undefined &&
     mcdict[idf.hex][idf.var] != undefined &&
     mcdict[idf.hex][idf.var][idf.concept] != undefined &&
@@ -109,7 +111,7 @@ function get_concept(idf) {
     return undefined;
 }
 
-function get_concept_cand(idf) {
+function get_concept_cand(idf: Identifier) {
   if(mcdict[idf.hex] != undefined)
     return mcdict[idf.hex][idf.var]; // can be undefined
 }
@@ -118,7 +120,7 @@ function get_concept_cand(idf) {
 // mathcolor
 // --------------------------
 
-function give_color(target) {
+function give_color(target: JQuery) {
   let idf = get_idf(target);
   let concept = get_concept(idf);
   if(concept != undefined) {
@@ -153,16 +155,16 @@ $(function() {
     // Note: this code is somehow very tricky but it works
     let sog_nodes;
     if (s.start_id == s.stop_id) {
-      sog_nodes = $('#' + s.start_id.escape_selector());
+      sog_nodes = $('#' + escape_selector(s.start_id));
     } else {
-      let start_node = $('#' + s.start_id.escape_selector());
-      let stop_node = $('#' + s.stop_id.escape_selector());
+      let start_node = $('#' + escape_selector(s.start_id));
+      let stop_node = $('#' + escape_selector(s.stop_id));
 
-      sog_nodes = start_node.nextUntil('#' + s.stop_id.escape_selector()).addBack().add(stop_node);
+      sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
     }
 
     // get the concept for the SoG
-    let idf = get_idf($('#' + s.mi_id.escape_selector()));
+    let idf = get_idf($('#' + escape_selector(s.mi_id)));
     let concept = get_concept(idf);
 
     // no hilight if no concept has been asigned
@@ -205,7 +207,7 @@ $(function() {
 
 $(function() {
   // show the box for annotation in the sidebar 
-  function draw_anno_box(mi_id, idf, concept_cand) {
+  function draw_anno_box(mi_id: string, idf: Identifier, concept_cand: Concept[]) {
     // box title
     let title = '<div class="sidebar-box-title">' + mi_id + '</div>'
 
@@ -216,7 +218,7 @@ $(function() {
     for(let concept_id in concept_cand) {
       let concept = concept_cand[concept_id];
 
-      let check = (concept_id == idf.concept) ? 'checked' : '';
+      let check = (Number(concept_id) == idf.concept) ? 'checked' : '';
       let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" ${check} />`;
 
       let args_info = 'NONE';
@@ -253,9 +255,9 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     $('.sidebar-box input[type=submit]').click(function() {
       localStorage['scroll_top'] = $(window).scrollTop();
 
-      if($(`#form-${mi_id.escape_selector()} input:checked`).length > 0) {
-        $('#form-' + mi_id.escape_selector()).attr('action', '/_concept');
-        $('#form-' + mi_id.escape_selector()).submit();
+      if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
+        $('#form-' + escape_selector(mi_id)).attr('action', '/_concept');
+        $('#form-' + escape_selector(mi_id)).submit();
       } else {
         alert('Please select a concept.');
       }
@@ -267,7 +269,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     })
   }
 
-  function show_anno_box(elem) {
+  function show_anno_box(elem: JQuery) {
     // highlight the selected element
     elem.attr('style', 'border: dotted 2px #000000; padding: 10px;');
 
@@ -284,7 +286,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     // if already selected, remove it
     let old_mi_id = sessionStorage.getItem('mi_id');
     if(old_mi_id != undefined) {
-      $('#' + old_mi_id.escape_selector()).removeAttr('style');
+      $('#' + escape_selector(old_mi_id)).removeAttr('style');
     }
 
     // store id of the currently selected mi
@@ -298,7 +300,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
   $(window).scrollTop(localStorage['scroll_top']);
   let mi_id = sessionStorage['mi_id'];
   if(mi_id != undefined) {
-    show_anno_box($('#' + mi_id.escape_selector()));
+    show_anno_box($('#' + escape_selector(mi_id)));
   }
 })
 
@@ -335,7 +337,7 @@ $(function() {
       // show it only if an mi with concept annotation selected
       $('.select-menu .sog-add').css('display', 'none');
       if(mi_id != undefined) {
-        let idf = get_idf($('#' + mi_id.escape_selector()));
+        let idf = get_idf($('#' + escape_selector(mi_id)));
         let concept = get_concept(idf);
         if(concept != undefined)
           $('.select-menu .sog-add').css('display', 'inherit');
@@ -440,7 +442,7 @@ $(function() {
 // --------------------------
 
 // for the identifiers that have not been annotated
-function show_border(target) {
+function show_border(target: JQuery) {
   let idf = get_idf(target);
   let concept_cand = get_concept_cand(idf);
   if(target.data('math-concept') == undefined && concept_cand != undefined)
