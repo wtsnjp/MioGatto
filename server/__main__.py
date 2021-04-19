@@ -15,7 +15,7 @@ Options:
     -V, --version         Show version
 """.format(p=PROG_NAME)
 VERSION = "0.1.0"
-REV_DATE = "2021-04-12"
+REV_DATE = "2021-04-19"
 
 # libraries
 from flask import Flask, request, redirect, render_template, Markup
