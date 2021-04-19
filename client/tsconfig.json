@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "outDir": "./dist",
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["./index.ts"]
+}

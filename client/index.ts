@@ -1,25 +1,49 @@
-// client.js for MioGatto
+// the MioGatto client
+'use strict';
+
+// --------------------------
+// Type declaration
+// --------------------------
+
+interface Identifier {
+  hex: string;
+  var: string;
+  concept?: number;
+}
+
+interface Concept {
+  args_type: string[];
+  arity: number;
+  description: string;
+  color?: string;
+}
+
+interface Source {
+  mi_id: string;
+  start_id: string;
+  stop_id: string;
+}
 
 // --------------------------
 // utility
 // --------------------------
 
 // escape for jQuery selector
-String.prototype.escape_selector = function() {
-  return this.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
+function escape_selector(raw: string) {
+  return raw.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
 }
 
 // convert UTF-8 string to hex string
-String.prototype.hex_encode = function() {
-  let arr = Array.from((new TextEncoder('utf-8')).encode(this)).map(
+function hex_encode(str: string) {
+  let arr = Array.from((new TextEncoder()).encode(str)).map(
     v => v.toString(16));
   return arr.join('');
 }
 
 // construct the idf dict from a mi element
-function get_idf(elem) {
-  let idf = {};
-  idf.hex = elem.text().hex_encode();
+function get_idf(elem: JQuery<any>) {
+  let idf = {} as Identifier;
+  idf.hex = hex_encode(elem.text());
   idf.var = 'default';
 
   let var_cand = elem.attr('mathvariant');
@@ -32,11 +56,8 @@ function get_idf(elem) {
   }
 
   let concept_cand = elem.data('math-concept');
-  if(concept_cand != undefined) {
+  if(concept_cand != undefined)
     idf.concept = Number(concept_cand);
-  } else {
-    idf.concept = undefined;
-  }
 
   return idf;
 }
@@ -46,7 +67,7 @@ function get_idf(elem) {
 // --------------------------
 
 // load from the external json file
-let mcdict = {};
+let mcdict = {} as {[key: string]: {[key: string]: Concept[]}};
 $.ajax({
   url: '/mcdict.json',
   dataType: 'json',
@@ -77,17 +98,15 @@ for(let idf_hex in mcdict) {
 }
 
 // accessors
-function get_concept(idf) {
-  if(mcdict[idf.hex] != undefined &&
-    mcdict[idf.hex][idf.var] != undefined &&
-    mcdict[idf.hex][idf.var][idf.concept] != undefined &&
-    mcdict[idf.hex][idf.var][idf.concept].description != undefined)
+function get_concept(idf: Identifier) {
+  if(idf.concept != undefined) {
     return mcdict[idf.hex][idf.var][idf.concept];
-  else
+  } else {
     return undefined;
+  }
 }
 
-function get_concept_cand(idf) {
+function get_concept_cand(idf: Identifier) {
   if(mcdict[idf.hex] != undefined)
     return mcdict[idf.hex][idf.var]; // can be undefined
 }
@@ -96,10 +115,10 @@ function get_concept_cand(idf) {
 // mathcolor
 // --------------------------
 
-function give_color(target) {
+function give_color(target: JQuery) {
   let idf = get_idf(target);
   let concept = get_concept(idf);
-  if(concept != undefined) {
+  if(concept != undefined && concept.color != undefined) {
     target.attr('mathcolor', concept.color);
   }
 }
@@ -115,7 +134,7 @@ $(function() {
 // --------------------------
 
 // load sog from the external json file
-let sog = {};
+let sog = {} as {sog: Source[]};
 $.ajax({
   url: '/sog.json',
   dataType: 'json',
@@ -131,20 +150,21 @@ $(function() {
     // Note: this code is somehow very tricky but it works
     let sog_nodes;
     if (s.start_id == s.stop_id) {
-      sog_nodes = $('#' + s.start_id.escape_selector());
+      sog_nodes = $('#' + escape_selector(s.start_id));
     } else {
-      let start_node = $('#' + s.start_id.escape_selector());
-      let stop_node = $('#' + s.stop_id.escape_selector());
+      let start_node = $('#' + escape_selector(s.start_id));
+      let stop_node = $('#' + escape_selector(s.stop_id));
 
-      sog_nodes = start_node.nextUntil('#' + s.stop_id.escape_selector()).addBack().add(stop_node);
+      sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
     }
 
     // get the concept for the SoG
-    let idf = get_idf($('#' + s.mi_id.escape_selector()));
+    let idf = get_idf($('#' + escape_selector(s.mi_id)));
     let concept = get_concept(idf);
 
     // no hilight if no concept has been asigned
-    if (concept == undefined) continue;
+    if (concept == undefined || concept.color == undefined)
+      continue;
 
     // highlight it!
     sog_nodes.css('background-color', concept.color);
@@ -167,7 +187,12 @@ $(function() {
     items: '[data-math-concept]',
     content: function() {
       let idf = get_idf($(this));
-      return get_concept(idf).description;
+      let concept = get_concept(idf);
+      if(concept != undefined) {
+        return concept.description;
+      } else {
+        return '(No description)';
+      }
     },
     open: function(event, ui) {
       $('mi').each(function() {
@@ -183,7 +208,7 @@ $(function() {
 
 $(function() {
   // show the box for annotation in the sidebar 
-  function draw_anno_box(mi_id, idf, concept_cand) {
+  function draw_anno_box(mi_id: string, idf: Identifier, concept_cand: Concept[]) {
     // box title
     let title = '<div class="sidebar-box-title">' + mi_id + '</div>'
 
@@ -194,7 +219,7 @@ $(function() {
     for(let concept_id in concept_cand) {
       let concept = concept_cand[concept_id];
 
-      let check = (concept_id == idf.concept) ? 'checked' : '';
+      let check = (Number(concept_id) == idf.concept) ? 'checked' : '';
       let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" ${check} />`;
 
       let args_info = 'NONE';
@@ -231,9 +256,9 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     $('.sidebar-box input[type=submit]').click(function() {
       localStorage['scroll_top'] = $(window).scrollTop();
 
-      if($(`#form-${mi_id.escape_selector()} input:checked`).length > 0) {
-        $('#form-' + mi_id.escape_selector()).attr('action', '/_concept');
-        $('#form-' + mi_id.escape_selector()).submit();
+      if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
+        $('#form-' + escape_selector(mi_id)).attr('action', '/_concept');
+        $('#form-' + escape_selector(mi_id)).submit();
       } else {
         alert('Please select a concept.');
       }
@@ -245,24 +270,25 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     })
   }
 
-  function show_anno_box(elem) {
+  function show_anno_box(mi: JQuery) {
     // highlight the selected element
-    elem.attr('style', 'border: dotted 2px #000000; padding: 10px;');
+    mi.attr('style', 'border: dotted 2px #000000; padding: 10px;');
 
     // prepare idf and get candidate concepts
-    let idf = get_idf(elem);
+    let idf = get_idf(mi);
     let concept_cand = get_concept_cand(idf);
 
     // draw the annotation box
-    if(concept_cand != undefined)
-      draw_anno_box(elem.attr('id'), idf, concept_cand);
+    let mi_id = mi.attr('id');
+    if(concept_cand != undefined && mi_id != undefined)
+      draw_anno_box(mi_id, idf, concept_cand);
   }
 
   $('mi').click(function() {
     // if already selected, remove it
     let old_mi_id = sessionStorage.getItem('mi_id');
     if(old_mi_id != undefined) {
-      $('#' + old_mi_id.escape_selector()).removeAttr('style');
+      $('#' + escape_selector(old_mi_id)).removeAttr('style');
     }
 
     // store id of the currently selected mi
@@ -276,7 +302,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
   $(window).scrollTop(localStorage['scroll_top']);
   let mi_id = sessionStorage['mi_id'];
   if(mi_id != undefined) {
-    show_anno_box($('#' + mi_id.escape_selector()));
+    show_anno_box($('#' + escape_selector(mi_id)));
   }
 })
 
@@ -285,17 +311,15 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 // --------------------------
 
 $(function() {
-  let page_x;
-  let page_y;
+  let page_x: number;
+  let page_y: number;
 
   function get_selected() {
-    let t = '';
+    let t;
     if(window.getSelection) {
       t = window.getSelection();
     } else if(document.getSelection) {
       t = document.getSelection();
-    } else if(document.selection) {
-      t = document.selection.createRange().text;
     }
     return t;
   }
@@ -303,7 +327,7 @@ $(function() {
   $(document).bind('mouseup', function() {
     let selected_text = get_selected();
 
-    if(selected_text != '') {
+    if(selected_text != undefined && selected_text.type == 'Range') {
       $('.select-menu').css({
         'left': page_x + 5,
         'top' : page_y - 55
@@ -315,7 +339,7 @@ $(function() {
       // show it only if an mi with concept annotation selected
       $('.select-menu .sog-add').css('display', 'none');
       if(mi_id != undefined) {
-        let idf = get_idf($('#' + mi_id.escape_selector()));
+        let idf = get_idf($('#' + escape_selector(mi_id)));
         let concept = get_concept(idf);
         if(concept != undefined)
           $('.select-menu .sog-add').css('display', 'inherit');
@@ -329,22 +353,25 @@ $(function() {
       $('.select-menu .sog-add').on('click',
       function() {
         localStorage['scroll_top'] = $(window).scrollTop();
-        let start_node = selected_text.anchorNode.parentElement;
-        let stop_node = selected_text.focusNode.parentElement;
+        let start_node = selected_text?.anchorNode?.parentElement;
+        let stop_node = selected_text?.focusNode?.parentElement;
+        if(start_node == undefined || stop_node == undefined)
+          return;
+
         let start_id, stop_id
 
         if(start_node.className == 'gd_word') {
           start_id= start_node.id;
-        } else if(start_node.nextSibling.className == 'gd_word') {
-          start_id = start_node.nextSibling.id;
+        } else if(start_node.nextElementSibling?.className == 'gd_word') {
+          start_id = start_node.nextElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
         }
 
         if(stop_node.className == 'gd_word') {
           stop_id = stop_node.id;
-        } else if(stop_node.previousSibling.className == 'gd_word') {
-          stop_id = stop_node.previousSibling.id;
+        } else if(stop_node.previousElementSibling?.className == 'gd_word') {
+          stop_id = stop_node.previousElementSibling.id;
         } else {
           alert('Invalid span for a source of grounding');
         }
@@ -359,7 +386,8 @@ $(function() {
         $.when($.post('/_add_sog', post_data))
         .done(function() {
           // remove selection and the button
-          selected_text.empty();
+          if(selected_text != undefined)
+            selected_text.empty();
           $('.select-menu').fadeOut(200);
 
           // reload the page
@@ -371,10 +399,10 @@ $(function() {
       });
 
       // ----- Action SoG delete -----
-      let e = selected_text.anchorNode.parentElement
+      let e = selected_text.anchorNode?.parentElement
 
       // show it only if SoG is selected
-      if(e.getAttribute('data-sog-mi') != undefined) {
+      if(e?.getAttribute('data-sog-mi') != undefined) {
         $('.select-menu .sog-del').css('display', 'inherit');
       } else {
         $('.select-menu .sog-del').css('display', 'none');
@@ -384,6 +412,11 @@ $(function() {
       $('.select-menu .sog-del').on('click',
       function() {
         localStorage['scroll_top'] = $(window).scrollTop();
+
+        // make sure e exists
+        // Note: the button is shown only if it exists
+        if(e == undefined)
+          return;
 
         // post the data
         let post_data = {
@@ -395,7 +428,8 @@ $(function() {
         $.when($.post('/_delete_sog', post_data))
         .done(function() {
           // remove selection and the button
-          selected_text.empty();
+          if(selected_text != undefined)
+            selected_text.empty();
           $('.select-menu').fadeOut(200);
 
           // reload the page
@@ -420,7 +454,7 @@ $(function() {
 // --------------------------
 
 // for the identifiers that have not been annotated
-function show_border(target) {
+function show_border(target: JQuery) {
   let idf = get_idf(target);
   let concept_cand = get_concept_cand(idf);
   if(target.data('math-concept') == undefined && concept_cand != undefined)

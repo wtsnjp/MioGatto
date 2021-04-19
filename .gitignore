@@ -89,6 +89,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# client
+node_modules/
+
 # part of the dataset
 annotators
 arxmliv

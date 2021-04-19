@@ -24,7 +24,7 @@ All the components of MioGatto is included in this repository:
 
 * `lib/` contains the project library.
 * `server/` contains the implementation of the server.
-* `static/` contains the implementation of the client.
+* `client/` contains the implementation of the client.
 * `tools/` contains our utility Python scripts.
 
 ### Files not in this repository
@@ -87,6 +87,21 @@ Some supplemental files including graph images will be saved in the `results` di
 
 ```
 $ python -m tools.analyzer -h
+```
+
+## Developing client
+
+The client is developed with TypeScript. All development tools will be installed with:
+
+```
+$ cd client
+$ npm install
+```
+
+To compile the client source `client/index.ts`, execute the following in the client directory:
+
+```
+$ npx tsc
 ```
 
 ## Publications
