@@ -82,7 +82,7 @@ def extract_info(tree):
 
 
 def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
-    pos, neg, pt_miss = 0, 0, 0
+    pos, neg, pt_miss, unannotated = 0, 0, 0, 0
     y_gold, y_target = [], []
 
     print('* Mismatches')
@@ -93,6 +93,10 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
     for mi_id in mi_anno.keys():
         concept_id_gold = mi_anno[mi_id]['concept_id']
         concept_id_target = mi_anno_target[mi_id]['concept_id']
+
+        if concept_id_target is None:
+            unannotated += 1
+            continue
 
         mi = mi_info[mi_id]
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
@@ -122,6 +126,7 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
                 pattern_agreed))
             neg += 1
 
+
     total = pos + neg
 
     print('* Summary')
@@ -129,6 +134,8 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
     print('Pattern mismatches: {}/{} = {:.2f}%'.format(pt_miss, neg,
                                                        pt_miss / neg * 100))
     print('Kappa: {}'.format(cohen_kappa_score(y_gold, y_target)))
+
+    logger.warning('Found %d unannotated occurence(s).', unannotated)
 
 
 def analyze_annotation(data_anno, data_mcdict, mi_info):
