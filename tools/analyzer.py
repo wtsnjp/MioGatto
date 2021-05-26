@@ -135,7 +135,8 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
                                                        pt_miss / neg * 100))
     print('Kappa: {}'.format(cohen_kappa_score(y_gold, y_target)))
 
-    logger.warning('Found %d unannotated occurence(s).', unannotated)
+    if unannotated > 0:
+        logger.warning('Found %d unannotated occurence(s).', unannotated)
 
 
 def analyze_annotation(data_anno, data_mcdict, mi_info):
