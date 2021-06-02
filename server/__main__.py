@@ -14,7 +14,7 @@ Options:
     -h, --help            Show this screen and exit
     -V, --version         Show version
 """.format(p=PROG_NAME)
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 REV_DATE = "2021-06-02"
 
 # libraries

@@ -209,9 +209,6 @@ $(function() {
 $(function() {
   // show the box for annotation in the sidebar 
   function draw_anno_box(mi_id: string, idf: Identifier, concept_cand: Concept[]) {
-    // box title
-    let title = '<div class="sidebar-box-title">' + mi_id + '</div>'
-
     // construct the form with the candidate list
     let hidden = `<input type="hidden" name="mi_id" value="${mi_id}" />`;
     let radios = '';
@@ -240,10 +237,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     let form = `<form id="form-${mi_id}" method="POST">${form_elements}</form>`;
 
     // show the box
-    let anno_box_content = `${title}
-<div class="sidebar-box-body">
-<p>Please select the most suitable one:<br/>${form}</p>
-</div>`
+    let id_span = `ID: <span style="font-family: monospace;">${mi_id}</span>`
+    let anno_box_content = `<p>${id_span}<hr color="#FFF">${form}</p>`
 
     // for debug
     //console.log(anno_box_content);
@@ -252,8 +247,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     $('#anno-box').html(anno_box_content);
 
     // buttons by jquery-ui
-    $('.sidebar-box input[type=submit]').button();
-    $('.sidebar-box input[type=submit]').click(function() {
+    $('.tab-content input[type=submit]').button();
+    $('.tab-content input[type=submit]').click(function() {
       localStorage['scroll_top'] = $(window).scrollTop();
 
       if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {

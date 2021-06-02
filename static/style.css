@@ -18,36 +18,93 @@ Version: 2021-03-26
     cursor: pointer;
 }
 
-.sidebar-box {
-    background: #dcefff;
+.sidebar {
+    width: 320px;
+    padding: 5px;
+    height: 98vh;
+    position: sticky;
+    top: 5px;
+    bottom: 5px;
 }
 
-.sidebar-box-title {
-    font-size: 120%;
-    font-family: sans-serif;
-    background: #5fb3f5;
-    padding: 4px;
-    color: #FFF;
-    font-weight: bold;
-    letter-spacing: 0.05em;
-}
-
-.sidebar-box-body {
-    max-height: calc(100vh - 18em);  /* FIXME: shouldn't be a magic number */
+.sidebar-tabs {
+    padding: 10px;
+    height: 95%;
     overflow: auto;
+    position: sticky;
+    top: 10px;
+    bottom: 10px;
 }
 
-.sidebar-box p {
-    padding: 4px 4px;
-    margin: 0;
+.sidebar-tab input.tab-title {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
 }
 
-.sidebar-box div.keep input {
+.sidebar-tab label.tab-title {
+    font-weight: bold;
+    font-family: sans-serif;
+    line-height: 3;
+    position: relative;
+    display: block;
+    padding: 0 0 0 1em;
+    cursor: pointer;
+    margin: 0 0 1px 0;
+    color: #fff;
+    background: #da3c41;
+}
+
+.sidebar-tab .tab-content {
+    overflow: hidden;
+    max-height: 0;
+    -webkit-transition: max-height 0.35s;
+    transition: max-height 0.35s;
+    color: #333333;
+    background: #f1c6c6;
+}
+
+.sidebar-tab .tab-content p {
+    margin: 1em;
+}
+
+/* checked */
+.sidebar-tab input.tab-title:checked ~ .tab-content {
+	max-height: none;
+}
+
+/* icon */
+.sidebar-tab label.tab-title::after {
+    line-height: 3;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    width: 3em;
+    height: 3em;
+    -webkit-transition: all 0.35s;
+    transition: all 0.35s;
+    text-align: center;
+}
+
+.sidebar-tab input.tab-title[type=checkbox] + label.tab-title::after {
+    content: '+';
+}
+
+.sidebar-tab input.tab-title[type=checkbox]:checked + label.tab-title::after {
+    transform: rotate(315deg);
+}
+
+.sidebar-tab .tab-content form {
+    padding: 10px 10px 0px 10px;
+}
+
+.sidebar-tab div.keep input {
     display: block;
     float: left;
 }
 
-.sidebar-box div.keep span.keep {
+.sidebar-tab div.keep span.keep {
     display: block;
     overflow: hidden;
 }
@@ -57,19 +114,6 @@ Version: 2021-03-26
     width: 1000px;
     display: -webkit-flex;
     display: flex;
-}
-
-.sidebar {
-    width: 320px;
-}
-
-.sidebar-item {
-    /* background-color: #e4b6b6; */
-    padding: 10px;
-    height: 95vh;
-    position: sticky;
-    top: 10px;
-    bottom: 10px;
 }
 
 .select-menu {

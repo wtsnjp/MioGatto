@@ -21,22 +21,34 @@
 </main>
 
 <div class="sidebar">
-<div class="sidebar-item">
-<div class="sidebar-box">
-<div class="sidebar-box-title">MioGatto v{{ version }}</div>
-<div class="sidebar-box-body">
+<div class="sidebar-tabs">
+
+<div class="sidebar-tab">
+<input class="tab-title" id="tab_miogatto" type="checkbox" name="tabs">
+<label class="tab-title" for="tab_miogatto">MioGatto v{{ version }}</label>
+<div class="tab-content">
   <p>Dev. revision: {{ rev_date }}</p>
   <p>Paper ID: {{ paper_id }}</p>
   <p>Annotator: {{ annotator }}</p>
 </div>
-<div class="sidebar-box-title">Progress</div>
-<div class="sidebar-box-body">
+</div>
+
+<div class="sidebar-tab">
+<input class="tab-title" id="tab_progress" type="checkbox" name="tabs">
+<label class="tab-title" for="tab_progress">Progress</label>
+<div class="tab-content">
   <p>Concepts: {{ p_concept }}</p>
   <p>Sources: {{ nof_sog }}</p>
 </div>
-<div id="anno-box" class="sidebar-box">
+</div>
+
+<div class="sidebar-tab">
+<input class="tab-title" id="tab_concept" type="checkbox" name="tabs" checked="checked">
+<label class="tab-title" for="tab_concept">Concept</label>
+<div id="anno-box" class="tab-content">
 </div>
 </div>
+
 </div>
 </div>
 
