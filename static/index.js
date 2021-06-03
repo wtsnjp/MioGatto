@@ -32,6 +32,27 @@ function get_idf(elem) {
     return idf;
 }
 // --------------------------
+// Sidebar
+// --------------------------
+$(function () {
+    $('.sidebar-tab input.tab-title').each(function () {
+        let tab_name = this.id;
+        if (localStorage[tab_name] == 'true') {
+            $(`#${tab_name}`).prop('checked', true);
+        }
+        $(`#${tab_name}`).on('change', function () {
+            if ($(this).prop('checked')) {
+                console.log(`${tab_name}: true`);
+                localStorage[tab_name] = true;
+            }
+            else {
+                console.log(`${tab_name}: false`);
+                localStorage[tab_name] = false;
+            }
+        });
+    });
+});
+// --------------------------
 // prepare the mcdict table
 // --------------------------
 // load from the external json file
