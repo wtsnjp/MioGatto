@@ -35,27 +35,11 @@ On the other hand, the annotation data is not included in this repository due to
 * `data/` contains the annotation data
 * `sources/` contains the preprocessed documents
 
-## A short guide for annotators
+## Annotator's guide
 
-### Getting started
+For the guide with GIF animation, please refer to our Wiki:
 
-Herein, `<paper id>` denotes the arXiv ID of the paper to annotate.
-
-1. Start the server: `python -m server <paper id>`
-2. Access to <http://localhost:4100/> with your browser.
-3. Annotation with the Web interface.
-
-### Annotation procedure
-
-1. Select a math identifier. The identifiers which has not yet annotated are shown with gray background.
-2. The annotation box will appear in the right side. Choose the most suitable candidate in the list.
-3. Select a span of a source of grounding and click the "Add Source" button (if any)
-
-### Some notes
-
-* Strongly recommended to manage your progress (in the `data/` directory) with VCS such as Git
-* You may feel the dictionary (the mcdict list) is inappropriate, but please choose the best candidate in the list at this point
-* Any suggestion about this annotation tool is welcome
+* <https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide>
 
 ## Using tools
 
