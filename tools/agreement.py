@@ -1,13 +1,12 @@
-# The analyzer tool for MioGatto
+# Agreement calculation tool for MioGatto
 import yaml
 import json
 import itertools
 import lxml.html
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 from docopt import docopt
 from pathlib import Path
+from sklearn.metrics import cohen_kappa_score
 
 from lib.cli import set_level
 from lib.common import get_mi2idf
@@ -16,18 +15,18 @@ from lib.common import get_mi2idf
 import logging as log
 
 log.Logger.set_level = set_level
-logger = log.getLogger('analyzer')
+logger = log.getLogger('agreement')
 
 # meta
-PROG_NAME = "tools.analyzer"
-HELP = """Analysing tool for MioGatto
+PROG_NAME = "tools.agreement"
+HELP = """Agreement calculation tool for MioGatto
 
 Usage:
     {p} [options] ID
 
 Options:
-    -o DIR, --out=DIR  Dir to save results [default: ./results]
-    --data=DIR         Dir for the gold data [default: ./data]
+    -t DIR, --target=DIR  Dir for the reference data (Required)
+    --reference=DIR    Dir for the reference data [default: ./data]
     --sources=DIR      Dir for preprocessed HTML [default: ./sources]
 
     -d, --debug        Show debug messages
@@ -73,6 +72,65 @@ def extract_info(tree):
     logger.debug('sec_info: %s', sec_info)
 
     return mi_info, sec_info
+
+
+def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
+    pos, neg, pt_miss, unannotated = 0, 0, 0, 0
+    y_gold, y_target = [], []
+
+    print('* Mismatches')
+    print('ID\tReference Concept\tAnnotated Concept\tPattern Agreed')
+
+    mi_anno, mi_anno_target = data_anno['mi_anno'], data_anno_target['mi_anno']
+
+    for mi_id in mi_anno.keys():
+        concept_id_gold = mi_anno[mi_id]['concept_id']
+        concept_id_target = mi_anno_target[mi_id]['concept_id']
+
+        if concept_id_target is None:
+            unannotated += 1
+            continue
+
+        mi = mi_info[mi_id]
+        idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
+
+        # for calculatin kappa
+        y_gold.append('{}:{}:{}'.format(idf_hex, idf_var, concept_id_gold))
+        y_target.append('{}:{}:{}'.format(idf_hex, idf_var, concept_id_target))
+
+        if concept_id_target == concept_id_gold:
+            pos += 1
+
+        else:
+            concept_list = data_mcdict[idf_hex]['identifiers'][idf_var]
+
+            concept_gold = concept_list[concept_id_gold]
+            concept_target = concept_list[concept_id_target]
+
+            if concept_gold['args_type'] == concept_target['args_type']:
+                pattern_agreed = True
+            else:
+                pt_miss += 1
+                pattern_agreed = False
+
+            print('{}\t{} ({})\t{} ({})\t{}'.format(
+                mi_id, concept_id_gold, concept_gold['description'],
+                concept_id_target, concept_target['description'],
+                pattern_agreed))
+            neg += 1
+
+    total = pos + neg
+
+    print('* Summary')
+    print('Agreement: {}/{} = {:.2f}%'.format(pos, total, pos / total * 100))
+    if neg > 0:
+        rate = pt_miss / neg * 100
+        print('Pattern mismatches: {}/{} = {:.2f}%'.format(pt_miss, neg, rate))
+    #print('Kappa: {}'.format(cohen_kappa_score(y_gold, y_target)))
+
+    # warn if annotation is incompleted
+    if unannotated > 0:
+        logger.warning('Found %d unannotated occurence(s).', unannotated)
 
 
 def analyze_annotation(data_anno, data_mcdict, mi_info):
@@ -161,18 +219,24 @@ def main():
     paper_id = args['ID']
 
     # dirs and files
-    out_dir = Path(args['--out'])
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if type(args['--target']) is not str:
+        logger.critical('Option --target (-t) is required')
+        exit(1)
+    target_dir = Path(args['--target'])
+    target_anno_json = target_dir / '{}_anno.json'.format(paper_id)
 
-    data_dir = Path(args['--data'])
+    ref_dir = Path(args['--reference'])
+    anno_json = ref_dir / '{}_anno.json'.format(paper_id)
+    mcdict_yaml = ref_dir / '{}_mcdict.yaml'.format(paper_id)
 
     sources_dir = Path(args['--sources'])
     source_html = sources_dir / '{}.html'.format(paper_id)
 
-    anno_json = data_dir / '{}_anno.json'.format(paper_id)
-    mcdict_yaml = data_dir / '{}_mcdict.yaml'.format(paper_id)
+    # load the target data
+    with open(target_anno_json) as f:
+        data_anno_target = json.load(f)
 
-    # load the data
+    # load the reference data
     with open(anno_json) as f:
         data_anno = json.load(f)
     with open(mcdict_yaml) as f:
@@ -186,58 +250,7 @@ def main():
     tree = lxml.html.parse(str(source_html))
     mi_info, sec_info = extract_info(tree)
 
-    logger.info('Executing normal analyses.')
-    tex_paper_id = paper_id.replace('.', '_')
-
-    items, concept_dict, occurences = analyze_annotation(
-        data_anno, data_mcdict, mi_info)
-
-    # export items data
-    items_tex = out_dir / '{}_items.tex'.format(tex_paper_id)
-    with open(items_tex, 'w') as f:
-        for i in items:
-            f.write('(\\gf{{{}}}{{{}}}, {})\n'.format(i[0], i[1], i[2]))
-
-    # plot items
-    sns.set_style("whitegrid", {'axes.grid': False})
-    plt.tick_params(labelbottom=False)
-    plt.bar([i[0] for i in items], [i[2] for i in items])
-
-    items_png = str(out_dir / '{}_items.png'.format(paper_id))
-    plt.savefig(items_png)
-    plt.clf()
-
-    # export occurences data
-    occurences_dat = out_dir / '{}_occurences.dat'.format(tex_paper_id)
-    with open(occurences_dat, 'w') as f:
-        for p in occurences:
-            f.write('{}  {}\n'.format(p[0] + 0.5, p[1]))
-
-    sections_tex = out_dir / '{}_sections.tex'.format(tex_paper_id)
-    s0 = r'\addplot [domain=-2:106, dashed] {{{}}} ' \
-         r'node [pos=0, left] {{\S{}}};'
-    with open(sections_tex, 'w') as f:
-        for sec, pos in sec_info.items():
-            f.write(s0.format(pos, sec.replace('S', '')) + '\r')
-
-    identifiers_tex = out_dir / '{}_identifiers.tex'.format(tex_paper_id)
-    s1 = r'\addplot [black] coordinates {{({x}, -41900) ({x}, 420000)}};'
-    with open(identifiers_tex, 'w') as f:
-        x = 0
-        for dc in concept_dict.values():
-            for ls in dc.values():
-                x += len(ls)
-                f.write(s1.format(x=x) + '\n')
-
-    # plot occurences
-    plt.scatter([v[0] for v in occurences], [v[1] for v in occurences],
-                s=2)
-    plt.xlabel('Concepts')
-    plt.ylabel('Position')
-
-    occurences_png = str(out_dir / '{}_occurences.png'.format(paper_id))
-    plt.savefig(occurences_png)
-    plt.clf()
+    calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info)
 
 
 if __name__ == '__main__':
