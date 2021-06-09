@@ -17,6 +17,9 @@ import logging as log
 log.Logger.set_level = set_level
 logger = log.getLogger('agreement')
 
+# dirty hack: suspend warning
+np.seterr(divide='ignore', invalid='ignore')
+
 # meta
 PROG_NAME = "tools.agreement"
 HELP = """Agreement calculation tool for MioGatto
@@ -76,7 +79,7 @@ def extract_info(tree):
 
 def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
     pos, neg, pt_miss, unannotated = 0, 0, 0, 0
-    y_gold, y_target = [], []
+    labels = dict()
 
     print('* Mismatches')
     print('ID\tReference Concept\tAnnotated Concept\tPattern Agreed')
@@ -95,9 +98,14 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
 
         # for calculatin kappa
-        y_gold.append('{}:{}:{}'.format(idf_hex, idf_var, concept_id_gold))
-        y_target.append('{}:{}:{}'.format(idf_hex, idf_var, concept_id_target))
+        idf_key = (idf_hex, idf_var)
+        if idf_key not in labels.keys():
+            labels[idf_key] = ([concept_id_gold], [concept_id_target])
+        else:
+            labels[idf_key][0].append(concept_id_gold)
+            labels[idf_key][1].append(concept_id_target)
 
+        # agreement
         if concept_id_target == concept_id_gold:
             pos += 1
 
@@ -126,7 +134,23 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
     if neg > 0:
         rate = pt_miss / neg * 100
         print('Pattern mismatches: {}/{} = {:.2f}%'.format(pt_miss, neg, rate))
-    #print('Kappa: {}'.format(cohen_kappa_score(y_gold, y_target)))
+
+    print('* Kappas')
+    kappas = []
+    for k, v in labels.items():
+        idf_hex, idf_var = k
+        kappa = cohen_kappa_score(v[0], v[1])
+        count = len(v[0])
+        kappas.append((idf_hex, idf_var, kappa, count))
+
+    w_sum, w_cnt = 0, 0
+    print('symbol\tvariation\tKappa\tcount')
+    for res in sorted(kappas, key=lambda x: x[3], reverse=True):
+        print(bytes.fromhex(res[0]).decode(), res[1], res[2], res[3], sep='\t')
+        if not np.isnan(res[2]):
+            w_cnt += res[3]
+            w_sum += res[2] * res[3]
+    print('Kappa (weighted avg.): %.4f' % (w_sum / w_cnt))
 
     # warn if annotation is incompleted
     if unannotated > 0:
