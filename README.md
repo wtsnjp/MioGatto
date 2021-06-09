@@ -14,7 +14,8 @@ The dependencies will be all installed with one shot:
 $ python -m pip install -r requirements.txt
 ```
 
-In case you don't want to install the dependencies into your system, please consider utilizing [venv](https://docs.python.org/3/library/venv.html).
+In case you don't want to install the dependencies into your system, please
+consider utilizing [venv](https://docs.python.org/3/library/venv.html).
 
 ## Project structure
 
@@ -29,7 +30,12 @@ All the components of MioGatto is included in this repository:
 
 ### Files not in this repository
 
-On the other hand, the annotation data is not included in this repository due to the NDA constrain for the arXMLiv dataset. The data is licensed to [SIGMathLing members](https://sigmathling.kwarc.info/member/) as [Dataset for Grounding of Formulae](https://sigmathling.kwarc.info/resources/grounding-dataset/). Please consider joining [SIGMathLing](https://sigmathling.kwarc.info/member/) to acquire the dataset.
+On the other hand, the annotation data is not included in this repository due
+to the NDA constrain for the arXMLiv dataset. The data is licensed to
+[SIGMathLing members](https://sigmathling.kwarc.info/member/) as [Dataset for
+Grounding of Formulae](https://sigmathling.kwarc.info/resources/grounding-dataset/).
+Please consider joining [SIGMathLing](https://sigmathling.kwarc.info/member/)
+to acquire the dataset.
 
 * `arxmliv/` contains the original documents from the arXMLiv dataset
 * `data/` contains the annotation data
@@ -43,9 +49,12 @@ For the guide with GIF animation, please refer to our Wiki:
 
 ## Using tools
 
-The Python scripts under the `tools` directory are mostly for the developers for this dataset. Detailed documents have not yet prepared.
+The Python scripts under the `tools` directory are mostly for the developers
+for this dataset. The `--help` (`-h`) option is available for all scripts.
+Detailed documents have not yet prepared.
 
-### The preprocess
+
+### Preprocess
 
 The basic usage will be shown with:
 
@@ -53,36 +62,35 @@ The basic usage will be shown with:
 $ python -m tools.preprocess -h
 ```
 
-### The analyser
+### Analysing the annotation results
 
-To calculate agreements between the gold data and data by annotators, execute:
-
-```
-$ python -m tools.analyzer --agreement=./annotators/<annotator>/<paper id>_anno.json <paper id>
-```
-
-For the basic analyses for gold data, execute:
+For the basic analyses for annotation data, execute:
 
 ```
 $ python -m tools.analyzer <paper id>
 ```
 
-Some supplemental files including graph images will be saved in the `results` directory as default. All available options will be shown with:
+Some supplemental files including graph images will be saved in the `results`
+directory as default.
+
+To calculate agreements between data by two annotators, execute:
 
 ```
-$ python -m tools.analyzer -h
+$ python -m tools.agreement --target=<path to annotator's data dir> <paper id>
 ```
 
 ## Developing client
 
-The client is developed with TypeScript. All development tools will be installed with:
+The client is developed with TypeScript. All development tools will be
+installed with:
 
 ```
 $ cd client
 $ npm install
 ```
 
-To compile the client source `client/index.ts`, execute the following in the client directory:
+To compile the client source `client/index.ts`, execute the following in the
+client directory:
 
 ```
 $ npx tsc
