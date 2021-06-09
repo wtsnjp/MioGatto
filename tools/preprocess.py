@@ -1,6 +1,24 @@
-#!/usr/bin/env python3
-PROG_NAME = "preprocess.py"
-HELP = """Preprocess tool for the pilot annotation
+# The preprocess tool for MioGatto
+import sys
+import yaml
+import json
+import lxml.html
+import unicodedata
+from docopt import docopt
+from pathlib import Path
+
+from lib.cli import set_level
+from lib.common import get_mi2idf
+
+# use logger
+import logging as log
+
+log.Logger.set_level = set_level
+logger = log.getLogger('preprocess')
+
+# meta
+PROG_NAME = "tools.preprocess"
+HELP = """Preprocess tool for MioGatto
 
 Usage:
     {p} [options] HTML
@@ -18,27 +36,7 @@ Options:
     -h, --help         Show this screen and exit
     -V, --version      Show version
 """.format(p=PROG_NAME)
-VERSION = "0.1.0"
-
-# libraries
-import os
-import sys
-import yaml
-import json
-import lxml.html
-import unicodedata
-from docopt import docopt
-from pathlib import Path
-
-sys.path.append('.')
-from lib.cli import set_level
-from lib.common import get_mi2idf
-
-# use logger
-import logging as log
-
-log.Logger.set_level = set_level
-logger = log.getLogger('preprocess')
+VERSION = "0.2.0"
 
 
 def hex2surface(idf_hex):
@@ -165,7 +163,7 @@ def observe_mi(tree, annotator, data_mcdict_ref):
         mi_id = e.attrib.get('id')
         idf = mi2idf.get(mi_id)
 
-        if not idf is None:
+        if idf is not None:
             idf_hex = idf['idf_hex']
             idf_var = idf['idf_var']
         else:
@@ -194,7 +192,7 @@ def idf2mc(idf_set):
     # organize the identifiers
     for idf in idf_set:
         idf_hex, idf_var = idf
-        if not idf_hex in idf_dict:
+        if idf_hex not in idf_dict:
             idf_dict[idf_hex] = [idf_var]
         else:
             idf_dict[idf_hex].append(idf_var)
@@ -266,7 +264,7 @@ def main():
     # now prepare for the preprocess
     logger.info('Begin to preprocess Paper "{}"'.format(paper_id))
 
-    os.mkdir(data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
     anno_json = data_dir / '{}_anno.json'.format(paper_id)
     mcdict_yaml = data_dir / '{}_mcdict.yaml'.format(paper_id)
 
@@ -278,8 +276,8 @@ def main():
         mcdict_yaml_ref = data_dir_ref / '{}_mcdict.yaml'.format(paper_id)
 
         if not anno_json_ref.exists() or not mcdict_yaml_ref.exists():
-            logger.warn('For --annotator operation, reference data' \
-                'files are required, but those not found.')
+            logger.warn('For --annotator operation, reference data'
+                        'files are required, but those not found.')
             logger.warn('Executing the default operation as fallback.')
             annotator = False
 

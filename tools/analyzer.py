@@ -1,28 +1,4 @@
-#!/usr/bin/env python3
-PROG_NAME = "analyzer.py"
-HELP = """Analysing tool for the pilot annotation
-
-Usage:
-    {p} [options] ID
-
-Options:
-    --agreement=FILE   Calculate the agreement for the FILE
-    -o DIR, --out=DIR  Dir to save results [default: ./results]
-
-    --data=DIR         Dir for the gold data [default: ./data]
-    --sources=DIR      Dir for preprocessed HTML [default: ./sources]
-
-    -d, --debug        Show debug messages
-    -q, --quiet        Show less messages
-
-    -h, --help         Show this screen and exit
-    -V, --version      Show version
-""".format(p=PROG_NAME)
-VERSION = "0.1.0"
-
-# libraries
-import os
-import sys
+# The analyzer tool for MioGatto
 import yaml
 import json
 import itertools
@@ -34,7 +10,6 @@ from docopt import docopt
 from pathlib import Path
 from sklearn.metrics import cohen_kappa_score
 
-sys.path.append('.')
 from lib.cli import set_level
 from lib.common import get_mi2idf
 
@@ -43,6 +18,28 @@ import logging as log
 
 log.Logger.set_level = set_level
 logger = log.getLogger('analyzer')
+
+# meta
+PROG_NAME = "tools.analyzer"
+HELP = """Analysing tool for MioGatto
+
+Usage:
+    {p} [options] ID
+
+Options:
+    --agreement=FILE   Calculate the agreement for the FILE
+
+    -o DIR, --out=DIR  Dir to save results [default: ./results]
+    --data=DIR         Dir for the gold data [default: ./data]
+    --sources=DIR      Dir for preprocessed HTML [default: ./sources]
+
+    -d, --debug        Show debug messages
+    -q, --quiet        Show less messages
+
+    -h, --help         Show this screen and exit
+    -V, --version      Show version
+""".format(p=PROG_NAME)
+VERSION = "0.2.0"
 
 
 def extract_info(tree):
@@ -58,7 +55,7 @@ def extract_info(tree):
         # idf info
         idf = mi2idf.get(mi_id)
 
-        if not idf is None:
+        if idf is not None:
             mi_info[mi_id] = idf
         else:
             continue
@@ -126,7 +123,6 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
                 pattern_agreed))
             neg += 1
 
-
     total = pos + neg
 
     print('* Summary')
@@ -135,6 +131,7 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
                                                        pt_miss / neg * 100))
     print('Kappa: {}'.format(cohen_kappa_score(y_gold, y_target)))
 
+    # warn if annotation is incompleted
     if unannotated > 0:
         logger.warning('Found %d unannotated occurence(s).', unannotated)
 
@@ -226,6 +223,8 @@ def main():
 
     # dirs and files
     out_dir = Path(args['--out'])
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     data_dir = Path(args['--data'])
 
     sources_dir = Path(args['--sources'])
@@ -287,21 +286,20 @@ def main():
                 f.write('{}  {}\n'.format(p[0] + 0.5, p[1]))
 
         sections_tex = out_dir / '{}_sections.tex'.format(tex_paper_id)
+        s0 = r'\addplot [domain=-2:106, dashed] {{{}}} ' \
+             r'node [pos=0, left] {{\S{}}};'
         with open(sections_tex, 'w') as f:
             for sec, pos in sec_info.items():
-                f.write(
-                    '\\addplot [domain=-2:106, dashed] {{{}}} node [pos=0, left] {{\\S{}}};\n'
-                    .format(pos, sec.replace('S', '')))
+                f.write(s0.format(pos, sec.replace('S', '')) + '\r')
 
         identifiers_tex = out_dir / '{}_identifiers.tex'.format(tex_paper_id)
+        s1 = r'\addplot [black] coordinates {{({x}, -41900) ({x}, 420000)}};'
         with open(identifiers_tex, 'w') as f:
             x = 0
             for dc in concept_dict.values():
                 for ls in dc.values():
                     x += len(ls)
-                    f.write(
-                        '\\addplot [black] coordinates {{({x}, -41900) ({x}, 420000)}};\n'
-                        .format(x=x))
+                    f.write(s1.format(x=x) + '\n')
 
         # plot occurences
         plt.scatter([v[0] for v in occurences], [v[1] for v in occurences],
