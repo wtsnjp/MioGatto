@@ -1,5 +1,4 @@
 # The preprocess tool for MioGatto
-import sys
 import yaml
 import json
 import lxml.html
@@ -254,12 +253,6 @@ def main():
     html_in = Path(args['HTML'])
     paper_id = html_in.stem
     html_out = sources_dir / '{}.html'.format(paper_id)
-
-    # make sure not to overwrite existing data unintentionally
-    if data_dir.exists():
-        logger.critical(
-            'The data dir "{}" already exists. Abort!'.format(data_dir))
-        sys.exit(1)
 
     # now prepare for the preprocess
     logger.info('Begin to preprocess Paper "{}"'.format(paper_id))

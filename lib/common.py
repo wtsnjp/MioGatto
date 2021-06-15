@@ -14,6 +14,10 @@ def get_mi2idf(tree):
     for e in root.xpath('//mi'):
         mi_id = e.attrib.get('id')
 
+        # skip if empty
+        if e.text is None:
+            continue
+
         # get idf hex
         idf_hex = e.text.encode().hex()
 
