@@ -144,6 +144,72 @@ def preprocess_html(tree, paper_id):
             if e.text == 'old':
                 e.tag = 'mtext'
 
+    if paper_id == '1711.09576':
+        for e in root.xpath('//mi'):
+            # ref
+            if e.text == 'r':
+                e1 = e.getnext()  # invisible times
+                e2 = e1.getnext()  # e
+                e3 = e2.getnext()  # invisible times
+                e4 = e3.getnext()  # f
+                if e2.text == 'e' and e4.text == 'f':
+                    e.text = 'ref'
+                    p = e.getparent()
+                    p.remove(e1)
+                    p.remove(e2)
+                    p.remove(e3)
+                    p.remove(e4)
+
+            # Acc
+            if e.text == 'A' and e.getnext() is not None:
+                e1 = e.getnext()  # invisible times
+                e2 = e1.getnext()  # c
+                if e2 is None:
+                    continue
+                e3 = e2.getnext()  # invisible times
+                if e3 is None:
+                    continue
+                e4 = e3.getnext()  # c
+                if e2.text == 'c' and e4.text == 'c':
+                    e.text = 'Acc'
+                    p = e.getparent()
+                    p.remove(e1)
+                    p.remove(e2)
+                    p.remove(e3)
+                    p.remove(e4)
+
+            # Rej
+            if e.text == 'R' and e.getnext() is not None:
+                e1 = e.getnext()  # invisible times
+                e2 = e1.getnext()  # e
+                if e2 is None:
+                    continue
+                e3 = e2.getnext()  # invisible times
+                if e3 is None:
+                    continue
+                e4 = e3.getnext()  # j
+                if e2.text == 'e' and e4.text == 'j':
+                    e.text = 'Rej'
+                    p = e.getparent()
+                    p.remove(e1)
+                    p.remove(e2)
+                    p.remove(e3)
+                    p.remove(e4)
+
+            # Im
+            if e.text == 'I':
+                e1 = e.getnext()  # invisible times
+                if e1 is None:
+                    continue
+                e2 = e1.getnext()  # m
+                if e2 is None:
+                    continue
+                if e2.text == 'm':
+                    e.text = 'Im'
+                    p = e.getparent()
+                    p.remove(e1)
+                    p.remove(e2)
+
     return tree
 
 
