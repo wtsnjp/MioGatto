@@ -48,6 +48,29 @@ def hex2surface(idf_hex):
     return surface
 
 
+# add word span tags to text (directly) in <p> tags
+def split_words_into_span_tags(text, parent_id, idx):
+    from lxml.html.builder import SPAN
+
+    def word_span(w, p, i, c):
+        s = SPAN(w)
+        s.attrib['class'] = 'gd_word'
+        s.attrib['id'] = '{}.{}.w{}'.format(p, i + 1, c)
+        return s
+
+    words = text.split(' ')
+    word_cnt, spans = 1, []
+
+    for w in words[:-1]:
+        spans.extend([word_span(w, parent_id, idx, word_cnt), SPAN(' ')])
+        word_cnt += 1
+
+    if not words[-1] == '':
+        spans.append(word_span(words[-1], parent_id, idx, word_cnt))
+
+    return spans
+
+
 def preprocess_html(tree, paper_id):
     root = tree.getroot()
 
@@ -55,35 +78,23 @@ def preprocess_html(tree, paper_id):
     for e in root.xpath('//annotation|//annotation-xml'):
         e.drop_tree()
 
+    # dirty hack: fix math markups
+    if paper_id == '1808.02342':
+        from lib.fixers import fix1808_02342
+        fix1808_02342(root)
+
+    if paper_id == '1711.09576':
+        from lib.fixers import fix1711_09576
+        fix1711_09576(root)
+
     # tweak images
     for e in root.xpath('//img'):
         if 'ltx_graphics' in e.attrib.get('class', '').split(' '):
-            e.attrib['src'] = '/static/img/{}/'.format(
-                paper_id) + e.attrib['src']
+            src = '/static/img/{}/'.format(paper_id) + e.attrib['src']
+            e.attrib['src'] = src
+            e.attrib['alt'] = src
             e.attrib['width'] = None
             e.attrib['height'] = None
-
-    # add word span tags to text (directly) in <p> tags
-    def split_words_into_span_tags(text, parent_id, idx):
-        from lxml.html.builder import SPAN
-
-        def word_span(w, p, i, c):
-            s = SPAN(w)
-            s.attrib['class'] = 'gd_word'
-            s.attrib['id'] = '{}.{}.w{}'.format(p, i + 1, c)
-            return s
-
-        words = text.split(' ')
-        word_cnt, spans = 1, []
-
-        for w in words[:-1]:
-            spans.extend([word_span(w, parent_id, idx, word_cnt), SPAN(' ')])
-            word_cnt += 1
-
-        if not words[-1] == '':
-            spans.append(word_span(words[-1], parent_id, idx, word_cnt))
-
-        return spans
 
     for e in root.xpath('//p|//figcaption'):
         # get texts and remove
@@ -107,108 +118,6 @@ def preprocess_html(tree, paper_id):
             if not spans[i] is None:
                 for s in reversed(spans[i]):
                     e.insert(i, s)
-
-    # dirty hack: fix math markups
-    if paper_id == '1808.02342':
-        for e in root.xpath('//mtext'):
-            if e.text == 'E':
-                e.tag = 'mi'
-                e.attrib['mathvariant'] = 'normal'
-
-            if e.text == 'KL':
-                e.tag = 'mi'
-
-            if e.text.strip() == 'maximize':
-                e.tag = 'mi'
-                e.text = e.text.strip()
-
-            if e.text == 'arg':
-                # add "arg" to max/min
-                mm = e.getnext().getnext().xpath(
-                    './/mi[text()="max"]|.//mi[text()="min"]')[0]
-                mm.text = 'arg' + mm.text
-
-                # remove unnecessary elements
-                e.getparent().remove(e)
-
-        for e in root.xpath('//mo'):
-            if e.text == '𝜃':
-                e.tag = 'mi'
-                e.text = 'θ'  # GREEK SMALL LETTER THETA
-
-            if e.text == '𝑞':
-                e.tag = 'mi'
-                e.text = 'q'  # LATIN SMALL LETTER Q
-
-        for e in root.xpath('//mi'):
-            if e.text == 'old':
-                e.tag = 'mtext'
-
-    if paper_id == '1711.09576':
-        for e in root.xpath('//mi'):
-            # ref
-            if e.text == 'r':
-                e1 = e.getnext()  # invisible times
-                e2 = e1.getnext()  # e
-                e3 = e2.getnext()  # invisible times
-                e4 = e3.getnext()  # f
-                if e2.text == 'e' and e4.text == 'f':
-                    e.text = 'ref'
-                    p = e.getparent()
-                    p.remove(e1)
-                    p.remove(e2)
-                    p.remove(e3)
-                    p.remove(e4)
-
-            # Acc
-            if e.text == 'A' and e.getnext() is not None:
-                e1 = e.getnext()  # invisible times
-                e2 = e1.getnext()  # c
-                if e2 is None:
-                    continue
-                e3 = e2.getnext()  # invisible times
-                if e3 is None:
-                    continue
-                e4 = e3.getnext()  # c
-                if e2.text == 'c' and e4.text == 'c':
-                    e.text = 'Acc'
-                    p = e.getparent()
-                    p.remove(e1)
-                    p.remove(e2)
-                    p.remove(e3)
-                    p.remove(e4)
-
-            # Rej
-            if e.text == 'R' and e.getnext() is not None:
-                e1 = e.getnext()  # invisible times
-                e2 = e1.getnext()  # e
-                if e2 is None:
-                    continue
-                e3 = e2.getnext()  # invisible times
-                if e3 is None:
-                    continue
-                e4 = e3.getnext()  # j
-                if e2.text == 'e' and e4.text == 'j':
-                    e.text = 'Rej'
-                    p = e.getparent()
-                    p.remove(e1)
-                    p.remove(e2)
-                    p.remove(e3)
-                    p.remove(e4)
-
-            # Im
-            if e.text == 'I':
-                e1 = e.getnext()  # invisible times
-                if e1 is None:
-                    continue
-                e2 = e1.getnext()  # m
-                if e2 is None:
-                    continue
-                if e2.text == 'm':
-                    e.text = 'Im'
-                    p = e.getparent()
-                    p.remove(e1)
-                    p.remove(e2)
 
     return tree
 
