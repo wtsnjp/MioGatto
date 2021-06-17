@@ -1,4 +1,14 @@
-#!/usr/bin/env python3
+# The server implementation for MioGatto
+from flask import Flask, request, redirect, render_template, Markup
+import re
+import json
+import yaml
+import lxml.html
+from lxml import etree
+from docopt import docopt
+from copy import deepcopy
+
+# meta
 PROG_NAME = "server.py"
 HELP = """The server implementation for MioGatto
 
@@ -16,16 +26,6 @@ Options:
 """.format(p=PROG_NAME)
 VERSION = "0.2.0"
 REV_DATE = "2021-06-02"
-
-# libraries
-from flask import Flask, request, redirect, render_template, Markup
-import re
-import json
-import yaml
-import lxml.html
-from lxml import etree
-from docopt import docopt
-from copy import deepcopy
 
 
 # preprocess mcdict
@@ -58,7 +58,7 @@ def convert_mcdict(data_mcdict):
         return '<math>' + math + '</math>'
 
     def process_desc(desc):
-        if not desc or not '$' in desc:
+        if not desc or '$' not in desc:
             return desc
 
         # process maths
@@ -85,7 +85,6 @@ def convert_mcdict(data_mcdict):
 
 # generating demo HTML
 def generate_html(paper_id, data_anno, tree):
-    from lxml.html.builder import SPAN
     mi_anno = data_anno['mi_anno']
 
     # avoid destroying the original tree
