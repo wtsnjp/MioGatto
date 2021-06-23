@@ -273,7 +273,7 @@ def main():
 
     # make the mcdict list
     data_mcdict = {
-        'mdict_version': '0.2',
+        'mcdict_version': '0.2',
         'annotator': 'YOUR NAME',
         'concepts': idf2mc(identifiers),
     }
