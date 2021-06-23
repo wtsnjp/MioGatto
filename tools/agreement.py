@@ -8,6 +8,7 @@ from docopt import docopt
 from pathlib import Path
 from sklearn.metrics import cohen_kappa_score
 
+from lib.version import VERSION
 from lib.cli import set_level
 from lib.common import get_mi2idf
 
@@ -38,7 +39,6 @@ Options:
     -h, --help         Show this screen and exit
     -V, --version      Show version
 """.format(p=PROG_NAME)
-VERSION = "0.2.0"
 
 
 def extract_info(tree):

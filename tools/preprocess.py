@@ -5,6 +5,7 @@ import unicodedata
 from docopt import docopt
 from pathlib import Path
 
+from lib.version import VERSION
 from lib.cli import set_level
 from lib.common import get_mi2idf
 
@@ -34,7 +35,6 @@ Options:
     -h, --help         Show this screen and exit
     -V, --version      Show version
 """.format(p=PROG_NAME)
-VERSION = "0.2.0"
 
 
 def hex2surface(idf_hex):
