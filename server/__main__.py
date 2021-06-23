@@ -2,7 +2,6 @@
 from flask import Flask, request, redirect, render_template, Markup
 import re
 import json
-import yaml
 import lxml.html
 from lxml import etree
 from docopt import docopt
@@ -155,7 +154,7 @@ def routing_functions(paper_id, annotator):
         data_dir = 'data'
 
     anno_json = './{}/{}_anno.json'.format(data_dir, paper_id)
-    mcdict_yaml = './{}/{}_mcdict.yaml'.format(data_dir, paper_id)
+    mcdict_json = './{}/{}_mcdict.json'.format(data_dir, paper_id)
 
     # initialize the annotation data
     with open(anno_json) as f:
@@ -212,10 +211,14 @@ def routing_functions(paper_id, annotator):
         return redirect('/')
 
     @app.route('/mcdict.json', methods=['GET'])
-    def mcdict_json():
-        with open(mcdict_yaml) as f:
-            data_mcdict = yaml.load(f, Loader=yaml.FullLoader)
-        mcdict = convert_mcdict(data_mcdict)
+    def root_mcdict_json():
+        with open(mcdict_json) as f:
+            data_mcdict = json.load(f)
+        if data_mcdict.get('mcdict_version', '') != '0.2':
+            app.logger.warning('Mcdict version is incompatible')
+
+        mcdict = convert_mcdict(data_mcdict['concepts'])
+
         return json.dumps(mcdict,
                           ensure_ascii=False,
                           indent=4,

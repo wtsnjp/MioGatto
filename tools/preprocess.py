@@ -1,5 +1,4 @@
 # The preprocess tool for MioGatto
-import yaml
 import json
 import lxml.html
 import unicodedata
@@ -177,23 +176,19 @@ def idf2mc(idf_set):
     return {
         idf[0]: {
             'surface': hex2surface(idf[0]),
-            'identifiers': {
-                v: [{
-                    'args_type': [],
-                    'arity': 0,
-                    'description': None,
-                }]
-                for v in idf[1]
-            }
+            'identifiers': {v: []
+                            for v in idf[1]}
         }
         for idf in idf_sorted
     }
 
 
 def merge_mcdict(data_mcdict, data_mcdict_ref):
-    for idf_hex, idfs in data_mcdict.items():
-        idfs_ref = data_mcdict_ref.get(idf_hex,
-                                       dict()).get('identifiers', None)
+    concepts = data_mcdict['concepts']
+    concepts_ref = data_mcdict_ref['concepts']
+
+    for idf_hex, idfs in concepts.items():
+        idfs_ref = concepts_ref.get(idf_hex, dict()).get('identifiers', None)
 
         if idfs_ref is None:
             continue
@@ -234,24 +229,24 @@ def main():
 
     data_dir.mkdir(parents=True, exist_ok=True)
     anno_json = data_dir / '{}_anno.json'.format(paper_id)
-    mcdict_yaml = data_dir / '{}_mcdict.yaml'.format(paper_id)
+    mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
     data_mcdict_ref = dict()
 
     # for --annotator operation, reference data are required
     if annotator:
         anno_json_ref = data_dir_ref / '{}_anno.json'.format(paper_id)
-        mcdict_yaml_ref = data_dir_ref / '{}_mcdict.yaml'.format(paper_id)
+        mcdict_json_ref = data_dir_ref / '{}_mcdict.json'.format(paper_id)
 
-        if not anno_json_ref.exists() or not mcdict_yaml_ref.exists():
+        if not anno_json_ref.exists() or not mcdict_json_ref.exists():
             logger.warn('For --annotator operation, reference data'
                         'files are required, but those not found.')
             logger.warn('Executing the default operation as fallback.')
             annotator = False
 
         else:
-            with open(mcdict_yaml_ref) as f:
-                data_mcdict_ref = yaml.load(f, Loader=yaml.FullLoader)
+            with open(mcdict_json_ref) as f:
+                data_mcdict_ref = json.load(f)
 
     # load and modify the HTML
     tree = lxml.html.parse(str(html_in))
@@ -267,7 +262,7 @@ def main():
     # make the annotation structure
     data_anno = {
         'anno_version': '0.2',
-        'annotator': 'NAME',
+        'annotator': 'YOUR NAME',
         'mi_anno': dict(),
     }
     for mi_id, concept_id in occurences.items():
@@ -277,7 +272,11 @@ def main():
         }
 
     # make the mcdict list
-    data_mcdict = idf2mc(identifiers)
+    data_mcdict = {
+        'mdict_version': '0.2',
+        'annotator': 'YOUR NAME',
+        'concepts': idf2mc(identifiers),
+    }
 
     # TODO: temporary, use the referential mcdict for annotators
     if annotator:
@@ -291,12 +290,13 @@ def main():
                   indent=4,
                   sort_keys=True,
                   separators=(',', ': '))
-    with open(mcdict_yaml, 'w') as f:
-        yaml.dump(data_mcdict,
+    with open(mcdict_json, 'w') as f:
+        json.dump(data_mcdict,
                   f,
-                  width=50,
-                  encoding='utf-8',
-                  allow_unicode=True)
+                  ensure_ascii=False,
+                  indent=4,
+                  sort_keys=True,
+                  separators=(',', ': '))
 
 
 if __name__ == '__main__':
