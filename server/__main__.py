@@ -28,7 +28,7 @@ REV_DATE = "2021-06-02"
 
 
 # preprocess mcdict
-def convert_mcdict(data_mcdict):
+def preprocess_mcdict(data_mcdict):
     # description processor
     def process_math(math):
         def construct_mi(idf_text, idf_var, concept_id):
@@ -129,9 +129,9 @@ def generate_html(paper_id, data_anno, tree):
                            main_content=Markup(main_content))
 
 
-def save_data(data_anno, anno_json):
-    with open(anno_json, 'w') as f:
-        json.dump(data_anno,
+def save_data(file_name, data):
+    with open(file_name, 'w') as f:
+        json.dump(data,
                   f,
                   ensure_ascii=False,
                   indent=4,
@@ -156,11 +156,17 @@ def routing_functions(paper_id, annotator):
     anno_json = './{}/{}_anno.json'.format(data_dir, paper_id)
     mcdict_json = './{}/{}_mcdict.json'.format(data_dir, paper_id)
 
-    # initialize the annotation data
+    # load annotation data
     with open(anno_json) as f:
         data_anno = json.load(f)
     if data_anno.get('anno_version') != '0.2':
         app.logger.warning('Annotation data version is incompatible')
+
+    # load mcdict
+    with open(mcdict_json) as f:
+        data_mcdict = json.load(f)
+    if data_mcdict.get('mcdict_version', '') != '0.2':
+        app.logger.warning('Mcdict version is incompatible')
 
     # parse html
     tree = lxml.html.parse(source_html)
@@ -177,7 +183,28 @@ def routing_functions(paper_id, annotator):
         if res.get('concept'):
             data_anno['mi_anno'][res['mi_id']]['concept_id'] = int(
                 res['concept'])
-            save_data(data_anno, anno_json)
+            save_data(anno_json, data_anno)
+
+        # redirect
+        return redirect('/')
+
+    @app.route('/_new_concept', methods=['POST'])
+    def action_new_concept():
+        # register and save data_anno
+        res = request.form
+        idf_hex = res.get('idf_hex')
+        idf_var = res.get('idf_var')
+
+        data_mcdict['concepts'][idf_hex]['identifiers'][idf_var].append({
+            'description':
+            res.get('description'),
+            'arity':
+            int(res.get('arity')),
+            'args_type':
+            res.getlist('args_type')
+        })
+
+        save_data(mcdict_json, data_mcdict)
 
         # redirect
         return redirect('/')
@@ -192,7 +219,7 @@ def routing_functions(paper_id, annotator):
         if not [start_id, stop_id] in cur_sog:
             cur_sog.append([start_id, stop_id])
 
-        save_data(data_anno, anno_json)
+        save_data(anno_json, data_anno)
 
         # redirect
         return redirect('/')
@@ -205,19 +232,14 @@ def routing_functions(paper_id, annotator):
 
         cur_sog.remove([start_id, stop_id])
 
-        save_data(data_anno, anno_json)
+        save_data(anno_json, data_anno)
 
         # redirect
         return redirect('/')
 
     @app.route('/mcdict.json', methods=['GET'])
     def root_mcdict_json():
-        with open(mcdict_json) as f:
-            data_mcdict = json.load(f)
-        if data_mcdict.get('mcdict_version', '') != '0.2':
-            app.logger.warning('Mcdict version is incompatible')
-
-        mcdict = convert_mcdict(data_mcdict['concepts'])
+        mcdict = preprocess_mcdict(data_mcdict['concepts'])
 
         return json.dumps(mcdict,
                           ensure_ascii=False,

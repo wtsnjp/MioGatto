@@ -200,9 +200,9 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
             radios += item;
         }
         let cand_list = `<div class="keep">${radios}</div>`;
-        let submit_button = '<p><input type="submit" value="Confirm"></p>';
-        let form_elements = hidden + cand_list + submit_button;
-        let form = `<form id="form-${mi_id}" method="POST">${form_elements}</form>`;
+        let buttons = '<p><button id="choose-concept">Choose</button> <button id="new-concept" type="button">New</button></p>';
+        let form_elements = hidden + cand_list + buttons;
+        let form = `<form id="form-${mi_id}" action="/_concept" method="POST">${form_elements}</form>`;
         // show the box
         let id_span = `ID: <span style="font-family: monospace;">${mi_id}</span>`;
         let anno_box_content = `<p>${id_span}<hr color="#FFF">${form}</p>`;
@@ -210,18 +210,19 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         //console.log(anno_box_content);
         // write the content
         $('#anno-box').html(anno_box_content);
-        // buttons by jquery-ui
-        $('.tab-content input[type=submit]').button();
-        $('.tab-content input[type=submit]').click(function () {
-            localStorage['scroll_top'] = $(window).scrollTop();
+        // send chosen concept
+        $('button#choose-concept').button();
+        $('button#choose-concept').on('submit', function () {
             if ($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
-                $('#form-' + escape_selector(mi_id)).attr('action', '/_concept');
-                $('#form-' + escape_selector(mi_id)).submit();
+                localStorage['scroll_top'] = $(window).scrollTop();
             }
             else {
                 alert('Please select a concept.');
+                return false;
             }
         });
+        // new concept dialog
+        new_concept_button(idf);
         // give colors at the same time
         $('mi').each(function () {
             give_color($(this));
@@ -235,10 +236,44 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         let concept_cand = get_concept_cand(idf);
         // draw the annotation box
         let mi_id = mi.attr('id');
-        if (concept_cand != undefined && mi_id != undefined)
-            draw_anno_box(mi_id, idf, concept_cand);
+        if (concept_cand != undefined && mi_id != undefined) {
+            if (concept_cand.length > 0) {
+                draw_anno_box(mi_id, idf, concept_cand);
+            }
+            else {
+                let id_span = `ID: <span style="font-family: monospace;">${mi_id}</span>`;
+                let no_concept = '<p>No concept is available.</p>';
+                let button = '<p><button id="new-concept" type="button">New</button></p>';
+                let msg = `<p>${id_span}<hr color="#FFF">${no_concept}${button}</p>`;
+                $('#anno-box').html(msg);
+            }
+        }
+        // enable the button
+        new_concept_button(idf);
     }
-    $('mi').click(function () {
+    function new_concept_button(idf) {
+        $('button#new-concept').button();
+        $('button#new-concept').on('click', function () {
+            $('.new-concept-dialog').dialog({
+                modal: true,
+                title: 'New Concept',
+                width: 500,
+                buttons: {
+                    'OK': function () {
+                        localStorage['scroll_top'] = $(window).scrollTop();
+                        let form = $('#form-new-concept');
+                        form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`);
+                        form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`);
+                        form.trigger("submit");
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        });
+    }
+    $('mi').on('click', function () {
         // if already selected, remove it
         let old_mi_id = sessionStorage.getItem('mi_id');
         if (old_mi_id != undefined) {

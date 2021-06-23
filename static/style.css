@@ -123,3 +123,8 @@ Version: 2021-03-26
     background: #fff;
     z-index: 1;
 }
+
+.new-concept-dialog {
+    display: none;
+    list-style: none;
+}
