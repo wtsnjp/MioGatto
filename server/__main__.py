@@ -84,6 +84,17 @@ def preprocess_mcdict(data_mcdict):
 
 
 # generating demo HTML
+def args_type_checkbox(args_type):
+    input_tag = '''<label for="{0}">
+<input type="checkbox" name="args_type" id="{0}" value="{0}" />{1}
+</label>'''
+
+    return '<br/>'.join([
+        '\n'.join([input_tag.format(t.lower(), t) for t in row])
+        for row in args_type
+    ])
+
+
 def generate_html(paper_id, data_anno, tree):
     mi_anno = data_anno['mi_anno']
 
@@ -114,6 +125,14 @@ def generate_html(paper_id, data_anno, tree):
         for sog in anno['sog']:
             nof_sog += 1
 
+    # new concept: arg types
+    args_type = [
+        ['Subscript', 'Superscript', 'Comma'],
+        ['Prime', 'Hat', 'Over'],
+        ['Open parenthesis', 'Close parenthesis'],
+        ['Open bracket', 'Close bracket', 'Vertical bar'],
+    ]
+
     # construction
     title = root.xpath('//head/title')[0].text
     body = root.xpath('body')[0]
@@ -127,6 +146,7 @@ def generate_html(paper_id, data_anno, tree):
                            annotator=data_anno.get('annotator', 'unknown'),
                            p_concept=p_concept,
                            nof_sog=nof_sog,
+                           args_type=Markup(args_type_checkbox(args_type)),
                            main_content=Markup(main_content))
 
 
