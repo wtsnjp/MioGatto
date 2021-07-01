@@ -84,15 +84,24 @@ def preprocess_mcdict(data_mcdict):
 
 
 # generating demo HTML
-def args_type_checkbox(args_type):
-    input_tag = '''<label for="{0}">
-<input type="checkbox" name="args_type" id="{0}" value="{0}" />{1}
-</label>'''
+def args_type_pulldowns():
+    select_tag = '''<li><select name="args_type{}">
+<option value="">-----</option>
+<option value="subscript">Subscript</option>
+<option value="superscript">Superscript</option>
+<option value="comma">Comma</option>
+<option value="prime">Prime</option>
+<option value="hat">Hat</option>
+<option value="over">Over</option>
+<option value="open parenthesis">Open parenthesis</option>
+<option value="close parenthesis">Close parenthesis</option>
+<option value="open bracket">Open bracket</option>
+<option value="close bracket">Close bracket</option>
+<option value="vertical bar">Vertical bar</option>
+</select></li>'''
+    items = '\n'.join([select_tag.format(i) for i in range(10)])
 
-    return '<br/>'.join([
-        '\n'.join([input_tag.format(t.lower(), t) for t in row])
-        for row in args_type
-    ])
+    return '<ol>{}</ol>'.format(items)
 
 
 def generate_html(paper_id, data_anno, tree):
@@ -125,14 +134,6 @@ def generate_html(paper_id, data_anno, tree):
         for sog in anno['sog']:
             nof_sog += 1
 
-    # new concept: arg types
-    args_type = [
-        ['Subscript', 'Superscript', 'Comma'],
-        ['Prime', 'Hat', 'Over'],
-        ['Open parenthesis', 'Close parenthesis'],
-        ['Open bracket', 'Close bracket', 'Vertical bar'],
-    ]
-
     # construction
     title = root.xpath('//head/title')[0].text
     body = root.xpath('body')[0]
@@ -146,7 +147,7 @@ def generate_html(paper_id, data_anno, tree):
                            annotator=data_anno.get('annotator', 'unknown'),
                            p_concept=p_concept,
                            nof_sog=nof_sog,
-                           args_type=Markup(args_type_checkbox(args_type)),
+                           args_type=Markup(args_type_pulldowns()),
                            main_content=Markup(main_content))
 
 
@@ -216,13 +217,20 @@ def routing_functions(paper_id, annotator):
         idf_hex = res.get('idf_hex')
         idf_var = res.get('idf_var')
 
+        # get args_type
+        args_type = []
+        for i in range(10):
+            t_i = res.get('args_type{}'.format(i))
+            if t_i != '':
+                args_type.append(t_i)
+
         data_mcdict['concepts'][idf_hex]['identifiers'][idf_var].append({
             'description':
             res.get('description'),
             'arity':
             int(res.get('arity')),
             'args_type':
-            res.getlist('args_type')
+            args_type
         })
 
         save_data(mcdict_json, data_mcdict)
