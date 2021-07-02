@@ -63,39 +63,8 @@ def fix1808_02342(root):
 
 
 def fix1711_09576(root):
-    from lxml.html.builder import IMG
-
     for e in root.xpath('//mi'):
         merge_mi(e, 'ref')
         merge_mi(e, 'Acc')
         merge_mi(e, 'Rej')
         merge_mi(e, 'Im')
-
-    for e in root.xpath('//figure[@class="ltx_figure"]'):
-        # remove embed figures
-        for c in e:
-            if c.tag != 'img' and c.tag != 'figcaption':
-                e.remove(c)
-
-        # add <img>
-        if [c.tag for c in e] == ['figcaption']:
-            img = IMG()
-            src = '/static/img/1711.09576/{}.png'.format(
-                e.attrib['id'].replace('.', '_'))
-            img.attrib['src'] = src
-            img.attrib['alt'] = src
-            e.insert(0, img)
-
-    for e in root.xpath('//figure[@class="ltx_table"]'):
-        # remove embed tables
-        for c in e:
-            if c.tag != 'figcaption':
-                e.remove(c)
-
-        # add <img>
-        img = IMG()
-        src = '/static/img/1711.09576/{}.png'.format(
-            e.attrib['id'].replace('.', '_'))
-        img.attrib['src'] = src
-        img.attrib['alt'] = src
-        e.insert(0, img)

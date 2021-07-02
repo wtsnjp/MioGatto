@@ -24,6 +24,7 @@ Usage:
 
 Options:
     -a, --annotator    Generate annotation files for annotators
+    --no-embed-floats  Remove embed figure/table codes
 
     --data=DIR         Dir for data outputs [default: ./generated_data]
     --data-ref=DIR     Dir for reference data [default: ./data]
@@ -70,7 +71,7 @@ def split_words_into_span_tags(text, parent_id, idx):
     return spans
 
 
-def preprocess_html(tree, paper_id):
+def preprocess_html(tree, paper_id, no_embed):
     root = tree.getroot()
 
     # drop unnecessary annotations
@@ -117,6 +118,41 @@ def preprocess_html(tree, paper_id):
             if not spans[i] is None:
                 for s in reversed(spans[i]):
                     e.insert(i, s)
+
+    # almost done
+    if not no_embed:
+        return tree
+
+    # remove embed float
+    from lxml.html.builder import IMG
+    for e in root.xpath('//figure[@class="ltx_figure"]'):
+        # remove embed figures
+        for c in e:
+            if c.tag != 'img' and c.tag != 'figcaption':
+                e.remove(c)
+
+        # add <img>
+        if [c.tag for c in e] == ['figcaption']:
+            img = IMG()
+            src = '/static/img/{}/{}.png'.format(
+                paper_id, e.attrib['id'].replace('.', '_'))
+            img.attrib['src'] = src
+            img.attrib['alt'] = src
+            e.insert(0, img)
+
+    for e in root.xpath('//figure[@class="ltx_table"]'):
+        # remove embed tables
+        for c in e:
+            if c.tag != 'figcaption':
+                e.remove(c)
+
+        # add <img>
+        img = IMG()
+        src = '/static/img/{}/{}.png'.format(
+            paper_id, e.attrib['id'].replace('.', '_'))
+        img.attrib['src'] = src
+        img.attrib['alt'] = src
+        e.insert(0, img)
 
     return tree
 
@@ -206,6 +242,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
     annotator = args['--annotator']
+    no_embed = args['--no-embed-floats']
 
     # setup logger
     log_level = log.INFO
@@ -250,7 +287,7 @@ def main():
 
     # load and modify the HTML
     tree = lxml.html.parse(str(html_in))
-    tree = preprocess_html(tree, paper_id)
+    tree = preprocess_html(tree, paper_id, no_embed)
     tree.write(str(html_out), pretty_print=True, encoding='utf-8')
 
     # extract formulae information
