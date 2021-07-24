@@ -254,6 +254,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
     function new_concept_button(idf) {
         $('button#new-concept').button();
         $('button#new-concept').on('click', function () {
+            let form = $('#form-new-concept')[0];
+            form.reset();
             $('.new-concept-dialog').dialog({
                 modal: true,
                 title: 'New Concept',
@@ -261,7 +263,6 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
                 buttons: {
                     'OK': function () {
                         localStorage['scroll_top'] = $(window).scrollTop();
-                        let form = $('#form-new-concept');
                         form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`);
                         form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`);
                         form.trigger("submit");
