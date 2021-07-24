@@ -217,7 +217,7 @@ $(function() {
         return '(No description)';
       }
     },
-    open: function(event, ui) {
+    open: function(_event, _ui) {
       $('mi').each(function() {
         give_color($(this));
       })
@@ -336,8 +336,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
             $(this).dialog('close');
           }
         }
-      })
-    })
+      });
+    });
   }
 
   $('mi').on('click', function() {
@@ -380,7 +380,7 @@ $(function() {
     return t;
   }
 
-  $(document).bind('mouseup', function() {
+  $(document).on('mouseup', function() {
     let selected_text = get_selected();
 
     if(selected_text != undefined && selected_text.type == 'Range') {
@@ -447,11 +447,11 @@ $(function() {
           $('.select-menu').fadeOut(200);
 
           // reload the page
-          location.reload(true);
+          location.reload();
         })
         .fail(function() {
           console.log('POST sog::add failed!');
-        })
+        });
       });
 
       // ----- Action SoG delete -----
@@ -489,7 +489,7 @@ $(function() {
           $('.select-menu').fadeOut(200);
 
           // reload the page
-          location.reload(true);
+          location.reload();
         })
         .fail(function() {
           console.log('POST sog::delete failed!');
@@ -520,5 +520,5 @@ function show_border(target: JQuery) {
 $(function() {
   $('mi').each(function() {
     show_border($(this));
-  })
+  });
 });
