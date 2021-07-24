@@ -25,7 +25,7 @@ Options:
     -h, --help            Show this screen and exit
     -V, --version         Show version
 """.format(p=PROG_NAME)
-REV_DATE = "2021-06-28"
+REV_DATE = "2021-07-25"
 
 
 # preprocess mcdict
@@ -238,6 +238,33 @@ def routing_functions(paper_id, annotator):
         # redirect
         return redirect('/')
 
+    @app.route('/_update_concept', methods=['POST'])
+    def action_update_concept():
+        # register and save data_anno
+        res = request.form
+        idf_hex = res.get('idf_hex')
+        idf_var = res.get('idf_var')
+        concept_id = int(res.get('concept_id'))
+
+        # get args_type
+        args_type = []
+        for i in range(10):
+            t_i = res.get('args_type{}'.format(i))
+            if t_i != '':
+                args_type.append(t_i)
+
+        data_mcdict['concepts'][idf_hex]['identifiers'][idf_var][
+            concept_id] = {
+                'description': res.get('description'),
+                'arity': int(res.get('arity')),
+                'args_type': args_type
+            }
+
+        save_data(mcdict_json, data_mcdict)
+
+        # redirect
+        return redirect('/')
+
     @app.route('/_add_sog', methods=['POST'])
     def action_add_sog():
         res = request.form
@@ -268,7 +295,8 @@ def routing_functions(paper_id, annotator):
 
     @app.route('/mcdict.json', methods=['GET'])
     def root_mcdict_json():
-        mcdict = preprocess_mcdict(data_mcdict['concepts'])
+        copied_concepts = deepcopy(data_mcdict['concepts'])
+        mcdict = preprocess_mcdict(copied_concepts)
 
         return json.dumps(mcdict,
                           ensure_ascii=False,

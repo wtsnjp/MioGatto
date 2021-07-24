@@ -249,6 +249,7 @@ $(function() {
 
       let item = `${input}<span class="keep"><label for="c${concept_id}">
 ${concept.description} <span style="color: #808080;">[${args_info}]</span>
+(<a class="edit-concept" data-mi="${mi_id}" data-concept="${concept_id}" href="javascript:void(0);">edit</a>)
 </label></span>`
       radios += item;
     }
@@ -276,12 +277,21 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         localStorage['scroll_top'] = $(window).scrollTop();
       } else {
         alert('Please select a concept.');
-        return false
+        return false;
       }
     });
 
-    // new concept dialog
+    // enable concept dialogs
     new_concept_button(idf);
+    $('a.edit-concept').on('click', function() {
+      let mi_id = $(this).attr('data-mi');
+      let concept_id = $(this).attr('data-concept');
+
+      if(mi_id != undefined && concept_id != undefined) {
+        let idf = get_idf($('#' + escape_selector(mi_id)));
+        edit_concept(idf, Number(concept_id));
+      }
+    });
 
     // give colors at the same time
     $('mi').each(function() {
@@ -308,20 +318,22 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         let button = '<p><button id="new-concept" type="button">New</button></p>'
         let msg = `<p>${id_span}<hr color="#FFF">${no_concept}${button}</p>`
         $('#anno-box').html(msg);
+
+        // enable the button
+        new_concept_button(idf);
       }
     }
-
-    // enable the button
-    new_concept_button(idf);
   }
 
   function new_concept_button(idf: Identifier) {
     $('button#new-concept').button();
     $('button#new-concept').on('click', function() {
-      let form = $('#form-new-concept')[0] as HTMLFormElement;
-      form.reset();
+      let concept_dialog = $('.concept-dialog').clone();
+      concept_dialog.removeClass('concept-dialog');
+      let form = concept_dialog.find('#concept-form');
+      form.attr('action', '/_new_concept');
 
-      $('.new-concept-dialog').dialog({
+      concept_dialog.dialog({
         modal: true,
         title: 'New Concept',
         width: 500,
@@ -337,6 +349,40 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
           }
         }
       });
+    });
+  }
+
+  function edit_concept(idf: Identifier, concept_id: number) {
+    let concept_dialog = $('.concept-dialog').clone();
+    concept_dialog.removeClass('concept-dialog');
+    let form = concept_dialog.find('#concept-form');
+    form.attr('action', '/_update_concept');
+
+    // put the current values
+    let concept = mcdict[idf.hex][idf.var][concept_id];
+    form.find('textarea').text(concept.description);
+    form.find('input[name="arity"]').attr('value', concept.arity);
+    concept.args_type.forEach(function(value, idx) {
+      form.find(`select[name="args_type${idx}"]`).find(
+        `option[value="${value}"]`).prop('selected', true);
+    })
+
+    concept_dialog.dialog({
+      modal: true,
+      title: 'Edit Concept',
+      width: 500,
+      buttons: {
+        'OK': function() {
+          localStorage['scroll_top'] = $(window).scrollTop();
+          form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`)
+          form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`)
+          form.append(`<input type="hidden" name="concept_id" value="${concept_id}" />`)
+          form.trigger("submit");
+        },
+        'Cancel': function() {
+          $(this).dialog('close');
+        }
+      }
     });
   }
 
