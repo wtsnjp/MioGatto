@@ -3,7 +3,7 @@
 Style for MioGatto
 
 Author: Takuto ASAKURA <takuto at is.s.u-tokyo.ac.jp>
-Version: 2021-03-26
+Version: 2021-07-25
 
 */
 
@@ -16,6 +16,10 @@ Version: 2021-03-26
 
 .main mi {
     cursor: pointer;
+}
+
+.main img {
+    max-width: 100%;
 }
 
 .sidebar {
