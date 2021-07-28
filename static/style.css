@@ -128,7 +128,7 @@ Version: 2021-07-25
     z-index: 1;
 }
 
-.new-concept-dialog {
+.concept-dialog {
     display: none;
     list-style: none;
 }

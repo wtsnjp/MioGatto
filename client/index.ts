@@ -340,8 +340,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         buttons: {
           'OK': function() {
             localStorage['scroll_top'] = $(window).scrollTop();
-            form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`)
-            form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`)
+            form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`);
+            form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`);
             form.trigger("submit");
           },
           'Cancel': function() {
@@ -353,8 +353,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
   }
 
   function edit_concept(idf: Identifier, concept_id: number) {
-    let concept_dialog = $('.concept-dialog').clone();
-    concept_dialog.removeClass('concept-dialog');
+    let concept_dialog = $('#concept-dialog-template').clone();
+    concept_dialog.removeAttr('id');
     let form = concept_dialog.find('#concept-form');
     form.attr('action', '/_update_concept');
 
