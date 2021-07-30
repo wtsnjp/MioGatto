@@ -213,7 +213,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
         $('#anno-box').html(anno_box_content);
         // send chosen concept
         $('button#choose-concept').button();
-        $('button#choose-concept').on('submit', function () {
+        $('button#choose-concept').on('click', function () {
             if ($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
                 localStorage['scroll_top'] = $(window).scrollTop();
             }

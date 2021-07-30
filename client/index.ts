@@ -195,9 +195,9 @@ $(function() {
       'data-sog-mi': s.mi_id,
       'data-sog-start': s.start_id,
       'data-sog-stop': s.stop_id,
-    })
+    });
   }
-})
+});
 
 // --------------------------
 // tooltip
@@ -272,7 +272,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 
     // send chosen concept
     $('button#choose-concept').button();
-    $('button#choose-concept').on('submit', function() {
+    $('button#choose-concept').on('click', function() {
       if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
         localStorage['scroll_top'] = $(window).scrollTop();
       } else {
@@ -398,7 +398,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 
     // show the annotation box
     show_anno_box($(this));
-  })
+  });
 
   // keep position and sidebar content after submiting the form
   $(window).scrollTop(localStorage['scroll_top']);
@@ -406,7 +406,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
   if(mi_id != undefined) {
     show_anno_box($('#' + escape_selector(mi_id)));
   }
-})
+});
 
 // --------------------------
 // SoG Registration
@@ -549,7 +549,7 @@ $(function() {
     page_x = e.pageX;
     page_y = e.pageY;
   });
-})
+});
 
 // --------------------------
 // background color
