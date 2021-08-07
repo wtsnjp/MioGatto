@@ -1,5 +1,4 @@
 # Agreement calculation tool for MioGatto
-import yaml
 import json
 import itertools
 import lxml.html
@@ -110,7 +109,8 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
             pos += 1
 
         else:
-            concept_list = data_mcdict[idf_hex]['identifiers'][idf_var]
+            concept_list = data_mcdict['concepts'][idf_hex]['identifiers'][
+                idf_var]
 
             concept_gold = concept_list[concept_id_gold]
             concept_target = concept_list[concept_id_target]
@@ -163,7 +163,9 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
     nof_idf_mul = 0
     nof_concept = 0
 
-    for letter in data_mcdict.values():
+    concepts = data_mcdict['concepts']
+
+    for letter in concepts.values():
         nof_idf += len(letter['identifiers'])
 
         for idf in letter['identifiers'].values():
@@ -172,14 +174,14 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
             nof_concept += len(idf)
 
     print('* Basic information')
-    print('#strings for identifiers: {}'.format(len(data_mcdict)))
+    print('#strings for identifiers: {}'.format(len(concepts)))
     print('#entries (identifiers): {}'.format(nof_idf))
     print('#items (mathematical concepts): {}'.format(nof_concept))
     print('#entries with multiple items: {}'.format(nof_idf_mul))
 
     # analyse items
     items = sorted([(v['surface']['text'], idf_var, len(idf))
-                    for idf_hex, v in data_mcdict.items()
+                    for idf_hex, v in concepts.items()
                     for idf_var, idf in v['identifiers'].items()],
                    key=lambda x: x[2],
                    reverse=True)
@@ -197,7 +199,7 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
     cnt_iter = itertools.count(0)
 
     concept_dict = dict()
-    for idf_hex, v in data_mcdict.items():
+    for idf_hex, v in concepts.items():
         concept_dict[idf_hex] = dict()
         for idf_var, idf in v['identifiers'].items():
             concept_dict[idf_hex][idf_var] = [next(cnt_iter) for _ in idf]
@@ -251,7 +253,7 @@ def main():
 
     ref_dir = Path(args['--reference'])
     anno_json = ref_dir / '{}_anno.json'.format(paper_id)
-    mcdict_yaml = ref_dir / '{}_mcdict.yaml'.format(paper_id)
+    mcdict_json = ref_dir / '{}_mcdict.json'.format(paper_id)
 
     sources_dir = Path(args['--sources'])
     source_html = sources_dir / '{}.html'.format(paper_id)
@@ -263,8 +265,8 @@ def main():
     # load the reference data
     with open(anno_json) as f:
         data_anno = json.load(f)
-    with open(mcdict_yaml) as f:
-        data_mcdict = yaml.load(f, Loader=yaml.FullLoader)
+    with open(mcdict_json) as f:
+        data_mcdict = json.load(f)
 
     # check the version of annotation data
     if data_anno.get('anno_version', '') != '0.2':
