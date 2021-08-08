@@ -146,11 +146,15 @@ def calc_agreements(data_anno, data_anno_target, data_mcdict, mi_info):
     w_sum, w_cnt = 0, 0
     print('symbol\tvariation\tKappa\tcount')
     for res in sorted(kappas, key=lambda x: x[3], reverse=True):
-        print(bytes.fromhex(res[0]).decode(), res[1], res[2], res[3], sep='\t')
+        print(bytes.fromhex(res[0]).decode(),
+              res[1],
+              '{:.3f}'.format(res[2]),
+              res[3],
+              sep='\t')
         if not np.isnan(res[2]):
             w_cnt += res[3]
             w_sum += res[2] * res[3]
-    print('Kappa (weighted avg.): %.4f' % (w_sum / w_cnt))
+    print('Kappa (weighted avg.): %.3f' % (w_sum / w_cnt))
 
     # warn if annotation is incompleted
     if unannotated > 0:
