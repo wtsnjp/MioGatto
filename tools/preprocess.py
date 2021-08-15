@@ -24,7 +24,7 @@ Usage:
 
 Options:
     -a, --annotator    Generate annotation files for annotators
-    --no-embed-floats  Remove embed figure/table codes
+    --embed-floats     Preserve embed figure/table codes
 
     --data=DIR         Dir for data outputs [default: ./generated_data]
     --data-ref=DIR     Dir for reference data [default: ./data]
@@ -71,7 +71,7 @@ def split_words_into_span_tags(text, parent_id, idx):
     return spans
 
 
-def preprocess_html(tree, paper_id, no_embed):
+def preprocess_html(tree, paper_id, embed_floats):
     root = tree.getroot()
 
     # drop unnecessary annotations
@@ -120,7 +120,7 @@ def preprocess_html(tree, paper_id, no_embed):
                     e.insert(i, s)
 
     # almost done
-    if not no_embed:
+    if embed_floats:
         return tree
 
     # remove embed float
@@ -242,7 +242,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
     annotator = args['--annotator']
-    no_embed = args['--no-embed-floats']
+    embed_floats = args['--embed-floats']
 
     # setup logger
     log_level = log.INFO
@@ -287,13 +287,14 @@ def main():
 
     # load and modify the HTML
     tree = lxml.html.parse(str(html_in))
-    tree = preprocess_html(tree, paper_id, no_embed)
+    tree = preprocess_html(tree, paper_id, embed_floats)
     tree.write(str(html_out), pretty_print=True, encoding='utf-8')
 
     # extract formulae information
     occurences, identifiers, attribs = observe_mi(tree, annotator,
                                                   data_mcdict_ref)
     logger.info('#indentifiers: {}'.format(len(identifiers)))
+    logger.info('#occurences: {}'.format(len(occurences)))
     logger.info('mi attributes: {}'.format(', '.join(attribs)))
 
     # make the annotation structure
