@@ -25,7 +25,7 @@ Options:
     -h, --help            Show this screen and exit
     -V, --version         Show version
 """.format(p=PROG_NAME)
-REV_DATE = "2021-07-25"
+REV_DATE = "2021-08-15"
 
 
 # preprocess mcdict
