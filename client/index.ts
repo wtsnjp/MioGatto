@@ -496,7 +496,7 @@ $(function() {
           location.reload();
         })
         .fail(function() {
-          console.log('POST sog::add failed!');
+          console.error('Failed to POST _add_sog!');
         });
       });
 
@@ -539,7 +539,7 @@ $(function() {
           location.reload();
         })
         .fail(function() {
-          console.log('POST sog::delete failed!');
+          console.error('Failed to POST _delete_sog!');
         })
       });
     } else {
