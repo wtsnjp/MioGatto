@@ -349,12 +349,25 @@ function get_selection() {
     // return undefineds for unproper cases
     if (selected_text == undefined || selected_text.type != 'Range')
         return [undefined, undefined, undefined];
-    let start_node = (_a = selected_text === null || selected_text === void 0 ? void 0 : selected_text.anchorNode) === null || _a === void 0 ? void 0 : _a.parentElement;
-    let stop_node = (_b = selected_text === null || selected_text === void 0 ? void 0 : selected_text.focusNode) === null || _b === void 0 ? void 0 : _b.parentElement;
-    if (start_node == undefined || stop_node == undefined)
+    let anchor_node = (_a = selected_text === null || selected_text === void 0 ? void 0 : selected_text.anchorNode) === null || _a === void 0 ? void 0 : _a.parentElement;
+    let focus_node = (_b = selected_text === null || selected_text === void 0 ? void 0 : selected_text.focusNode) === null || _b === void 0 ? void 0 : _b.parentElement;
+    if (anchor_node == undefined || focus_node == undefined)
         return [undefined, undefined, undefined];
-    if ($(start_node).parents('.main').length == 0 || $(stop_node).parents('.main').length == 0)
+    if ($(anchor_node).parents('.main').length == 0 || $(focus_node).parents('.main').length == 0)
         return [undefined, undefined, undefined];
+    // determine which (start|stop)_node
+    let anchor_rect = anchor_node.getBoundingClientRect();
+    let focus_rect = focus_node.getBoundingClientRect();
+    let start_node, stop_node;
+    if (anchor_rect.top < focus_rect.top) {
+        [start_node, stop_node] = [anchor_node, focus_node];
+    }
+    else if (anchor_rect.top == focus_rect.top && anchor_rect.left <= focus_rect.left) {
+        [start_node, stop_node] = [anchor_node, focus_node];
+    }
+    else {
+        [start_node, stop_node] = [focus_node, anchor_node];
+    }
     // get start_id and stop_id
     let start_id, stop_id;
     if (start_node.className == 'gd_word') {

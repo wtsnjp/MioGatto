@@ -426,13 +426,26 @@ function get_selection(): [
   if(selected_text == undefined || selected_text.type != 'Range')
     return [undefined, undefined, undefined];
 
-  let start_node = selected_text?.anchorNode?.parentElement;
-  let stop_node = selected_text?.focusNode?.parentElement;
-  if(start_node == undefined || stop_node == undefined)
+  let anchor_node = selected_text?.anchorNode?.parentElement;
+  let focus_node = selected_text?.focusNode?.parentElement;
+  if(anchor_node == undefined || focus_node == undefined)
     return [undefined, undefined, undefined];
-  
-  if($(start_node).parents('.main').length == 0 || $(stop_node).parents('.main').length == 0)
+
+  if($(anchor_node).parents('.main').length == 0 || $(focus_node).parents('.main').length == 0)
     return [undefined, undefined, undefined];
+
+  // determine which (start|stop)_node
+  let anchor_rect = anchor_node.getBoundingClientRect();
+  let focus_rect = focus_node.getBoundingClientRect();
+
+  let start_node, stop_node;
+  if(anchor_rect.top < focus_rect.top) {
+    [start_node, stop_node] = [anchor_node, focus_node];
+  } else if(anchor_rect.top == focus_rect.top && anchor_rect.left <= focus_rect.left) {
+    [start_node, stop_node] = [anchor_node, focus_node];
+  } else {
+    [start_node, stop_node] = [focus_node, anchor_node];
+  }
 
   // get start_id and stop_id
   let start_id, stop_id;
