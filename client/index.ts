@@ -412,39 +412,37 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 // SoG Registration
 // --------------------------
 
+function get_selected() {
+  let t;
+  if(window.getSelection) {
+    t = window.getSelection();
+  } else if(document.getSelection) {
+    t = document.getSelection();
+  }
+  return t;
+}
+
 $(function() {
   let page_x: number;
   let page_y: number;
-
-  function get_selected() {
-    let t;
-    if(window.getSelection) {
-      t = window.getSelection();
-    } else if(document.getSelection) {
-      t = document.getSelection();
-    }
-    return t;
-  }
 
   $(document).on('mouseup', function() {
     let selected_text = get_selected();
 
     if(selected_text != undefined && selected_text.type == 'Range') {
-      $('.select-menu').css({
-        'left': page_x + 5,
-        'top' : page_y - 55
-      }).fadeIn(200).css('display', 'flex');
-
       // ----- Action SoG add -----
       let mi_id = sessionStorage['mi_id'];
 
       // show it only if an mi with concept annotation selected
-      $('.select-menu .sog-add').css('display', 'none');
       if(mi_id != undefined) {
         let idf = get_idf($('#' + escape_selector(mi_id)));
         let concept = get_concept(idf);
-        if(concept != undefined)
-          $('.select-menu .sog-add').css('display', 'inherit');
+        if(concept != undefined) {
+          $('.select-menu').css({
+            'left': page_x + 5,
+            'top' : page_y - 55
+          }).fadeIn(200).css('display', 'flex');
+        }
       }
 
       // use jquery-ui
@@ -454,7 +452,8 @@ $(function() {
       $('.select-menu .sog-add').off('click');
       $('.select-menu .sog-add').on('click',
       function() {
-        localStorage['scroll_top'] = $(window).scrollTop();
+        $('.select-menu').css('display', 'none');
+
         let start_node = selected_text?.anchorNode?.parentElement;
         let stop_node = selected_text?.focusNode?.parentElement;
         if(start_node == undefined || stop_node == undefined)
@@ -485,12 +484,13 @@ $(function() {
           'stop_id': stop_id
         };
 
+        localStorage['scroll_top'] = $(window).scrollTop();
+
         $.when($.post('/_add_sog', post_data))
         .done(function() {
           // remove selection and the button
           if(selected_text != undefined)
             selected_text.empty();
-          $('.select-menu').fadeOut(200);
 
           // reload the page
           location.reload();
@@ -513,7 +513,7 @@ $(function() {
       $('.select-menu .sog-del').off('click');
       $('.select-menu .sog-del').on('click',
       function() {
-        localStorage['scroll_top'] = $(window).scrollTop();
+        $('.select-menu').css('display', 'none');
 
         // make sure e exists
         // Note: the button is shown only if it exists
@@ -527,12 +527,13 @@ $(function() {
           'stop_id': e.getAttribute('data-sog-stop'),
         };
 
+        localStorage['scroll_top'] = $(window).scrollTop();
+
         $.when($.post('/_delete_sog', post_data))
         .done(function() {
           // remove selection and the button
           if(selected_text != undefined)
             selected_text.empty();
-          $('.select-menu').fadeOut(200);
 
           // reload the page
           location.reload();
@@ -542,10 +543,11 @@ $(function() {
         })
       });
     } else {
-      $('.select-menu').fadeOut(200);
+      $('.select-menu').css('display', 'none');
     }
   });
-  $(document).on("mousedown", function(e){
+
+  $(document).on("mousedown", function(e) {
     page_x = e.pageX;
     page_y = e.pageY;
   });
