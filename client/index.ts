@@ -412,14 +412,48 @@ ${concept.description} <span style="color: #808080;">[${args_info}]</span>
 // SoG Registration
 // --------------------------
 
-function get_selected() {
-  let t;
+function get_selection(): [
+    string | undefined, string | undefined, HTMLElement | undefined] {
+  // get selection
+  let selected_text;
   if(window.getSelection) {
-    t = window.getSelection();
+    selected_text = window.getSelection();
   } else if(document.getSelection) {
-    t = document.getSelection();
+    selected_text = document.getSelection();
   }
-  return t;
+
+  // return undefineds for unproper cases
+  if(selected_text == undefined || selected_text.type != 'Range')
+    return [undefined, undefined, undefined];
+
+  let start_node = selected_text?.anchorNode?.parentElement;
+  let stop_node = selected_text?.focusNode?.parentElement;
+  if(start_node == undefined || stop_node == undefined)
+    return [undefined, undefined, undefined];
+  
+  if($(start_node).parents('.main').length == 0 || $(stop_node).parents('.main').length == 0)
+    return [undefined, undefined, undefined];
+
+  // get start_id and stop_id
+  let start_id, stop_id;
+
+  if(start_node.className == 'gd_word') {
+    start_id= start_node.id;
+  } else if(start_node.nextElementSibling?.className == 'gd_word') {
+    start_id = start_node.nextElementSibling.id;
+  } else {
+    console.warn('Invalid span for a source of grounding');
+  }
+
+  if(stop_node.className == 'gd_word') {
+    stop_id = stop_node.id;
+  } else if(stop_node.previousElementSibling?.className == 'gd_word') {
+    stop_id = stop_node.previousElementSibling.id;
+  } else {
+    console.warn('Invalid span for a source of grounding');
+  }
+
+  return [start_id, stop_id, start_node];
 }
 
 $(function() {
@@ -427,124 +461,89 @@ $(function() {
   let page_y: number;
 
   $(document).on('mouseup', function() {
-    let selected_text = get_selected();
+    $('.select-menu').css('display', 'none');
+    let [start_id, stop_id, parent] = get_selection();
 
-    if(selected_text != undefined && selected_text.type == 'Range') {
-      // ----- Action SoG add -----
-      let mi_id = sessionStorage['mi_id'];
+    if(parent == undefined)
+      return;
 
-      // show it only if an mi with concept annotation selected
-      if(mi_id != undefined) {
-        let idf = get_idf($('#' + escape_selector(mi_id)));
-        let concept = get_concept(idf);
-        if(concept != undefined) {
-          $('.select-menu').css({
-            'left': page_x + 5,
-            'top' : page_y - 55
-          }).fadeIn(200).css('display', 'flex');
-        }
+    // ----- Action SoG add -----
+    let mi_id = sessionStorage['mi_id'];
+
+    // show it only if an mi with concept annotation selected
+    if(mi_id != undefined) {
+      let idf = get_idf($('#' + escape_selector(mi_id)));
+      let concept = get_concept(idf);
+      if(concept != undefined) {
+        $('.select-menu').css({
+          'left': page_x + 5,
+          'top' : page_y - 55
+        }).fadeIn(200).css('display', 'flex');
       }
-
-      // use jquery-ui
-      $('.select-menu input[type=submit]').button();
-
-      // the add function
-      $('.select-menu .sog-add').off('click');
-      $('.select-menu .sog-add').on('click',
-      function() {
-        $('.select-menu').css('display', 'none');
-
-        let start_node = selected_text?.anchorNode?.parentElement;
-        let stop_node = selected_text?.focusNode?.parentElement;
-        if(start_node == undefined || stop_node == undefined)
-          return;
-
-        let start_id, stop_id
-
-        if(start_node.className == 'gd_word') {
-          start_id= start_node.id;
-        } else if(start_node.nextElementSibling?.className == 'gd_word') {
-          start_id = start_node.nextElementSibling.id;
-        } else {
-          alert('Invalid span for a source of grounding');
-        }
-
-        if(stop_node.className == 'gd_word') {
-          stop_id = stop_node.id;
-        } else if(stop_node.previousElementSibling?.className == 'gd_word') {
-          stop_id = stop_node.previousElementSibling.id;
-        } else {
-          alert('Invalid span for a source of grounding');
-        }
-
-        // post the data
-        let post_data = {
-          'mi_id': mi_id,
-          'start_id': start_id,
-          'stop_id': stop_id
-        };
-
-        localStorage['scroll_top'] = $(window).scrollTop();
-
-        $.when($.post('/_add_sog', post_data))
-        .done(function() {
-          // remove selection and the button
-          if(selected_text != undefined)
-            selected_text.empty();
-
-          // reload the page
-          location.reload();
-        })
-        .fail(function() {
-          console.error('Failed to POST _add_sog!');
-        });
-      });
-
-      // ----- Action SoG delete -----
-      let e = selected_text.anchorNode?.parentElement
-
-      // show it only if SoG is selected
-      if(e?.getAttribute('data-sog-mi') != undefined) {
-        $('.select-menu .sog-del').css('display', 'inherit');
-      } else {
-        $('.select-menu .sog-del').css('display', 'none');
-      }
-
-      $('.select-menu .sog-del').off('click');
-      $('.select-menu .sog-del').on('click',
-      function() {
-        $('.select-menu').css('display', 'none');
-
-        // make sure e exists
-        // Note: the button is shown only if it exists
-        if(e == undefined)
-          return;
-
-        // post the data
-        let post_data = {
-          'mi_id': e.getAttribute('data-sog-mi'),
-          'start_id': e.getAttribute('data-sog-start'),
-          'stop_id': e.getAttribute('data-sog-stop'),
-        };
-
-        localStorage['scroll_top'] = $(window).scrollTop();
-
-        $.when($.post('/_delete_sog', post_data))
-        .done(function() {
-          // remove selection and the button
-          if(selected_text != undefined)
-            selected_text.empty();
-
-          // reload the page
-          location.reload();
-        })
-        .fail(function() {
-          console.error('Failed to POST _delete_sog!');
-        })
-      });
-    } else {
-      $('.select-menu').css('display', 'none');
     }
+
+    // use jquery-ui
+    $('.select-menu input[type=submit]').button();
+
+    // the add function
+    $('.select-menu .sog-add').off('click');
+    $('.select-menu .sog-add').on('click',
+    function() {
+      $('.select-menu').css('display', 'none');
+
+      // post the data
+      let post_data = {
+        'mi_id': mi_id,
+        'start_id': start_id,
+        'stop_id': stop_id
+      };
+
+      localStorage['scroll_top'] = $(window).scrollTop();
+
+      $.when($.post('/_add_sog', post_data))
+      .done(function() {
+        location.reload();
+      })
+      .fail(function() {
+        console.error('Failed to POST _add_sog!');
+      });
+    });
+
+    // ----- Action SoG delete -----
+    // show it only if SoG is selected
+    if(parent?.getAttribute('data-sog-mi') != undefined) {
+      $('.select-menu .sog-del').css('display', 'inherit');
+    } else {
+      $('.select-menu .sog-del').css('display', 'none');
+    }
+
+    $('.select-menu .sog-del').off('click');
+    $('.select-menu .sog-del').on('click',
+    function() {
+      $('.select-menu').css('display', 'none');
+
+      // make sure parent exists
+      // Note: the button is shown only if it exists
+      if(parent == undefined)
+        return;
+
+      // post the data
+      let post_data = {
+        'mi_id': parent.getAttribute('data-sog-mi'),
+        'start_id': parent.getAttribute('data-sog-start'),
+        'stop_id': parent.getAttribute('data-sog-stop'),
+      };
+
+      localStorage['scroll_top'] = $(window).scrollTop();
+
+      $.when($.post('/_delete_sog', post_data))
+      .done(function() {
+        location.reload();
+      })
+      .fail(function() {
+        console.error('Failed to POST _delete_sog!');
+      })
+    });
   });
 
   $(document).on("mousedown", function(e) {
