@@ -179,13 +179,13 @@ def routing_functions(paper_id, annotator):
     mcdict_json = './{}/{}_mcdict.json'.format(data_dir, paper_id)
 
     # load annotation data
-    with open(anno_json) as f:
+    with open(anno_json, encoding='utf-8') as f:
         data_anno = json.load(f)
     if data_anno.get('anno_version') != '0.2':
         app.logger.warning('Annotation data version is incompatible')
 
     # load mcdict
-    with open(mcdict_json) as f:
+    with open(mcdict_json, encoding='utf-8') as f:
         data_mcdict = json.load(f)
     if data_mcdict.get('mcdict_version', '') != '0.2':
         app.logger.warning('Mcdict version is incompatible')
