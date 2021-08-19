@@ -62,6 +62,20 @@ function get_idf(elem: JQuery<any>) {
   return idf;
 }
 
+// convert color code from hex to rgb
+function hex2rgb(hex: string) {
+  if(hex.slice(0, 1) == "#") {
+    hex = hex.slice(1);
+  }
+  if(hex.length == 3) {
+    hex = hex.slice(0, 1) + hex.slice(0, 1) + hex.slice(1, 2) + hex.slice(1, 2) + hex.slice(2, 3) + hex.slice(2, 3);
+  }
+
+  return [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map(function(str) {
+    return parseInt(str, 16);
+  });
+}
+
 // --------------------------
 // Sidebar
 // --------------------------
@@ -190,7 +204,7 @@ $(function() {
       continue;
 
     // highlight it!
-    sog_nodes.css('background-color', concept.color);
+    sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.6)`);
     sog_nodes.attr({
       'data-sog-mi': s.mi_id,
       'data-sog-start': s.start_id,
