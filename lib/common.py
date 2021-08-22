@@ -1,4 +1,6 @@
 # The common codes
+import json
+
 
 def get_mi2idf(tree):
     root = tree.getroot()
@@ -35,3 +37,23 @@ def get_mi2idf(tree):
         mi2idf[mi_id] = {'idf_hex': idf_hex, 'idf_var': idf_var}
 
     return mi2idf
+
+
+def load_anno_json(fn, logger):
+    with open(fn, encoding='utf-8') as f:
+        data = json.load(f)
+
+    if data.get('anno_version', '') != '0.2':
+        logger.warning('{}: Annotation data version is incompatible', fn)
+
+    return data['mi_anno'], data['annotator']
+
+
+def load_mcdict_json(fn, logger):
+    with open(fn, encoding='utf-8') as f:
+        data = json.load(f)
+
+    if data.get('mcdict_version', '') != '0.2':
+        logger.warning('{}: Math concept dict version is incompatible', fn)
+
+    return data['concepts'], data['annotator']
