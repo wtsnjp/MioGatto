@@ -63,7 +63,10 @@ def extract_info(tree):
             lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
         mi_info[mi_id]['pos'] = pos
 
-    return mi_info
+    # make word list
+    wl = [e.attrib.get('id') for e in root.xpath('//span[@class="gd_word"]')]
+
+    return mi_info, wl
 
 
 def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
@@ -124,6 +127,35 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
     return pos, neg, pt_miss, labels
 
 
+def sog_match(ref_mi_anno, target_mi_anno, word_list):
+    ref_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
+                 anno['concept_id']) for anno in ref_mi_anno.values()
+                for sog in anno['sog']]
+    target_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
+                    anno['concept_id']) for anno in target_mi_anno.values()
+                   for sog in anno['sog']]
+
+    pos_sog_match = 0
+    neg_sog_match = 0
+
+    for ref_sog_tp in ref_sogs:
+        ref_s, ref_e = ref_sog_tp[0]
+        ref_concept = ref_sog_tp[1]
+
+        for target_sog_tp in target_sogs:
+            target_s, target_e = target_sog_tp[0]
+            target_concept = target_sog_tp[1]
+
+            if not (ref_e < target_s and ref_s < target_e) and not (
+                    ref_e > target_s and ref_s > target_e):
+                if ref_concept == target_concept:
+                    pos_sog_match += 1
+                else:
+                    neg_sog_match += 1
+
+    return len(ref_sogs), len(target_sogs), pos_sog_match, neg_sog_match
+
+
 def main():
     # parse options
     args = docopt(HELP, version=VERSION)
@@ -164,11 +196,14 @@ def main():
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
-    mi_info = extract_info(tree)
+    mi_info, word_list = extract_info(tree)
 
     pos, neg, pt_miss, labels = calc_agreements(ref_mi_anno, target_mi_anno,
                                                 ref_concepts, mi_info,
                                                 show_mismatch)
+
+    nof_ref_sogs, nof_target_sogs, pos_sog_match, neg_sog_match = sog_match(
+        ref_mi_anno, target_mi_anno, word_list)
 
     # show results
     total = pos + neg
@@ -181,6 +216,12 @@ def main():
     if neg > 0:
         rate = pt_miss / neg * 100
         print('Pattern mismatches: {}/{} = {:.2f}%'.format(pt_miss, neg, rate))
+
+    print('* Source of grounding')
+    print('#ref_sogs: {}'.format(nof_ref_sogs))
+    print('#target_sogs: {}'.format(nof_target_sogs))
+    print('#pos_sog_match: {}'.format(pos_sog_match))
+    print('#neg_sog_match: {}'.format(neg_sog_match))
 
     print('* Kappas')
     kappas = []
