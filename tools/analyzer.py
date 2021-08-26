@@ -1,5 +1,4 @@
 # The analyzer tool for MioGatto
-import json
 import itertools
 import lxml.html
 import numpy as np
@@ -10,7 +9,7 @@ from pathlib import Path
 
 from lib.version import VERSION
 from lib.cli import set_level
-from lib.common import get_mi2idf
+from lib.common import get_mi2idf, load_anno_json, load_mcdict_json
 
 # use logger
 import logging as log
@@ -74,13 +73,12 @@ def extract_info(tree):
     return mi_info, sec_info
 
 
-def analyze_annotation(data_anno, data_mcdict, mi_info):
+def analyze_annotation(paper_id, annotator, mcdict_author, mi_anno, concepts,
+                       mi_info):
     # basic analysis for mcdict
     nof_idf = 0
     nof_idf_mul = 0
     nof_concept = 0
-
-    concepts = data_mcdict['concepts']
 
     for letter in concepts.values():
         nof_idf += len(letter['identifiers'])
@@ -91,10 +89,12 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
             nof_concept += len(idf)
 
     print('* Basic information')
-    print('#strings for identifiers: {}'.format(len(concepts)))
-    print('#entries (identifiers): {}'.format(nof_idf))
-    print('#items (mathematical concepts): {}'.format(nof_concept))
-    print('#entries with multiple items: {}'.format(nof_idf_mul))
+    print('Paper ID: {}'.format(paper_id))
+    print('Author of math concept dict: {}'.format(annotator))
+    print('Annotator: {}'.format(mcdict_author))
+    print('#types of identifiers: {}'.format(len(concepts)))
+    print('#occurences: {}'.format(len(mi_anno)))
+    print()
 
     # analyse items
     items = sorted([(v['surface']['text'], idf_var, len(idf))
@@ -105,12 +105,19 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
     logger.debug('items: %s', items)
     nof_items = np.array([i[2] for i in items])
 
-    print('* Items information')
-    print('max of #items: {}'.format(nof_items[0]))
-    print('median of #items: {}'.format(int(np.median(nof_items))))
-    print('mean of #items: {:.1f}'.format(np.mean(nof_items)))
-    print('variance of #items: {:.1f}'.format(np.var(nof_items)))
-    print('standard deviation of #items: {:.1f}'.format(np.std(nof_items)))
+    print('* Math concept dictionary')
+    print('#entries (identifiers): {}'.format(nof_idf))
+    print('#items (math concepts): {}'.format(nof_concept))
+    print('#entries with multiple items: {}'.format(nof_idf_mul))
+    print()
+
+    print('* Number of items in each entry')
+    print('Max: {}'.format(nof_items[0]))
+    print('Median: {}'.format(int(np.median(nof_items))))
+    print('Mean: {:.1f}'.format(np.mean(nof_items)))
+    print('Variance: {:.1f}'.format(np.var(nof_items)))
+    print('Standard deviation: {:.1f}'.format(np.std(nof_items)))
+    print()
 
     # analyze occurences
     cnt_iter = itertools.count(0)
@@ -122,78 +129,44 @@ def analyze_annotation(data_anno, data_mcdict, mi_info):
             concept_dict[idf_hex][idf_var] = [next(cnt_iter) for _ in idf]
     logger.debug('concept_dict: %s', concept_dict)
 
-    total = 0
+    nof_annotated, total_nof_candidates, nof_sog = 0, 0, 0
     candidates = [0] * nof_items[0]
     occurences = []
-    for mi_id, anno in data_anno['mi_anno'].items():
+    for mi_id, anno in mi_anno.items():
         mi = mi_info[mi_id]
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
 
-        concept_id = anno['concept_id']
+        concept_id = anno.get('concept_id')
+        if concept_id is not None:
+            nof_annotated += 1
+
+        nof_sog += len(anno.get('sog', []))
 
         nof_candidates = len(concept_dict[idf_hex][idf_var])
         candidates[nof_candidates - 1] += 1
-        total += nof_candidates
+        total_nof_candidates += nof_candidates
         concept_sid = concept_dict[idf_hex][idf_var][concept_id]
         occurences.append((concept_sid, mi['pos']))
 
     logger.debug('occurences: %s', occurences)
     logger.debug('candidates: %s', candidates)
 
-    print('* occurences information')
-    print('#occurences: {}'.format(len(occurences)))
-    print('average #candidates: {:.1f}'.format(total / len(occurences)))
+    print('* Annotation')
+    nof_occurences = len(occurences)
+    progress_rate = nof_annotated / nof_occurences * 100
+    print('Progress rate: {:.2f}% ({}/{})'.format(progress_rate, nof_annotated,
+                                                 nof_occurences))
+    print('Average #candidates: {:.1f}'.format(total_nof_candidates /
+                                               nof_occurences))
+    print('#SoG: {}'.format(nof_sog))
 
     return items, concept_dict, occurences
 
 
-def main():
-    # parse options
-    args = docopt(HELP, version=VERSION)
-
-    # setup logger
-    log_level = log.INFO
-    if args['--quiet']:
-        log_level = log.WARN
-    if args['--debug']:
-        log_level = log.DEBUG
-    logger.set_level(log_level)
-
-    paper_id = args['ID']
-
-    # dirs and files
-    out_dir = Path(args['--out'])
+def export_graphs(paper_id, items, concept_dict, occurences, sec_info,
+                  out_dir):
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    data_dir = Path(args['--data'])
-
-    sources_dir = Path(args['--sources'])
-    source_html = sources_dir / '{}.html'.format(paper_id)
-
-    anno_json = data_dir / '{}_anno.json'.format(paper_id)
-    mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
-
-    # load the data
-    with open(anno_json) as f:
-        data_anno = json.load(f)
-    with open(mcdict_json) as f:
-        data_mcdict = json.load(f)
-
-    # check the version of data
-    if data_anno.get('anno_version', '') != '0.2':
-        logger.warning('Annotation data version is incompatible')
-
-    if data_mcdict.get('mcdict_version', '') != '0.2':
-        logger.warning('Mcdict version is incompatible')
-
-    # load the source HTML and extract information
-    tree = lxml.html.parse(str(source_html))
-    mi_info, sec_info = extract_info(tree)
-
     tex_paper_id = paper_id.replace('.', '_')
-
-    items, concept_dict, occurences = analyze_annotation(
-        data_anno, data_mcdict, mi_info)
 
     # export items data
     items_tex = out_dir / '{}_items.tex'.format(tex_paper_id)
@@ -233,14 +206,54 @@ def main():
                 f.write(s1.format(x=x) + '\n')
 
     # plot occurences
-    plt.scatter([v[0] for v in occurences], [v[1] for v in occurences],
-                s=2)
+    plt.scatter([v[0] for v in occurences], [v[1] for v in occurences], s=2)
     plt.xlabel('Concepts')
     plt.ylabel('Position')
 
     occurences_png = str(out_dir / '{}_occurences.png'.format(paper_id))
     plt.savefig(occurences_png)
     plt.clf()
+
+
+def main():
+    # parse options
+    args = docopt(HELP, version=VERSION)
+
+    # setup logger
+    log_level = log.INFO
+    if args['--quiet']:
+        log_level = log.WARN
+    if args['--debug']:
+        log_level = log.DEBUG
+    logger.set_level(log_level)
+
+    paper_id = args['ID']
+
+    # dirs and files
+    out_dir = Path(args['--out'])
+    data_dir = Path(args['--data'])
+
+    sources_dir = Path(args['--sources'])
+    source_html = sources_dir / '{}.html'.format(paper_id)
+
+    anno_json = data_dir / '{}_anno.json'.format(paper_id)
+    mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
+
+    # load the data
+    mi_anno, annotator = load_anno_json(anno_json, logger)
+    concepts, mcdict_author = load_mcdict_json(mcdict_json, logger)
+
+    # load the source HTML and extract information
+    tree = lxml.html.parse(str(source_html))
+    mi_info, sec_info = extract_info(tree)
+
+    items, concept_dict, occurences = analyze_annotation(
+        paper_id, annotator, mcdict_author, mi_anno, concepts, mi_info)
+
+    # supplementary graphs
+    if out_dir is not None:
+        export_graphs(paper_id, items, concept_dict, occurences, sec_info,
+                      out_dir)
 
 
 if __name__ == '__main__':
