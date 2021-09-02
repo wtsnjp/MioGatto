@@ -31,7 +31,7 @@ All the components of MioGatto is included in this repository:
 ### Files not in this repository
 
 On the other hand, the annotation data is not included in this repository due
-to the NDA constrain for the arXMLiv dataset. The data is licensed to
+to the NDA constrain for [the arXMLiv dataset](https://sigmathling.kwarc.info/resources/arxmliv-dataset-2020/). The data is licensed to
 [SIGMathLing members](https://sigmathling.kwarc.info/member/) as [Dataset for
 Grounding of Formulae](https://sigmathling.kwarc.info/resources/grounding-dataset/).
 Please consider joining [SIGMathLing](https://sigmathling.kwarc.info/member/)
@@ -47,16 +47,32 @@ For the guide with GIF animation, please refer to our Wiki:
 
 * <https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide>
 
-## Using tools
+## Prepare the input and analyze the annotated data (Advanced)
 
 The Python scripts under the `tools` directory are mostly for the developers
-for this dataset. The `--help` (`-h`) option is available for all scripts.
-Detailed documents have not yet prepared.
+for the grounding dataset. The `--help` (`-h`) option is available for all
+scripts and should provide guides to their basic usages.
 
+### Preparing data
 
-### Preprocess
+As mentioned above, the HTML5 files in [the arXMLiv dataset](https://sigmathling.kwarc.info/resources/arxmliv-dataset-2020/)
+are suitable as the input document for MioGatto. Alternatively, you can provide
+the equivalent HTML5 files from LaTeX sources by using
+[LaTeXML](https://dlmf.nist.gov/LaTeXML/):
 
-The basic usage will be shown with:
+```
+$ latexmlc --preload=[nobibtex,ids,mathlexemes,localrawstyles]latexml.sty --format=html5 --pmml --cmml --mathtex --nodefaultresources --dest=<output HTML file> <input TeX file>
+```
+
+Then you can give the HTML5 files to our preprocess script:
+
+```
+$ python -m tools.preprocess <HTML file>
+```
+
+This will output the preprocessed HTML file to the `sources/` and generate the
+initialized JSON files for the annotation to the `generated_data/` by default. Please
+refer to the help message for the options.
 
 ```
 $ python -m tools.preprocess -h
@@ -72,6 +88,13 @@ $ python -m tools.analyzer <paper id>
 
 Some supplemental files including graph images will be saved in the `results`
 directory as default.
+
+Similarly, analyses for the sources of grounding annotation can be performed
+with the `tools.sog` script.
+
+```
+$ python -m tools.sog <paper id>
+```
 
 To calculate agreements between data by two annotators, execute:
 
