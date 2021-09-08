@@ -136,26 +136,27 @@ def analyze_annotation(paper_id, annotator, mcdict_author, mi_anno, concepts,
         mi = mi_info[mi_id]
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
 
-        concept_id = anno.get('concept_id')
-        if concept_id is not None:
-            nof_annotated += 1
-
         nof_sog += len(anno.get('sog', []))
 
         nof_candidates = len(concept_dict[idf_hex][idf_var])
         candidates[nof_candidates - 1] += 1
         total_nof_candidates += nof_candidates
-        concept_sid = concept_dict[idf_hex][idf_var][concept_id]
-        occurences.append((concept_sid, mi['pos']))
+
+        concept_id = anno.get('concept_id')
+        if concept_id is not None:
+            nof_annotated += 1
+
+            concept_sid = concept_dict[idf_hex][idf_var][concept_id]
+            occurences.append((concept_sid, mi['pos']))
 
     logger.debug('occurences: %s', occurences)
     logger.debug('candidates: %s', candidates)
 
     print('* Annotation')
-    nof_occurences = len(occurences)
+    nof_occurences = len(mi_anno)
     progress_rate = nof_annotated / nof_occurences * 100
     print('Progress rate: {:.2f}% ({}/{})'.format(progress_rate, nof_annotated,
-                                                 nof_occurences))
+                                                  nof_occurences))
     print('Average #candidates: {:.1f}'.format(total_nof_candidates /
                                                nof_occurences))
     print('#SoG: {}'.format(nof_sog))
