@@ -1,4 +1,4 @@
-# Agreement calculation tool for MioGatto
+# An analysis script for sources of grounding
 import lxml.html
 import numpy as np
 from docopt import docopt
