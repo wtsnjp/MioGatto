@@ -78,6 +78,9 @@ def preprocess_html(tree, paper_id, embed_floats):
     for e in root.xpath('//annotation|//annotation-xml'):
         e.drop_tree()
 
+    for e in root.xpath('//span[@class="ltx_text"]'):
+        e.drop_tag()
+
     # dirty hack: fix math markups
     if paper_id == '1808.02342':
         from lib.fixers import fix1808_02342
