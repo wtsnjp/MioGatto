@@ -204,7 +204,7 @@ $(function() {
       continue;
 
     // highlight it!
-    sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.6)`);
+    sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
     sog_nodes.attr({
       'data-sog-mi': s.mi_id,
       'data-sog-start': s.start_id,
