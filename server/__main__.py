@@ -91,6 +91,7 @@ def args_type_pulldowns():
 <option value="superscript">Superscript</option>
 <option value="comma">Comma</option>
 <option value="prime">Prime</option>
+<option value="asterisk">Asterisk</option>
 <option value="hat">Hat</option>
 <option value="over">Over</option>
 <option value="open parenthesis">Open parenthesis</option>
