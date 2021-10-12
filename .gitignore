@@ -107,4 +107,5 @@ results/
 # local things
 .local.vimrc
 static/img/
-extra/
+extra
+libextra
