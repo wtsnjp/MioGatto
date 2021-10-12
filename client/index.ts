@@ -261,10 +261,8 @@ $(function() {
         args_info = concept.args_type.join(', ');
       }
 
-      let arity = concept.arity
-
       let item = `${input}<span class="keep"><label for="c${concept_id}">
-${concept.description} <span style="color: #808080;">[${args_info}](arity: ${arity})</span>
+${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>
 (<a class="edit-concept" data-mi="${mi_id}" data-concept="${concept_id}" href="javascript:void(0);">edit</a>)
 </label></span>`
       radios += item;
