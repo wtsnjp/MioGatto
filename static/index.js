@@ -180,7 +180,7 @@ $(function () {
                 if (concept.args_type.length > 0) {
                     args_info = concept.args_type.join(', ');
                 }
-                return `${concept.description} [${args_info}] (arity: ${concept.arity})`;
+                return `${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>`;
             }
             else {
                 return '(No description)';
