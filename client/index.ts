@@ -226,7 +226,11 @@ $(function() {
       let idf = get_idf($(this));
       let concept = get_concept(idf);
       if(concept != undefined) {
-        return concept.description;
+        let args_info = 'NONE';
+        if(concept.args_type.length > 0) {
+          args_info = concept.args_type.join(', ');
+        }
+        return `${concept.description} [${args_info}] (arity: ${concept.arity})`;
       } else {
         return '(No description)';
       }
