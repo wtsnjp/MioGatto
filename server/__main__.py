@@ -93,6 +93,8 @@ def args_type_pulldowns():
 <option value="prime">Prime</option>
 <option value="asterisk">Asterisk</option>
 <option value="hat">Hat</option>
+<option value="tilde">Tilde</option>
+<option value="bar">Bar</option>
 <option value="over">Over</option>
 <option value="open parenthesis">Open parenthesis</option>
 <option value="close parenthesis">Close parenthesis</option>
