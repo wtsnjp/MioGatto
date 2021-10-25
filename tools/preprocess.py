@@ -23,11 +23,10 @@ Usage:
     {p} [options] HTML
 
 Options:
-    -a, --annotator    Generate annotation files for annotators
     --embed-floats     Preserve embed figure/table codes
+    --overwrite        Overwrite output files if already exist
 
-    --data=DIR         Dir for data outputs [default: ./generated_data]
-    --data-ref=DIR     Dir for reference data [default: ./data]
+    --data=DIR         Dir for data outputs [default: ./data]
     --sources=DIR      Dir for HTML outputs [default: ./sources]
 
     -d, --debug        Show debug messages
@@ -151,8 +150,8 @@ def preprocess_html(tree, paper_id, embed_floats):
 
         # add <img>
         img = IMG()
-        src = '/static/img/{}/{}.png'.format(
-            paper_id, e.attrib['id'].replace('.', '_'))
+        src = '/static/img/{}/{}.png'.format(paper_id,
+                                             e.attrib['id'].replace('.', '_'))
         img.attrib['src'] = src
         img.attrib['alt'] = src
         e.insert(0, img)
@@ -160,7 +159,7 @@ def preprocess_html(tree, paper_id, embed_floats):
     return tree
 
 
-def observe_mi(tree, annotator, data_mcdict_ref):
+def observe_mi(tree):
     # initialize
     identifiers = set()
     occurences = dict()
@@ -184,13 +183,7 @@ def observe_mi(tree, annotator, data_mcdict_ref):
         # check for the attrib
         mi_attribs.update(e.attrib)
 
-        # add to mi dict
-        # Note: in --annotator, fill if the identifier has only a concept
-        if annotator and len(
-                data_mcdict_ref[idf_hex]['identifiers'][idf_var]) == 1:
-            occurences[mi_id] = 0
-        else:
-            occurences[mi_id] = None
+        occurences[mi_id] = None
 
         identifiers.add((idf_hex, idf_var))
 
@@ -222,29 +215,9 @@ def idf2mc(idf_set):
     }
 
 
-def merge_mcdict(data_mcdict, data_mcdict_ref):
-    concepts = data_mcdict['concepts']
-    concepts_ref = data_mcdict_ref['concepts']
-
-    for idf_hex, idfs in concepts.items():
-        idfs_ref = concepts_ref.get(idf_hex, dict()).get('identifiers', None)
-
-        if idfs_ref is None:
-            continue
-
-        for idf_var, idf in idfs['identifiers'].items():
-            idf_ref = idfs_ref.get(idf_var, None)
-
-            if idf_ref:
-                idfs['identifiers'][idf_var] = idf_ref
-
-    return data_mcdict
-
-
 def main():
     # parse options
     args = docopt(HELP, version=VERSION)
-    annotator = args['--annotator']
     embed_floats = args['--embed-floats']
 
     # setup logger
@@ -257,7 +230,6 @@ def main():
 
     # dirs and files
     data_dir = Path(args['--data'])
-    data_dir_ref = Path(args['--data-ref'])
     sources_dir = Path(args['--sources'])
 
     html_in = Path(args['HTML'])
@@ -271,34 +243,27 @@ def main():
     anno_json = data_dir / '{}_anno.json'.format(paper_id)
     mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
-    data_mcdict_ref = dict()
+    # prevent unintentional overwriting
+    if args['--overwrite'] is not True:
+        if html_out.exists():
+            logger.error('Source file %s exists. Use --overwrite to force',
+                         html_out)
+            exit(1)
 
-    # for --annotator operation, reference data are required
-    if annotator:
-        anno_json_ref = data_dir_ref / '{}_anno.json'.format(paper_id)
-        mcdict_json_ref = data_dir_ref / '{}_mcdict.json'.format(paper_id)
+        if anno_json.exists() or mcdict_json.exists():
+            logger.error('Data files exist in %s. Use --overwrite to force',
+                         data_dir)
+            exit(1)
 
-        if not anno_json_ref.exists() or not mcdict_json_ref.exists():
-            logger.warn('For --annotator operation, reference data'
-                        'files are required, but those not found.')
-            logger.warn('Executing the default operation as fallback.')
-            annotator = False
-
-        else:
-            with open(mcdict_json_ref) as f:
-                data_mcdict_ref = json.load(f)
-
-    # load and modify the HTML
+    # load the HTML and modify the DOM tree
     tree = lxml.html.parse(str(html_in))
     tree = preprocess_html(tree, paper_id, embed_floats)
-    tree.write(str(html_out), pretty_print=True, encoding='utf-8')
 
     # extract formulae information
-    occurences, identifiers, attribs = observe_mi(tree, annotator,
-                                                  data_mcdict_ref)
-    logger.info('#indentifiers: {}'.format(len(identifiers)))
-    logger.info('#occurences: {}'.format(len(occurences)))
-    logger.info('mi attributes: {}'.format(', '.join(attribs)))
+    occurences, identifiers, attribs = observe_mi(tree)
+    print('#indentifiers: {}'.format(len(identifiers)))
+    print('#occurences: {}'.format(len(occurences)))
+    print('mi attributes: {}'.format(', '.join(attribs)))
 
     # make the annotation structure
     data_anno = {
@@ -319,11 +284,11 @@ def main():
         'concepts': idf2mc(identifiers),
     }
 
-    # TODO: temporary, use the referential mcdict for annotators
-    if annotator:
-        data_mcdict = merge_mcdict(data_mcdict, data_mcdict_ref)
+    # write output files
+    logger.info('Writing preprocessed HTML to %s', html_out)
+    tree.write(str(html_out), pretty_print=True, encoding='utf-8')
 
-    # write the new generated data
+    logger.info('Writing initialized anno template to %s', anno_json)
     with open(anno_json, 'w') as f:
         json.dump(data_anno,
                   f,
@@ -331,6 +296,8 @@ def main():
                   indent=4,
                   sort_keys=True,
                   separators=(',', ': '))
+
+    logger.info('Writing initialized mcdict template to %s', mcdict_json)
     with open(mcdict_json, 'w') as f:
         json.dump(data_mcdict,
                   f,

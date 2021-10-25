@@ -71,7 +71,7 @@ $ python -m tools.preprocess <HTML file>
 ```
 
 This will output the preprocessed HTML file to the `sources/` and generate the
-initialized JSON files for the annotation to the `generated_data/` by default. Please
+initialized JSON files for the annotation to the `data/` by default. Please
 refer to the help message for the options.
 
 ```

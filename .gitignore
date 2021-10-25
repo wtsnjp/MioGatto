@@ -100,12 +100,9 @@ doc
 static/img
 sources
 
-# generated things
-generated_data/
-results/
-
-# local things
+# local stuff
 .local.vimrc
 static/img/
+results/
 extra
 libextra
