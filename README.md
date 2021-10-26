@@ -10,8 +10,8 @@
 
 The dependencies will be all installed with one shot:
 
-```
-$ python -m pip install -r requirements.txt
+```shell
+python -m pip install -r requirements.txt
 ```
 
 In case you don't want to install the dependencies into your system, please
@@ -60,30 +60,30 @@ are suitable as the input document for MioGatto. Alternatively, you can provide
 the equivalent HTML5 files from LaTeX sources by using
 [LaTeXML](https://dlmf.nist.gov/LaTeXML/):
 
-```
-$ latexmlc --preload=[nobibtex,ids,mathlexemes,localrawstyles]latexml.sty --format=html5 --pmml --cmml --mathtex --nodefaultresources --dest=<output HTML file> <input TeX file>
+```shell
+latexmlc --preload=[nobibtex,ids,mathlexemes,localrawstyles]latexml.sty --format=html5 --pmml --cmml --mathtex --nodefaultresources --dest=<output HTML file> <input TeX file>
 ```
 
 Then you can give the HTML5 files to our preprocess script:
 
-```
-$ python -m tools.preprocess <HTML file>
+```shell
+python -m tools.preprocess <HTML file>
 ```
 
 This will output the preprocessed HTML file to the `sources/` and generate the
 initialized JSON files for the annotation to the `data/` by default. Please
 refer to the help message for the options.
 
-```
-$ python -m tools.preprocess -h
+```shell
+python -m tools.preprocess -h
 ```
 
 ### Analysing the annotation results
 
 For the basic analyses for annotation data, execute:
 
-```
-$ python -m tools.analyzer <paper id>
+```shell
+python -m tools.analyzer <paper id>
 ```
 
 Some supplemental files including graph images will be saved in the `results`
@@ -92,14 +92,14 @@ directory as default.
 Similarly, analyses for the sources of grounding annotation can be performed
 with the `tools.sog` script.
 
-```
-$ python -m tools.sog <paper id>
+```shell
+python -m tools.sog <paper id>
 ```
 
 To calculate agreements between data by two annotators, execute:
 
-```
-$ python -m tools.agreement --target=<path to annotator's data dir> <paper id>
+```shell
+python -m tools.agreement --target=<path to annotator's data dir> <paper id>
 ```
 
 ## Developing client
@@ -107,16 +107,16 @@ $ python -m tools.agreement --target=<path to annotator's data dir> <paper id>
 The client is developed with TypeScript. All development tools will be
 installed with:
 
-```
-$ cd client
-$ npm install
+```shell
+cd client
+npm install
 ```
 
 To compile the client source `client/index.ts`, execute the following in the
 client directory:
 
-```
-$ npx tsc
+```shell
+npx tsc
 ```
 
 ## Publications
