@@ -499,3 +499,20 @@ $(function () {
         show_border($(this));
     });
 });
+// --------------------------
+// Error from the server
+// --------------------------
+$(function () {
+    if ($('#error-message').text().length != 0) {
+        $('#error-dialog').dialog({
+            dialogClass: 'error-dialog',
+            modal: true,
+            title: 'Error',
+            buttons: {
+                "OK": function () {
+                    $(this).dialog('close');
+                }
+            }
+        });
+    }
+});

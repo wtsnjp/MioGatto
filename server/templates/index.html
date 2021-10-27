@@ -30,6 +30,12 @@
 </form>
 </div>
 
+<div id="error-dialog" class="error-dialog">
+<p id="error-message">{% for message in get_flashed_messages() %}
+  {{ message }}
+{% endfor %}</p>
+</div>
+
 {{ main_content }}
 </main>
 

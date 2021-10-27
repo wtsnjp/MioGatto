@@ -1,5 +1,6 @@
 # The server implementation for MioGatto
-from flask import Flask, request, redirect, render_template, Markup
+from flask import Flask, request, redirect, flash, render_template, Markup
+import os
 import re
 import json
 import lxml.html
@@ -168,6 +169,7 @@ def save_data(file_name, data):
 
 # the web app
 app = Flask(__name__)
+app.secret_key = os.urandom(12)
 
 
 def routing_functions(paper_id, annotator):
@@ -221,6 +223,19 @@ def routing_functions(paper_id, annotator):
         idf_hex = res.get('idf_hex')
         idf_var = res.get('idf_var')
 
+        # check arity
+        if not res.get('arity').isdigit():
+            flash('Arity must be non-negative integer.')
+            return redirect('/')
+        else:
+            arity = int(res.get('arity'))
+
+        # check description
+        description = res.get('description')
+        if len(description) == 0:
+            flash('Description must be filled.')
+            return redirect('/')
+
         # get args_type
         args_type = []
         for i in range(10):
@@ -230,9 +245,9 @@ def routing_functions(paper_id, annotator):
 
         data_mcdict['concepts'][idf_hex]['identifiers'][idf_var].append({
             'description':
-            res.get('description'),
+            description,
             'arity':
-            int(res.get('arity')),
+            arity,
             'args_type':
             args_type
         })

@@ -3,7 +3,7 @@
 Style for MioGatto
 
 Author: Takuto ASAKURA <takuto at is.s.u-tokyo.ac.jp>
-Version: 2021-07-25
+Version: 2021-10-27
 
 */
 
@@ -128,7 +128,12 @@ Version: 2021-07-25
     z-index: 1;
 }
 
-.concept-dialog {
+.concept-dialog, .error-dialog {
     display: none;
     list-style: none;
+}
+
+.error-dialog .ui-dialog-titlebar {
+    color: white;
+    background: red;
 }
