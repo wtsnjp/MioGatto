@@ -6,17 +6,9 @@ from pathlib import Path
 from sklearn.metrics import cohen_kappa_score
 
 from lib.version import VERSION
-from lib.cli import set_level
-from lib.common import get_mi2idf, load_anno_json, load_mcdict_json
-
-# use logger
-import logging as log
-
-log.Logger.set_level = set_level
-logger = log.getLogger('agreement')
-
-# dirty hack: suspend warning
-np.seterr(divide='ignore', invalid='ignore')
+from lib.logger import get_logger
+from lib.util import get_mi2idf
+from lib.annotation import MiAnno, McDict
 
 # meta
 PROG_NAME = "tools.agreement"
@@ -38,6 +30,11 @@ Options:
     -h, --help      Show this screen and exit
     -V, --version   Show version
 """.format(p=PROG_NAME)
+
+logger = get_logger(PROG_NAME)
+
+# dirty hack: suspend warning
+np.seterr(divide='ignore', invalid='ignore')
 
 
 def extract_info(tree):
@@ -69,7 +66,7 @@ def extract_info(tree):
     return mi_info, wl
 
 
-def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
+def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info,
                     show_mismatch):
     pos, neg, pt_miss, unannotated = 0, 0, 0, 0
     labels = dict()
@@ -78,9 +75,9 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
         print('* Mismatches')
         print('ID\tReference Concept\tAnnotated Concept\tPattern Agreed')
 
-    for mi_id in ref_mi_anno.keys():
-        concept_id_gold = ref_mi_anno[mi_id]['concept_id']
-        concept_id_target = target_mi_anno[mi_id]['concept_id']
+    for mi_id in ref_mi_anno.occr.keys():
+        concept_id_gold = ref_mi_anno.occr[mi_id]['concept_id']
+        concept_id_target = target_mi_anno.occr[mi_id]['concept_id']
 
         if concept_id_target is None:
             unannotated += 1
@@ -102,12 +99,12 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
             pos += 1
 
         else:
-            concept_list = ref_concepts[idf_hex]['identifiers'][idf_var]
+            concept_list = ref_mcdict.concepts[idf_hex][idf_var]
 
             concept_gold = concept_list[concept_id_gold]
             concept_target = concept_list[concept_id_target]
 
-            if concept_gold['args_type'] == concept_target['args_type']:
+            if concept_gold.args_type == concept_target.args_type:
                 pattern_agreed = True
             else:
                 pt_miss += 1
@@ -115,8 +112,8 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
 
             if show_mismatch:
                 print('{}\t{} ({})\t{} ({})\t{}'.format(
-                    mi_id, concept_id_gold, concept_gold['description'],
-                    concept_id_target, concept_target['description'],
+                    mi_id, concept_id_gold, concept_gold.description,
+                    concept_id_target, concept_target.description,
                     pattern_agreed))
             neg += 1
 
@@ -129,10 +126,11 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_concepts, mi_info,
 
 def sog_match(ref_mi_anno, target_mi_anno, word_list):
     ref_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
-                 anno['concept_id']) for anno in ref_mi_anno.values()
+                 anno['concept_id']) for anno in ref_mi_anno.occr.values()
                 for sog in anno['sog']]
     target_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
-                    anno['concept_id']) for anno in target_mi_anno.values()
+                    anno['concept_id'])
+                   for anno in target_mi_anno.occr.values()
                    for sog in anno['sog']]
 
     pos_sog_match = 0
@@ -160,14 +158,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    # setup logger
-    log_level = log.INFO
-    if args['--quiet']:
-        log_level = log.WARN
-    if args['--debug']:
-        log_level = log.DEBUG
-    logger.set_level(log_level)
-
+    logger.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
     show_mismatch = args['--show-mismatch']
 
@@ -187,19 +178,19 @@ def main():
     source_html = sources_dir / '{}.html'.format(paper_id)
 
     # load the target data
-    target_mi_anno, target_annotator = load_anno_json(target_anno_json, logger)
-    _, target_mcdict_author = load_mcdict_json(target_mcdict_json, logger)
+    target_mi_anno = MiAnno(target_anno_json, logger)
+    target_mcdict = McDict(target_mcdict_json, logger)
 
     # load the reference data
-    ref_mi_anno, ref_annotator = load_anno_json(ref_anno_json, logger)
-    ref_concepts, ref_mcdict_author = load_mcdict_json(ref_mcdict_json, logger)
+    ref_mi_anno = MiAnno(ref_anno_json, logger)
+    ref_mcdict = McDict(ref_mcdict_json, logger)
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
     mi_info, word_list = extract_info(tree)
 
     pos, neg, pt_miss, labels = calc_agreements(ref_mi_anno, target_mi_anno,
-                                                ref_concepts, mi_info,
+                                                ref_mcdict, mi_info,
                                                 show_mismatch)
 
     nof_ref_sogs, nof_target_sogs, pos_sog_match, neg_sog_match = sog_match(
@@ -209,9 +200,9 @@ def main():
     total = pos + neg
     print('* Summary')
     print('Reference data: Annotation by {}, Math concept dict by {}'.format(
-        ref_annotator, ref_mcdict_author))
+        ref_mi_anno.annotator, ref_mcdict.author))
     print('Target data: Annotation by {}, Math concept dict by {}'.format(
-        target_annotator, target_mcdict_author))
+        target_mi_anno.annotator, target_mcdict.author))
     print('Agreement: {}/{} = {:.2f}%'.format(pos, total, pos / total * 100))
     if neg > 0:
         rate = pt_miss / neg * 100

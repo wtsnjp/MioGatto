@@ -8,14 +8,9 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.cli import set_level
-from lib.common import get_mi2idf, load_anno_json, load_mcdict_json
-
-# use logger
-import logging as log
-
-log.Logger.set_level = set_level
-logger = log.getLogger('analyzer')
+from lib.logger import get_logger
+from lib.util import get_mi2idf
+from lib.annotation import MiAnno, McDict
 
 # meta
 PROG_NAME = "tools.analyzer"
@@ -25,7 +20,7 @@ Usage:
     {p} [options] ID
 
 Options:
-    -o DIR, --out=DIR  Dir to save results [default: ./results]
+    -o DIR, --out=DIR  Dir to save results
     --data=DIR         Dir for the gold data [default: ./data]
     --sources=DIR      Dir for preprocessed HTML [default: ./sources]
 
@@ -35,6 +30,8 @@ Options:
     -h, --help         Show this screen and exit
     -V, --version      Show version
 """.format(p=PROG_NAME)
+
+logger = get_logger(PROG_NAME)
 
 
 def extract_info(tree):
@@ -73,33 +70,34 @@ def extract_info(tree):
     return mi_info, sec_info
 
 
-def analyze_annotation(paper_id, annotator, mcdict_author, mi_anno, concepts,
-                       mi_info):
+def analyze_annotation(paper_id, mi_anno, mcdict, mi_info):
+    concepts = mcdict.concepts
+
     # basic analysis for mcdict
     nof_idf = 0
     nof_idf_mul = 0
     nof_concept = 0
 
     for letter in concepts.values():
-        nof_idf += len(letter['identifiers'])
+        nof_idf += len(letter)
 
-        for idf in letter['identifiers'].values():
+        for idf in letter.values():
             if len(idf) > 1:
                 nof_idf_mul += 1
             nof_concept += len(idf)
 
     print('* Basic information')
     print('Paper ID: {}'.format(paper_id))
-    print('Author of math concept dict: {}'.format(annotator))
-    print('Annotator: {}'.format(mcdict_author))
+    print('Author of math concept dict: {}'.format(mcdict.author))
+    print('Annotator: {}'.format(mi_anno.annotator))
     print('#types of identifiers: {}'.format(len(concepts)))
-    print('#occurences: {}'.format(len(mi_anno)))
+    print('#occurences: {}'.format(len(mi_anno.occr)))
     print()
 
     # analyse items
-    items = sorted([(v['surface']['text'], idf_var, len(idf))
+    items = sorted([(mcdict.surfaces[idf_hex]['text'], idf_var, len(idf))
                     for idf_hex, v in concepts.items()
-                    for idf_var, idf in v['identifiers'].items()],
+                    for idf_var, idf in v.items()],
                    key=lambda x: x[2],
                    reverse=True)
     logger.debug('items: %s', items)
@@ -125,14 +123,14 @@ def analyze_annotation(paper_id, annotator, mcdict_author, mi_anno, concepts,
     concept_dict = dict()
     for idf_hex, v in concepts.items():
         concept_dict[idf_hex] = dict()
-        for idf_var, idf in v['identifiers'].items():
+        for idf_var, idf in v.items():
             concept_dict[idf_hex][idf_var] = [next(cnt_iter) for _ in idf]
     logger.debug('concept_dict: %s', concept_dict)
 
     nof_annotated, total_nof_candidates, nof_sog = 0, 0, 0
     candidates = [0] * nof_items[0]
     occurences = []
-    for mi_id, anno in mi_anno.items():
+    for mi_id, anno in mi_anno.occr.items():
         mi = mi_info[mi_id]
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
 
@@ -153,7 +151,7 @@ def analyze_annotation(paper_id, annotator, mcdict_author, mi_anno, concepts,
     logger.debug('candidates: %s', candidates)
 
     print('* Annotation')
-    nof_occurences = len(mi_anno)
+    nof_occurences = len(mi_anno.occr)
     progress_rate = nof_annotated / nof_occurences * 100
     print('Progress rate: {:.2f}% ({}/{})'.format(progress_rate, nof_annotated,
                                                   nof_occurences))
@@ -220,18 +218,10 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    # setup logger
-    log_level = log.INFO
-    if args['--quiet']:
-        log_level = log.WARN
-    if args['--debug']:
-        log_level = log.DEBUG
-    logger.set_level(log_level)
-
+    logger.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
 
     # dirs and files
-    out_dir = Path(args['--out'])
     data_dir = Path(args['--data'])
 
     sources_dir = Path(args['--sources'])
@@ -241,18 +231,19 @@ def main():
     mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
     # load the data
-    mi_anno, annotator = load_anno_json(anno_json, logger)
-    concepts, mcdict_author = load_mcdict_json(mcdict_json, logger)
+    mi_anno = MiAnno(anno_json, logger)
+    mcdict = McDict(mcdict_json, logger)
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
     mi_info, sec_info = extract_info(tree)
 
     items, concept_dict, occurences = analyze_annotation(
-        paper_id, annotator, mcdict_author, mi_anno, concepts, mi_info)
+        paper_id, mi_anno, mcdict, mi_info)
 
     # supplementary graphs
-    if out_dir is not None:
+    if args['--out'] is not None:
+        out_dir = Path(args['--out'])
         export_graphs(paper_id, items, concept_dict, occurences, sec_info,
                       out_dir)
 

@@ -1,13 +1,12 @@
 # The preprocess tool for MioGatto
-import json
 import lxml.html
 import unicodedata
 from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.cli import set_level
-from lib.common import get_mi2idf
+from lib.util import set_level, get_mi2idf
+from lib.annotation import dump_json
 
 # use logger
 import logging as log
@@ -266,23 +265,10 @@ def main():
     print('mi attributes: {}'.format(', '.join(attribs)))
 
     # make the annotation structure
-    data_anno = {
-        'anno_version': '0.2',
-        'annotator': 'YOUR NAME',
-        'mi_anno': dict(),
-    }
-    for mi_id, concept_id in occurences.items():
-        data_anno['mi_anno'][mi_id] = {
-            'concept_id': concept_id,
-            'sog': [],
-        }
-
-    # make the mcdict list
-    data_mcdict = {
-        'mcdict_version': '0.2',
-        'annotator': 'YOUR NAME',
-        'concepts': idf2mc(identifiers),
-    }
+    mi_anno = {mi_id: {
+        'concept_id': concept_id,
+        'sog': [],
+    } for mi_id, concept_id in occurences.items()}
 
     # write output files
     logger.info('Writing preprocessed HTML to %s', html_out)
@@ -290,21 +276,19 @@ def main():
 
     logger.info('Writing initialized anno template to %s', anno_json)
     with open(anno_json, 'w') as f:
-        json.dump(data_anno,
-                  f,
-                  ensure_ascii=False,
-                  indent=4,
-                  sort_keys=True,
-                  separators=(',', ': '))
+        dump_json({
+            'anno_version': '0.2',
+            'annotator': 'YOUR NAME',
+            'mi_anno': mi_anno,
+        }, f)
 
     logger.info('Writing initialized mcdict template to %s', mcdict_json)
     with open(mcdict_json, 'w') as f:
-        json.dump(data_mcdict,
-                  f,
-                  ensure_ascii=False,
-                  indent=4,
-                  sort_keys=True,
-                  separators=(',', ': '))
+        dump_json({
+            'mcdict_version': '0.2',
+            'annotator': 'YOUR NAME',
+            'concepts': idf2mc(identifiers),
+        }, f)
 
 
 if __name__ == '__main__':

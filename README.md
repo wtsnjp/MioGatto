@@ -2,7 +2,7 @@
 
 ## System requirements
 
-* Python3 (3.5 or later)
+* Python3 (3.9 or later)
 * A Web Browser with MathML support (for the GUI annotation system)
     * [Firefox](https://www.mozilla.org/firefox/) is recommended
 

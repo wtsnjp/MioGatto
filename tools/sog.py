@@ -5,14 +5,9 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.cli import set_level
-from lib.common import get_mi2idf, load_anno_json, load_mcdict_json
-
-# use logger
-import logging as log
-
-log.Logger.set_level = set_level
-logger = log.getLogger('sog')
+from lib.logger import get_logger
+from lib.util import get_mi2idf
+from lib.annotation import MiAnno, McDict
 
 # meta
 PROG_NAME = "tools.sog"
@@ -33,8 +28,10 @@ Options:
     -V, --version   Show version
 """.format(p=PROG_NAME)
 
+logger = get_logger(PROG_NAME)
 
-def analyze_sog(tree, mi_anno, concepts):
+
+def analyze_sog(tree, mi_anno: MiAnno, mcdict: McDict) -> dict:
     mi2idf = get_mi2idf(tree)
     root = tree.getroot()
 
@@ -47,37 +44,33 @@ def analyze_sog(tree, mi_anno, concepts):
             words[w_id] = e.text
             # TODO: check for the else case
 
-    # add sog field to concepts
-    for v in concepts.values():
-        for cs in v['identifiers'].values():
-            for c in cs:
-                c['sog'] = []
+    # initialize sog_by_concept
+    sog_by_concept = {
+        idf_hex: {
+            idf_var: [[] for _ in cs]
+            for idf_var, cs in v.items()
+        }
+        for idf_hex, v in mcdict.concepts.items()
+    }
 
     # get actual text
-    for mi_id, anno in mi_anno.items():
+    for mi_id, anno in mi_anno.occr.items():
         for sog in anno['sog']:
             w_ids = wl[wl.index(sog[0]):wl.index(sog[1]) + 1]
             idf, c_id = mi2idf[mi_id], anno['concept_id']
             idf_hex, idf_var = idf['idf_hex'], idf['idf_var']
-            concepts[idf_hex]['identifiers'][idf_var][c_id]['sog'].append(
-                ' '.join([
-                    words[w_id] for w_id in w_ids
-                    if words.get(w_id) is not None
-                ]))
+            sog_by_concept[idf_hex][idf_var][c_id].append(' '.join([
+                words[w_id] for w_id in w_ids if words.get(w_id) is not None
+            ]))
+
+    return sog_by_concept
 
 
 def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    # setup logger
-    log_level = log.INFO
-    if args['--quiet']:
-        log_level = log.WARN
-    if args['--debug']:
-        log_level = log.DEBUG
-    logger.set_level(log_level)
-
+    logger.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
 
     # dirs and files
@@ -90,23 +83,23 @@ def main():
     mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
     # load the data
-    mi_anno, annotator = load_anno_json(anno_json, logger)
-    concepts, mcdict_author = load_mcdict_json(mcdict_json, logger)
+    mi_anno = MiAnno(anno_json, logger)
+    mcdict = McDict(mcdict_json, logger)
 
     # analyze and show the results
     tree = lxml.html.parse(str(source_html))
-    analyze_sog(tree, mi_anno, concepts)
+    sog_by_concept = analyze_sog(tree, mi_anno, mcdict)
 
     print('* Metadata')
     print('Paper ID: {}'.format(paper_id))
-    print('Author of math concept dict: {}'.format(annotator))
-    print('Annotator: {}'.format(mcdict_author))
+    print('Author of math concept dict: {}'.format(mi_anno.annotator))
+    print('Annotator: {}'.format(mcdict.author))
     print()
 
     print('* Number of SoG by concept')
     nof_sogs = [
-        len(c['sog']) for v in concepts.values()
-        for cs in v['identifiers'].values() for c in cs
+        len(sogs) for v in sog_by_concept.values() for cs in v.values()
+        for sogs in cs
     ]
     print('Max: {}'.format(max(nof_sogs)))
     print('Median: {}'.format(int(np.median(nof_sogs))))
@@ -119,12 +112,13 @@ def main():
         exit(0)
 
     print('* Actual SoG by concept')
-    for v in concepts.values():
-        for idf_var, cs in v['identifiers'].items():
-            print('{} ({})'.format(v['surface']['text'], idf_var))
-            for c in cs:
-                print('    - {}'.format(c['description']))
-                for idx, sog in enumerate(c['sog']):
+    for idf_hex, v in sog_by_concept.items():
+        for idf_var, cs in v.items():
+            print('{} ({})'.format(mcdict.surfaces[idf_hex]['text'], idf_var))
+            for cid, sogs in enumerate(cs):
+                print('    - {}'.format(
+                    mcdict.concepts[idf_hex][idf_var][cid].description))
+                for idx, sog in enumerate(sogs):
                     print('        {}. {}'.format(idx + 1, sog))
 
 

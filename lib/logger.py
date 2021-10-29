@@ -1,7 +1,14 @@
-# The CLI utility library
+# Custom logger
 import logging as log
 
-def set_level(self, level):
+
+def __set_logger(self, quiet: bool, debug: bool):
+    level = log.INFO
+    if quiet:
+        level = log.WARN
+    if debug:
+        level = log.DEBUG
+
     # use stream handler
     handler = log.StreamHandler()
     formatter = log.Formatter('%(name)s %(levelname)s: %(message)s')
@@ -14,3 +21,7 @@ def set_level(self, level):
     self.addHandler(handler)
     self.propagate = False
 
+
+def get_logger(name: str):
+    log.Logger.set_logger = __set_logger
+    return log.getLogger(name)
