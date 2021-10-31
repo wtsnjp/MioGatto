@@ -5,14 +5,9 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.util import set_level, get_mi2idf
+from lib.logger import get_logger
+from lib.util import get_mi2idf
 from lib.annotation import dump_json
-
-# use logger
-import logging as log
-
-log.Logger.set_level = set_level
-logger = log.getLogger('preprocess')
 
 # meta
 PROG_NAME = "tools.preprocess"
@@ -22,18 +17,20 @@ Usage:
     {p} [options] HTML
 
 Options:
-    --embed-floats     Preserve embed figure/table codes
-    --overwrite        Overwrite output files if already exist
+    --embed-floats      Preserve embed figure/table codes
+    --overwrite         Overwrite output files if already exist
 
-    --data=DIR         Dir for data outputs [default: ./data]
-    --sources=DIR      Dir for HTML outputs [default: ./sources]
+    -d DIR, --data=DIR  Dir for data outputs [default: ./data]
+    --sources=DIR       Dir for HTML outputs [default: ./sources]
 
-    -d, --debug        Show debug messages
-    -q, --quiet        Show less messages
+    -D, --debug         Show debug messages
+    -q, --quiet         Show less messages
 
-    -h, --help         Show this screen and exit
-    -V, --version      Show version
+    -h, --help          Show this screen and exit
+    -V, --version       Show version
 """.format(p=PROG_NAME)
+
+logger = get_logger(PROG_NAME)
 
 
 def hex2surface(idf_hex):
@@ -217,15 +214,9 @@ def idf2mc(idf_set):
 def main():
     # parse options
     args = docopt(HELP, version=VERSION)
-    embed_floats = args['--embed-floats']
 
-    # setup logger
-    log_level = log.INFO
-    if args['--quiet']:
-        log_level = log.WARN
-    if args['--debug']:
-        log_level = log.DEBUG
-    logger.set_level(log_level)
+    logger.set_logger(args['--quiet'], args['--debug'])
+    embed_floats = args['--embed-floats']
 
     # dirs and files
     data_dir = Path(args['--data'])

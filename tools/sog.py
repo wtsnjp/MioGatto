@@ -17,15 +17,15 @@ Usage:
     {p} [options] ID
 
 Options:
-    --data=DIR      Dir for the gold data [default: ./data]
-    --sources=DIR   Dir for preprocessed HTML [default: ./sources]
+    -d DIR, --data=DIR  Dir for the gold data [default: ./data]
+    --sources=DIR       Dir for preprocessed HTML [default: ./sources]
 
-    -s, --show-sog  Show actual SoG by concept
-    -d, --debug     Show debug messages
-    -q, --quiet     Show less messages
+    -s, --show-sog      Show actual SoG by concept
+    -D, --debug         Show debug messages
+    -q, --quiet         Show less messages
 
-    -h, --help      Show this screen and exit
-    -V, --version   Show version
+    -h, --help          Show this screen and exit
+    -V, --version       Show version
 """.format(p=PROG_NAME)
 
 logger = get_logger(PROG_NAME)

@@ -17,14 +17,14 @@ Usage:
     {p} [options] ID
 
 Options:
-    --data=DIR         Dir for the gold data [default: ./data]
-    --sources=DIR      Dir for preprocessed HTML [default: ./sources]
+    -d DIR, --data=DIR  Dir for the gold data [default: ./data]
+    --sources=DIR       Dir for preprocessed HTML [default: ./sources]
 
-    -d, --debug        Run in the debug mode
-    -p, --port=NUM     Port number [default: 4100]
+    -D, --debug         Run in the debug mode
+    -p, --port=NUM      Port number [default: 4100]
 
-    -h, --help         Show this screen and exit
-    -V, --version      Show version
+    -h, --help          Show this screen and exit
+    -V, --version       Show version
 """.format(p=PROG_NAME)
 
 

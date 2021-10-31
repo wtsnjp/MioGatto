@@ -24,7 +24,7 @@ Options:
     --sources=DIR   Dir for preprocessed HTML [default: ./sources]
 
     -s, --show-mismatch  Show mismatch details
-    -d, --debug     Show debug messages
+    -D, --debug     Show debug messages
     -q, --quiet     Show less messages
 
     -h, --help      Show this screen and exit

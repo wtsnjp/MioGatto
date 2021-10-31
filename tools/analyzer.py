@@ -20,15 +20,15 @@ Usage:
     {p} [options] ID
 
 Options:
-    -o DIR, --out=DIR  Dir to save results
-    --data=DIR         Dir for the gold data [default: ./data]
-    --sources=DIR      Dir for preprocessed HTML [default: ./sources]
+    -o DIR, --out=DIR   Dir to save results
+    -d DIR, --data=DIR  Dir for the gold data [default: ./data]
+    --sources=DIR       Dir for preprocessed HTML [default: ./sources]
 
-    -d, --debug        Show debug messages
-    -q, --quiet        Show less messages
+    -D, --debug         Show debug messages
+    -q, --quiet         Show less messages
 
-    -h, --help         Show this screen and exit
-    -V, --version      Show version
+    -h, --help          Show this screen and exit
+    -V, --version       Show version
 """.format(p=PROG_NAME)
 
 logger = get_logger(PROG_NAME)
