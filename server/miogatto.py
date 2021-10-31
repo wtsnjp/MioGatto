@@ -11,7 +11,7 @@ from lib.version import VERSION
 from lib.annotation import MiAnno, McDict
 from lib.datatypes import MathConcept
 
-REV_DATE = "2021-10-28"
+REV_DATE = "2021-10-31"
 
 
 def make_concept(res) -> Optional[MathConcept]:
@@ -186,6 +186,15 @@ class MioGattoServer:
             # register
             self.mi_anno.occr[mi_id]['concept_id'] = concept_id
             self.mi_anno.dump()
+
+        return redirect('/')
+
+    def remove_concept(self):
+        res = request.form
+
+        mi_id = res['mi_id']
+        self.mi_anno.occr[mi_id]['concept_id'] = None
+        self.mi_anno.dump()
 
         return redirect('/')
 

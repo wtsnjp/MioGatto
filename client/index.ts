@@ -273,30 +273,42 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     }
 
     let cand_list = `<div class="keep">${radios}</div>`;
-    let buttons = '<p><button id="choose-concept">Choose</button> <button id="new-concept" type="button">New</button></p>'
+    let buttons = '<p><button id="assign-concept">Assign</button> <button id="remove-concept" type="button">Remove</button> <button id="new-concept" type="button">New</button></p>'
     let form_elements = hidden + cand_list + buttons
 
-    let form = `<form id="form-${mi_id}" action="/_concept" method="POST">${form_elements}</form>`;
+    let form_str = `<form id="form-${mi_id}" method="POST">${form_elements}</form>`;
 
     // show the box
     let id_span = `ID: <span style="font-family: monospace;">${mi_id}</span>`
-    let anno_box_content = `<p>${id_span}<hr color="#FFF">${form}</p>`
+    let anno_box_content = `<p>${id_span}<hr color="#FFF">${form_str}</p>`
 
     // for debug
     //console.log(anno_box_content);
 
     // write the content
-    $('#anno-box').html(anno_box_content);
+    let anno_box = $('#anno-box')
+    anno_box.html(anno_box_content);
 
-    // send chosen concept
-    $('button#choose-concept').button();
-    $('button#choose-concept').on('click', function() {
+    // assign chosen concept
+    $('button#assign-concept').button();
+    $('button#assign-concept').on('click', function() {
+      let form = anno_box.find(`#form-${escape_selector(mi_id)}`);
       if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
         localStorage['scroll_top'] = $(window).scrollTop();
+        form.attr('action', '/_concept');
+        form.trigger("submit");
       } else {
         alert('Please select a concept.');
         return false;
       }
+    });
+
+    // remove assignment
+    $('button#remove-concept').button();
+    $('button#remove-concept').on('click', function() {
+      let form = anno_box.find(`#form-${escape_selector(mi_id)}`);
+      form.attr('action', '/_remove_concept');
+      form.trigger("submit");
     });
 
     // enable concept dialogs
@@ -630,7 +642,7 @@ for (let i=1; i<10; i++) {
 $(document).on('keydown', function(event) {
   if(event.key == 'Enter') {
     if(!$('#concept-dialog')[0]) {
-      $('#choose-concept').trigger('click');
+      $('#assign-concept').trigger('click');
     }
   }
 });

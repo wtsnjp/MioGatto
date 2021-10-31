@@ -3,7 +3,7 @@
 Style for MioGatto
 
 Author: Takuto ASAKURA <takuto at is.s.u-tokyo.ac.jp>
-Version: 2021-10-27
+Version: 2021-10-31
 
 */
 
@@ -23,7 +23,7 @@ Version: 2021-10-27
 }
 
 .sidebar {
-    width: 320px;
+    width: 350px;
     padding: 5px;
     height: 98vh;
     position: sticky;
@@ -115,7 +115,7 @@ Version: 2021-10-27
 
 .container {
     margin: 0 auto;
-    width: 1000px;
+    width: 1010px;
     display: -webkit-flex;
     display: flex;
 }

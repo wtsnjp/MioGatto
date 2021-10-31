@@ -42,6 +42,10 @@ def routing_functions(server):
     def action_concept():
         return server.assign_concept()
 
+    @app.route('/_remove_concept', methods=['POST'])
+    def action_remove_concept():
+        return server.remove_concept()
+
     @app.route('/_new_concept', methods=['POST'])
     def action_new_concept():
         return server.new_concept()
