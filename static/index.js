@@ -152,11 +152,17 @@ $(function () {
         // get the concept for the SoG
         let idf = get_idf($('#' + escape_selector(s.mi_id)));
         let concept = get_concept(idf);
-        // no hilight if no concept has been asigned
-        if (concept == undefined || concept.color == undefined)
-            continue;
-        // highlight it!
-        sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+        if (concept == undefined || concept.color == undefined) {
+            // red underline if concept is unassigned
+            sog_nodes.css('text-decoration', 'underline');
+            sog_nodes.css('text-decoration-color', '#FF0000');
+            sog_nodes.css('text-decoration-thickness', '2px');
+        }
+        else {
+            // highlight it!
+            sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+        }
+        // embed SoG information for removing
         sog_nodes.attr({
             'data-sog-mi': s.mi_id,
             'data-sog-start': s.start_id,
