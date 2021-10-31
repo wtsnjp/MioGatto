@@ -279,7 +279,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     function new_concept_button(idf) {
         $('button#new-concept').button();
         $('button#new-concept').on('click', function () {
-            let concept_dialog = $('.concept-dialog').clone();
+            let concept_dialog = $('#concept-dialog-template').clone();
+            concept_dialog.attr('id', 'concept-dialog');
             concept_dialog.removeClass('concept-dialog');
             let form = concept_dialog.find('#concept-form');
             form.attr('action', '/_new_concept');
@@ -297,6 +298,9 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
                     'Cancel': function () {
                         $(this).dialog('close');
                     }
+                },
+                close: function () {
+                    $(this).remove();
                 }
             });
         });
@@ -498,6 +502,32 @@ $(function () {
     $('mi').each(function () {
         show_border($(this));
     });
+});
+// --------------------------
+// Keybord shortcuts
+// --------------------------
+function select_concept(num) {
+    let elem = $(`#c${num - 1}`);
+    if (elem[0]) {
+        $('input[name="concept"]').prop('checked', false);
+        $(`#c${num - 1}`).prop('checked', true);
+    }
+}
+for (let i = 1; i < 10; i++) {
+    $(document).on('keydown', function (event) {
+        if (!$('#concept-dialog')[0]) {
+            if (event.key == i.toString(10)) {
+                select_concept(i);
+            }
+        }
+    });
+}
+$(document).on('keydown', function (event) {
+    if (event.key == 'Enter') {
+        if (!$('#concept-dialog')[0]) {
+            $('#choose-concept').trigger('click');
+        }
+    }
 });
 // --------------------------
 // Error from the server
