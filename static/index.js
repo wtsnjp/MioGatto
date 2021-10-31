@@ -44,6 +44,27 @@ function hex2rgb(hex) {
     });
 }
 // --------------------------
+// Options
+// --------------------------
+$(function () {
+    let input_opt_hl = $('#option-limited-highlight');
+    if (localStorage['option-limited-highlight']) {
+        input_opt_hl.prop('checked', true);
+    }
+    // for the first time
+    give_sog_highlight(localStorage['option-limited-highlight']);
+    input_opt_hl.on('click', function () {
+        if ($(this).prop('checked')) {
+            localStorage['option-limited-highlight'] = true;
+            give_sog_highlight(true);
+        }
+        else {
+            localStorage['option-limited-highlight'] = false;
+            give_sog_highlight(false);
+        }
+    });
+});
+// --------------------------
 // Sidebar
 // --------------------------
 $(function () {
@@ -54,11 +75,9 @@ $(function () {
         }
         $(`#${tab_name}`).on('change', function () {
             if ($(this).prop('checked')) {
-                console.log(`${tab_name}: true`);
                 localStorage[tab_name] = true;
             }
             else {
-                console.log(`${tab_name}: false`);
                 localStorage[tab_name] = false;
             }
         });
@@ -136,7 +155,32 @@ $.ajax({
         sog = data;
     }
 });
-$(function () {
+function apply_highlight(sog_nodes, idf, sog) {
+    let concept = get_concept(idf);
+    if (concept == undefined || concept.color == undefined) {
+        // red underline if concept is unassigned
+        sog_nodes.css('text-decoration', 'underline');
+        sog_nodes.css('text-decoration-color', '#FF0000');
+        sog_nodes.css('text-decoration-thickness', '2px');
+    }
+    else {
+        // highlight it!
+        sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+    }
+    // embed SoG information for removing
+    sog_nodes.attr({
+        'data-sog-mi': sog.mi_id,
+        'data-sog-start': sog.start_id,
+        'data-sog-stop': sog.stop_id,
+    });
+}
+function remove_highlight(sog_nodes) {
+    sog_nodes.css('text-decoration', '');
+    sog_nodes.css('text-decoration-color', '');
+    sog_nodes.css('text-decoration-thickness', '');
+    sog_nodes.css('background-color', '');
+}
+function give_sog_highlight(option_hl) {
     for (let s of sog.sog) {
         // get SoG nodes
         // Note: this code is somehow very tricky but it works
@@ -149,27 +193,23 @@ $(function () {
             let stop_node = $('#' + escape_selector(s.stop_id));
             sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
         }
-        // get the concept for the SoG
-        let idf = get_idf($('#' + escape_selector(s.mi_id)));
-        let concept = get_concept(idf);
-        if (concept == undefined || concept.color == undefined) {
-            // red underline if concept is unassigned
-            sog_nodes.css('text-decoration', 'underline');
-            sog_nodes.css('text-decoration-color', '#FF0000');
-            sog_nodes.css('text-decoration-thickness', '2px');
+        let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
+        if (option_hl) {
+            let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
+            let cur_idf = get_idf(cur_mi);
+            if (cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var) {
+                apply_highlight(sog_nodes, sog_idf, s);
+            }
+            else {
+                remove_highlight(sog_nodes);
+            }
         }
         else {
-            // highlight it!
-            sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+            // always apply
+            apply_highlight(sog_nodes, sog_idf, s);
         }
-        // embed SoG information for removing
-        sog_nodes.attr({
-            'data-sog-mi': s.mi_id,
-            'data-sog-start': s.start_id,
-            'data-sog-stop': s.stop_id,
-        });
     }
-});
+}
 // --------------------------
 // tooltip
 // --------------------------
@@ -362,6 +402,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
         sessionStorage['mi_id'] = $(this).attr('id');
         // show the annotation box
         show_anno_box($(this));
+        // also update SoG highlight
+        give_sog_highlight(localStorage['option-limited-highlight']);
     });
     // keep position and sidebar content after submiting the form
     $(window).scrollTop(localStorage['scroll_top']);
