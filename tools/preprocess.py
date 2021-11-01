@@ -66,6 +66,39 @@ def split_words_into_span_tags(text, parent_id, idx):
     return spans
 
 
+def remove_embed_floats(root, paper_id):
+    # remove embed float
+    from lxml.html.builder import IMG
+    for e in root.xpath('//figure[@class="ltx_figure"]'):
+        # remove embed figures
+        for c in e:
+            if c.tag != 'img' and c.tag != 'figcaption':
+                e.remove(c)
+
+        # add <img>
+        if [c.tag for c in e] == ['figcaption']:
+            img = IMG()
+            src = '/static/img/{}/{}.png'.format(
+                paper_id, e.attrib['id'].replace('.', '_'))
+            img.attrib['src'] = src
+            img.attrib['alt'] = src
+            e.insert(0, img)
+
+    for e in root.xpath('//figure[@class="ltx_table"]'):
+        # remove embed tables
+        for c in e:
+            if c.tag != 'figcaption':
+                e.remove(c)
+
+        # add <img>
+        img = IMG()
+        src = '/static/img/{}/{}.png'.format(paper_id,
+                                             e.attrib['id'].replace('.', '_'))
+        img.attrib['src'] = src
+        img.attrib['alt'] = src
+        e.insert(0, img)
+
+
 def preprocess_html(tree, paper_id, embed_floats):
     root = tree.getroot()
 
@@ -120,39 +153,9 @@ def preprocess_html(tree, paper_id, embed_floats):
     # almost done
     if embed_floats:
         return tree
-
-    # remove embed float
-    from lxml.html.builder import IMG
-    for e in root.xpath('//figure[@class="ltx_figure"]'):
-        # remove embed figures
-        for c in e:
-            if c.tag != 'img' and c.tag != 'figcaption':
-                e.remove(c)
-
-        # add <img>
-        if [c.tag for c in e] == ['figcaption']:
-            img = IMG()
-            src = '/static/img/{}/{}.png'.format(
-                paper_id, e.attrib['id'].replace('.', '_'))
-            img.attrib['src'] = src
-            img.attrib['alt'] = src
-            e.insert(0, img)
-
-    for e in root.xpath('//figure[@class="ltx_table"]'):
-        # remove embed tables
-        for c in e:
-            if c.tag != 'figcaption':
-                e.remove(c)
-
-        # add <img>
-        img = IMG()
-        src = '/static/img/{}/{}.png'.format(paper_id,
-                                             e.attrib['id'].replace('.', '_'))
-        img.attrib['src'] = src
-        img.attrib['alt'] = src
-        e.insert(0, img)
-
-    return tree
+    else:
+        remove_embed_floats(root, paper_id)
+        return tree
 
 
 def observe_mi(tree):
