@@ -4,6 +4,7 @@ from typing import Optional
 from logging import Logger
 from copy import deepcopy
 from lxml import etree
+import subprocess
 import json
 import re
 
@@ -11,7 +12,12 @@ from lib.version import VERSION
 from lib.annotation import MiAnno, McDict
 from lib.datatypes import MathConcept
 
-REV_DATE = "2021-10-31"
+# get git revision
+try:
+    GIT_REVISON = subprocess.check_output(
+        ['git', 'rev-parse', '--short', 'HEAD']).strip().decode('ascii')
+except OSError:
+    GIT_REVISON = 'Unknown'
 
 
 def make_concept(res) -> Optional[MathConcept]:
@@ -169,7 +175,7 @@ class MioGattoServer:
         return render_template('index.html',
                                title=title,
                                version=VERSION,
-                               rev_date=REV_DATE,
+                               git_revision=GIT_REVISON,
                                paper_id=self.paper_id,
                                annotator=self.mi_anno.annotator,
                                p_concept=p_concept,

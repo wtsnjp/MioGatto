@@ -46,9 +46,10 @@
 <input class="tab-title" id="tab_miogatto" type="checkbox" name="tabs">
 <label class="tab-title" for="tab_miogatto">MioGatto v{{ version }}</label>
 <div class="tab-content">
-  <p>Dev. revision: {{ rev_date }}</p>
-  <p>Paper ID: {{ paper_id }}</p>
+  <p>Revision: <span style="font-family: monospace;">{{ git_revision }}</span></p>
+  <p>Paper ID: <span style="font-family: monospace;">{{ paper_id }}</span></p>
   <p>Annotator: {{ annotator }}</p>
+  <p>Links: <a href="https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide" target="_blank">help</a>, <a href="https://github.com/wtsnjp/MioGatto/issues" target="_blank">bug reports</a></p>
 </div>
 </div>
 
