@@ -25,11 +25,11 @@ class MiAnno:
             data = json.load(f)
 
         if data.get('anno_version', '') != '0.2':
-            logger.warning('{}: Annotation data version is incompatible', file)
+            logger.warning('%s: Annotation data version is incompatible', file)
 
         self.file = file
-        self.anno_version: str = data['anno_version']
-        self.annotator: str = data['annotator']
+        self.anno_version: str = data.get('anno_version', 'unknown')
+        self.annotator: str = data.get('annotator', 'unknown')
         self.occr: dict = data['mi_anno']
 
     def dump(self) -> None:
@@ -50,12 +50,12 @@ class McDict:
             data = json.load(f)
 
         if data.get('mcdict_version', '') != '0.2':
-            logger.warning('{}: Math concept dict version is incompatible',
+            logger.warning('%s: Math concept dict version is incompatible',
                            file)
 
         self.file = file
-        self.mcdict_version: str = data['mcdict_version']
-        self.author: str = data['annotator']
+        self.mcdict_version: str = data.get('mcdict_version', 'unknown')
+        self.author: str = data.get('annotator', 'unknown')
 
         concepts, surfaces = dict(), dict()
         for idf_hex, obj in data['concepts'].items():
@@ -69,17 +69,21 @@ class McDict:
         self.surfaces = surfaces
 
     def dump(self):
-        data = dict()
+        concepts = dict()
         for idf_hex, s in self.surfaces.items():
-            data[idf_hex] = {
+            concepts['concepts'][idf_hex] = {
                 'surface': s,
                 'identifiers': dict(),
             }
 
             for idf_var, cls in self.concepts[idf_hex].items():
-                data[idf_hex]['identifiers'][idf_var] = [
+                concepts['concepts'][idf_hex]['identifiers'][idf_var] = [
                     asdict(c) for c in cls
                 ]
 
         with open(self.file, 'w') as f:
-            dump_json(data, f)
+            dump_json({
+                'annotator': self.author,
+                'mcdict_version': self.mcdict_version,
+                'concepts': concepts,
+            }, f)
