@@ -48,11 +48,14 @@ function hex2rgb(hex) {
 // --------------------------
 $(function () {
     let input_opt_hl = $('#option-limited-highlight');
-    if (localStorage['option-limited-highlight']) {
+    // first time check
+    if (localStorage['option-limited-highlight'] == 'true') {
         input_opt_hl.prop('checked', true);
+        give_sog_highlight(true);
     }
-    // for the first time
-    give_sog_highlight(localStorage['option-limited-highlight']);
+    else {
+        give_sog_highlight(false);
+    }
     input_opt_hl.on('click', function () {
         if ($(this).prop('checked')) {
             localStorage['option-limited-highlight'] = true;
@@ -194,7 +197,7 @@ function give_sog_highlight(option_hl) {
             sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
         }
         let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
-        if (option_hl) {
+        if (option_hl && sessionStorage['mi_id'] != undefined) {
             let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
             let cur_idf = get_idf(cur_mi);
             if (cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var) {
