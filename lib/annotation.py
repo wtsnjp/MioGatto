@@ -71,13 +71,13 @@ class McDict:
     def dump(self):
         concepts = dict()
         for idf_hex, s in self.surfaces.items():
-            concepts['concepts'][idf_hex] = {
+            concepts[idf_hex] = {
                 'surface': s,
                 'identifiers': dict(),
             }
 
             for idf_var, cls in self.concepts[idf_hex].items():
-                concepts['concepts'][idf_hex]['identifiers'][idf_var] = [
+                concepts[idf_hex]['identifiers'][idf_var] = [
                     asdict(c) for c in cls
                 ]
 
