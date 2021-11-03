@@ -173,6 +173,10 @@ def observe_mi(tree):
         mi_id = e.attrib.get('id')
         idf = mi2idf.get(mi_id)
 
+        if mi_id is None:
+            # wired but to avoid errors
+            continue
+
         if idf is not None:
             idf_hex = idf['idf_hex']
             idf_var = idf['idf_var']
