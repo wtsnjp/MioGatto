@@ -58,11 +58,11 @@ $(function () {
     }
     input_opt_hl.on('click', function () {
         if ($(this).prop('checked')) {
-            localStorage['option-limited-highlight'] = true;
+            localStorage['option-limited-highlight'] = 'true';
             give_sog_highlight(true);
         }
         else {
-            localStorage['option-limited-highlight'] = false;
+            localStorage['option-limited-highlight'] = 'false';
             give_sog_highlight(false);
         }
     });
@@ -406,7 +406,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
         // show the annotation box
         show_anno_box($(this));
         // also update SoG highlight
-        give_sog_highlight(localStorage['option-limited-highlight']);
+        give_sog_highlight(localStorage['option-limited-highlight'] == 'true');
     });
     // keep position and sidebar content after submiting the form
     $(window).scrollTop(localStorage['scroll_top']);
