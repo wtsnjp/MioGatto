@@ -184,6 +184,29 @@ function remove_highlight(sog_nodes) {
     sog_nodes.css('background-color', '');
 }
 function give_sog_highlight(option_hl) {
+    // remove highlight
+    for (let s of sog.sog) {
+        // get SoG nodes
+        // Note: this code is somehow very tricky but it works
+        let sog_nodes;
+        if (s.start_id == s.stop_id) {
+            sog_nodes = $('#' + escape_selector(s.start_id));
+        }
+        else {
+            let start_node = $('#' + escape_selector(s.start_id));
+            let stop_node = $('#' + escape_selector(s.stop_id));
+            sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
+        }
+        let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
+        if (option_hl && sessionStorage['mi_id'] != undefined) {
+            let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
+            let cur_idf = get_idf(cur_mi);
+            if (!(cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var)) {
+                remove_highlight(sog_nodes);
+            }
+        }
+    }
+    // apply highlight
     for (let s of sog.sog) {
         // get SoG nodes
         // Note: this code is somehow very tricky but it works
@@ -202,9 +225,6 @@ function give_sog_highlight(option_hl) {
             let cur_idf = get_idf(cur_mi);
             if (cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var) {
                 apply_highlight(sog_nodes, sog_idf, s);
-            }
-            else {
-                remove_highlight(sog_nodes);
             }
         }
         else {
