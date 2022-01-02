@@ -109,15 +109,6 @@ def preprocess_html(tree, paper_id, embed_floats):
     for e in root.xpath('//span[@class="ltx_text"]'):
         e.drop_tag()
 
-    # dirty hack: fix math markups
-    if paper_id == '1808.02342':
-        from lib.fixers import fix1808_02342
-        fix1808_02342(root)
-
-    if paper_id == '1711.09576':
-        from lib.fixers import fix1711_09576
-        fix1711_09576(root)
-
     # tweak images
     for e in root.xpath('//img'):
         if 'ltx_graphics' in e.attrib.get('class', '').split(' '):
@@ -151,11 +142,8 @@ def preprocess_html(tree, paper_id, embed_floats):
                     e.insert(i, s)
 
     # almost done
-    if embed_floats:
-        return tree
-    else:
+    if not embed_floats:
         remove_embed_floats(root, paper_id)
-        return tree
 
 
 def observe_mi(tree):
@@ -254,7 +242,7 @@ def main():
 
     # load the HTML and modify the DOM tree
     tree = lxml.html.parse(str(html_in))
-    tree = preprocess_html(tree, paper_id, embed_floats)
+    preprocess_html(tree, paper_id, embed_floats)
 
     # extract formulae information
     occurences, identifiers, attribs = observe_mi(tree)
