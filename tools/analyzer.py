@@ -34,8 +34,7 @@ Options:
 logger = get_logger(PROG_NAME)
 
 
-def extract_info(tree):
-    mi2idf = get_mi2idf(tree)
+def extract_info(tree, mi2idf):
     root = tree.getroot()
     html_str = lxml.html.tostring(tree, encoding='utf-8').decode('utf-8')
 
@@ -70,7 +69,7 @@ def extract_info(tree):
     return mi_info, sec_info
 
 
-def analyze_annotation(paper_id, mi_anno, mcdict, mi_info):
+def analyze_annotation(paper_id, mi_anno, mcdict, mi_info, mi2idf):
     concepts = mcdict.concepts
 
     # basic analysis for mcdict
@@ -124,8 +123,12 @@ def analyze_annotation(paper_id, mi_anno, mcdict, mi_info):
     for idf_hex, v in concepts.items():
         concept_dict[idf_hex] = dict()
         for idf_var, idf in v.items():
-            concept_dict[idf_hex][idf_var] = [next(cnt_iter) for _ in idf]
-    logger.debug('concept_dict: %s', concept_dict)
+            concept_dict[idf_hex][idf_var] = [
+                {
+                    'sid': next(cnt_iter),  # unique ID
+                    'count': 0  # number of occurences
+                } for _ in idf
+            ]
 
     nof_annotated, total_nof_candidates, nof_sog = 0, 0, 0
     candidates = [0] * nof_items[0]
@@ -144,11 +147,9 @@ def analyze_annotation(paper_id, mi_anno, mcdict, mi_info):
         if concept_id is not None:
             nof_annotated += 1
 
-            concept_sid = concept_dict[idf_hex][idf_var][concept_id]
+            concept_sid = concept_dict[idf_hex][idf_var][concept_id]['sid']
+            concept_dict[idf_hex][idf_var][concept_id]['count'] += 1
             occurences.append((concept_sid, mi['pos']))
-
-    logger.debug('occurences: %s', occurences)
-    logger.debug('candidates: %s', candidates)
 
     print('* Annotation')
     nof_occurences = len(mi_anno.occr)
@@ -158,6 +159,42 @@ def analyze_annotation(paper_id, mi_anno, mcdict, mi_info):
     print('Average #candidates: {:.1f}'.format(total_nof_candidates /
                                                nof_occurences))
     print('#SoG: {}'.format(nof_sog))
+    print()
+
+    print('* Number of occurences by concept')
+    counts, count_zeros = [], []
+    for idf_hex, v in concept_dict.items():
+        for idf_var, cls in v.items():
+            for cid, c in enumerate(cls):
+                cnt = c['count']
+                if cnt == 0:
+                    # do not consider if no occurence is associated
+                    # this will be warned afterwards
+                    count_zeros.append((idf_hex, idf_var, cid))
+                else:
+                    counts.append(cnt)
+
+    print('Max: {}'.format(max(counts)))
+    print('Median: {}'.format(int(np.median(counts))))
+    print('Mean: {:.1f}'.format(np.mean(counts)))
+    print('Variance: {:.1f}'.format(np.var(counts)))
+    print('Standard deviation: {:.1f}'.format(np.std(counts)))
+    print()
+
+    # warnings
+    if len(count_zeros) > 0:
+        logger.warning('Nothing is associated with the following concepts:')
+        for tp in count_zeros:
+            idf_hex, idf_var, cid = tp
+            surface = mcdict.surfaces[idf_hex]['text']
+            desc = concepts[idf_hex][idf_var][cid].description
+            logger.warning('    %s > %s > %d (%s)', surface, idf_var, cid,
+                           desc)
+
+    # output for debugging
+    logger.debug('concept_dict: %s', concept_dict)
+    logger.debug('occurences: %s', occurences)
+    logger.debug('candidates: %s', candidates)
 
     return items, concept_dict, occurences
 
@@ -236,10 +273,11 @@ def main():
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
-    mi_info, sec_info = extract_info(tree)
+    mi2idf = get_mi2idf(tree)
+    mi_info, sec_info = extract_info(tree, mi2idf)
 
     items, concept_dict, occurences = analyze_annotation(
-        paper_id, mi_anno, mcdict, mi_info)
+        paper_id, mi_anno, mcdict, mi_info, mi2idf)
 
     # supplementary graphs
     if args['--out'] is not None:
