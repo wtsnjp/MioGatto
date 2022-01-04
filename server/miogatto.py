@@ -50,12 +50,16 @@ def args_type_pulldowns():
 <option value="subscript">Subscript</option>
 <option value="superscript">Superscript</option>
 <option value="comma">Comma</option>
+<option value="semicolon">Semicolon</option>
+<option value="colon">Colon</option>
 <option value="prime">Prime</option>
 <option value="asterisk">Asterisk</option>
 <option value="hat">Hat</option>
 <option value="tilde">Tilde</option>
 <option value="bar">Bar</option>
 <option value="over">Over</option>
+<option value="over right arrow">Over right arrow</option>
+<option value="over left arrow">Over left arrow</option>
 <option value="open parenthesis">Open parenthesis</option>
 <option value="close parenthesis">Close parenthesis</option>
 <option value="open bracket">Open bracket</option>
