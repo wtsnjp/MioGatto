@@ -17,8 +17,10 @@ Usage:
     {p} [options] ID
 
 Options:
-    -d DIR, --data=DIR  Dir for the gold data [default: ./data]
-    --sources=DIR       Dir for preprocessed HTML [default: ./sources]
+    -d DIR, --data=DIR
+        Dir for the gold data [default: ./data]
+    -s DIR, --sources=DIR
+        Dir for preprocessed HTML [default: ./sources]
 
     -D, --debug         Run in the debug mode
     -p, --port=NUM      Port number [default: 4100]
