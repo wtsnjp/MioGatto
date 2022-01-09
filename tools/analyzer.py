@@ -69,7 +69,7 @@ def extract_info(tree, mi2idf):
     return mi_info, sec_info
 
 
-def analyze_annotation(paper_id, mi_anno, mcdict, mi_info, mi2idf):
+def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
     concepts = mcdict.concepts
 
     # basic analysis for mcdict
@@ -85,8 +85,12 @@ def analyze_annotation(paper_id, mi_anno, mcdict, mi_info, mi2idf):
                 nof_idf_mul += 1
             nof_concept += len(idf)
 
+    root = tree.getroot()
+    nof_words = len(root.xpath('//span[@class = "gd_word"]'))
+
     print('* Basic information')
     print('Paper ID: {}'.format(paper_id))
+    print('#words: {}'.format(nof_words))
     print('Author of math concept dict: {}'.format(mcdict.author))
     print('Annotator: {}'.format(mi_anno.annotator))
     print('#types of identifiers: {}'.format(len(concepts)))
@@ -277,7 +281,7 @@ def main():
     mi_info, sec_info = extract_info(tree, mi2idf)
 
     items, concept_dict, occurences = analyze_annotation(
-        paper_id, mi_anno, mcdict, mi_info, mi2idf)
+        paper_id, tree, mi_anno, mcdict, mi_info, mi2idf)
 
     # supplementary graphs
     if args['--out'] is not None:
