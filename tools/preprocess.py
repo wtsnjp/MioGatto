@@ -43,7 +43,7 @@ def hex2surface(idf_hex):
     return surface
 
 
-# add word span tags to text (directly) in <p> tags
+# add word span tags to text directly
 def split_words_into_span_tags(text, parent_id, idx):
     from lxml.html.builder import SPAN
 
@@ -64,6 +64,25 @@ def split_words_into_span_tags(text, parent_id, idx):
         spans.append(word_span(words[-1], parent_id, idx, word_cnt))
 
     return spans
+
+
+def embed_word_span_tags(e, parent_id):
+    # get texts and remove
+    texts = [e.text]
+    e.text = None
+    for c in e.getchildren():
+        texts.append(c.tail)
+        c.tail = None
+
+    spans = [
+        split_words_into_span_tags(t, parent_id, i) if t else None
+        for i, t in enumerate(texts)
+    ]
+
+    for i in range(len(spans) - 1, -1, -1):
+        if not spans[i] is None:
+            for s in reversed(spans[i]):
+                e.insert(i, s)
 
 
 def remove_embed_floats(root, paper_id):
@@ -106,7 +125,7 @@ def preprocess_html(tree, paper_id, embed_floats):
     for e in root.xpath('//annotation|//annotation-xml'):
         e.drop_tree()
 
-    for e in root.xpath('//span[@class="ltx_text"]'):
+    for e in root.xpath('//span[contains(@class,"ltx_text")]'):
         e.drop_tag()
 
     # tweak images
@@ -118,28 +137,20 @@ def preprocess_html(tree, paper_id, embed_floats):
             e.attrib['width'] = None
             e.attrib['height'] = None
 
-    for e in root.xpath('//p|//figcaption'):
-        # get texts and remove
-        texts = [e.text]
-        e.text = None
-        for c in e.getchildren():
-            texts.append(c.tail)
-            c.tail = None
+    # normal paragraphs
+    for e in root.xpath('//p'):
+        parent_id = e.attrib['id']
+        embed_word_span_tags(e, parent_id)
 
-        # conpose span tags and add
-        if e.tag == 'figcaption':
-            parent_id = e.getparent().attrib['id']
-        else:
-            parent_id = e.attrib['id']
-        spans = [
-            split_words_into_span_tags(t, parent_id, i) if t else None
-            for i, t in enumerate(texts)
-        ]
+    # captions
+    for e in root.xpath('//figcaption'):
+        parent_id = e.getparent().attrib['id']
+        embed_word_span_tags(e, parent_id)
 
-        for i in range(len(spans) - 1, -1, -1):
-            if not spans[i] is None:
-                for s in reversed(spans[i]):
-                    e.insert(i, s)
+    # footnotes
+    for e in root.xpath('//span[contains(@class,"ltx_note_content")]'):
+        parent_id = e.getparent().getparent().attrib['id']
+        embed_word_span_tags(e, parent_id)
 
     # almost done
     if not embed_floats:
@@ -251,10 +262,13 @@ def main():
     print('mi attributes: {}'.format(', '.join(attribs)))
 
     # make the annotation structure
-    mi_anno = {mi_id: {
-        'concept_id': concept_id,
-        'sog': [],
-    } for mi_id, concept_id in occurences.items()}
+    mi_anno = {
+        mi_id: {
+            'concept_id': concept_id,
+            'sog': [],
+        }
+        for mi_id, concept_id in occurences.items()
+    }
 
     # write output files
     logger.info('Writing preprocessed HTML to %s', html_out)
@@ -262,19 +276,21 @@ def main():
 
     logger.info('Writing initialized anno template to %s', anno_json)
     with open(anno_json, 'w') as f:
-        dump_json({
-            'anno_version': '0.2',
-            'annotator': 'YOUR NAME',
-            'mi_anno': mi_anno,
-        }, f)
+        dump_json(
+            {
+                'anno_version': '0.2',
+                'annotator': 'YOUR NAME',
+                'mi_anno': mi_anno,
+            }, f)
 
     logger.info('Writing initialized mcdict template to %s', mcdict_json)
     with open(mcdict_json, 'w') as f:
-        dump_json({
-            'mcdict_version': '0.2',
-            'annotator': 'YOUR NAME',
-            'concepts': idf2mc(identifiers),
-        }, f)
+        dump_json(
+            {
+                'mcdict_version': '0.2',
+                'annotator': 'YOUR NAME',
+                'concepts': idf2mc(identifiers),
+            }, f)
 
 
 if __name__ == '__main__':
