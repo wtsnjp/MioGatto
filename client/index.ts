@@ -511,6 +511,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
   });
 
   // keep position and sidebar content after submiting the form
+  // This '$(window).scrollTop' seems redundant but somehow fixes the page position problems...
   $(window).scrollTop(localStorage['scroll_top']);
   let mi_id = sessionStorage['mi_id'];
   if(mi_id != undefined) {
@@ -741,3 +742,8 @@ $(function() {
     });
   }
 });
+
+// Set page position at the last
+$(function() {
+  $(window).scrollTop(localStorage['scroll_top']);
+})
