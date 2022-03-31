@@ -496,7 +496,9 @@ function get_selection() {
 $(function () {
     let page_x;
     let page_y;
-    $(document).on('mouseup', function () {
+    $(document).on('mouseup', function (e) {
+        page_x = e.pageX;
+        page_y = e.pageY;
         $('.select-menu').css('display', 'none');
         let [start_id, stop_id, parent] = get_selection();
         if (parent == undefined)
@@ -509,8 +511,8 @@ $(function () {
             let concept = get_concept(idf);
             if (concept != undefined) {
                 $('.select-menu').css({
-                    'left': page_x + 5,
-                    'top': page_y - 55
+                    'left': page_x - 60,
+                    'top': page_y - 50
                 }).fadeIn(200).css('display', 'flex');
             }
         }
@@ -565,10 +567,6 @@ $(function () {
                 console.error('Failed to POST _delete_sog!');
             });
         });
-    });
-    $(document).on("mousedown", function (e) {
-        page_x = e.pageX;
-        page_y = e.pageY;
     });
 });
 // --------------------------
