@@ -64,6 +64,8 @@ def args_type_pulldowns():
 <option value="close parenthesis">Close parenthesis</option>
 <option value="open bracket">Open bracket</option>
 <option value="close bracket">Close bracket</option>
+<option value="open brace">Open brace</option>
+<option value="close brace">Close brace</option>
 <option value="vertical bar">Vertical bar</option>
 <option value="leftside argument">Leftside argument</option>
 <option value="leftside base">Leftside base</option>
