@@ -8,6 +8,8 @@ def get_mi2idf(tree):
     ellipsises = [
         'e280a6',  # HORIZONTAL ELLIPSIS (…)
         'e28baf',  # MIDLINE HORIZONTAL ELLIPSIS (⋯)
+        'e28bae',  # VERTICAL ELLIPSIS (⋮)
+        'e28bb1',  # DOWN RIGHT DIAGONAL ELLIPSIS (⋱)
     ]
 
     # loop mi in the tree
