@@ -68,6 +68,7 @@ def args_type_pulldowns():
 <option value="close brace">Close brace</option>
 <option value="vertical bar">Vertical bar</option>
 <option value="leftside argument">Leftside argument</option>
+<option value="rightside argument">Rightside argument</option>
 <option value="leftside base">Leftside base</option>
 </select></li>'''
     items = '\n'.join([select_tag.format(i) for i in range(10)])
