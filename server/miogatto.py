@@ -255,7 +255,11 @@ class MioGattoServer:
 
         # TODO: validate the span range
         if [start_id, stop_id] not in self.mi_anno.occr[mi_id]['sog']:
-            self.mi_anno.occr[mi_id]['sog'].append([start_id, stop_id])
+            self.mi_anno.occr[mi_id]['sog'].append({
+                'start': start_id,
+                'stop': stop_id,
+                'type': 0
+            })
             self.mi_anno.dump()
 
         return redirect('/')
@@ -266,9 +270,30 @@ class MioGattoServer:
         mi_id = res['mi_id']
         start_id, stop_id = res['start_id'], res['stop_id']
 
-        if [start_id, stop_id] in self.mi_anno.occr[mi_id]['sog']:
-            self.mi_anno.occr[mi_id]['sog'].remove([start_id, stop_id])
+        delete_idx = None
+        for idx, sog in enumerate(self.mi_anno.occr[mi_id]['sog']):
+            if sog['start'] == start_id and sog['stop'] == stop_id:
+                delete_idx = idx
+                break
+
+        if delete_idx is not None:
+            del self.mi_anno.occr[mi_id]['sog'][delete_idx]
             self.mi_anno.dump()
+
+        return redirect('/')
+
+    def change_sog_type(self):
+        res = request.form
+
+        mi_id = res['mi_id']
+        start_id, stop_id = res['start_id'], res['stop_id']
+        sog_type = res['sog_type']
+
+        for sog in self.mi_anno.occr[mi_id]['sog']:
+            if sog['start'] == start_id and sog['stop'] == stop_id:
+                sog['type'] = sog_type
+                self.mi_anno.dump()
+                break
 
         return redirect('/')
 
@@ -288,8 +313,9 @@ class MioGattoServer:
             for sog in anno['sog']:
                 data['sog'].append({
                     'mi_id': mi_id,
-                    'start_id': sog[0],
-                    'stop_id': sog[1]
+                    'start_id': sog['start'],
+                    'stop_id': sog['stop'],
+                    'type': sog['type']
                 })
 
         return json.dumps(data,

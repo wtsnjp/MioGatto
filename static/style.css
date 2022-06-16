@@ -120,15 +120,30 @@ Version: 2021-10-31
     display: flex;
 }
 
-.select-menu {
+.sog-menu {
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    /* color: #5d627b; */
+    background: #fff;
+    border: solid 2px;
+    /* box-shadow: 0 3px 5px rgba(0, 0, 0, 0.22); */
     display: none;
     list-style: none;
     position: absolute;
-    background: #fff;
     z-index: 1;
 }
 
-.concept-dialog, .error-dialog {
+.sog-menu-wrap {
+    display: flex;
+    flex-flow: column;
+}
+
+.sog-menu input.sog-del:hover {
+    background: #ff0000;
+    color: #ffffff;
+}
+
+.concept-dialog, .sog-type-dialog, .error-dialog {
     display: none;
     list-style: none;
 }

@@ -14,9 +14,29 @@
 
 <main class="main">
 <!-- hidden by default -->
-<div class="select-menu">
-<input class="sog-add" type="submit" value="Add source">
+<div class="sog-menu">
+<div class="sog-menu-wrap">
+
+<div class="sog-mod-menu">
+<div class="sog-menu-wrap">
+<div class="sog-mod-menu-info"></div>
+<div>
+<input class="sog-type" type="submit" value="Change type">
 <input class="sog-del" type="submit" value="Delete source">
+</div>
+</div>
+</div>
+
+<div class="sog-add-menu">
+<div class="sog-menu-wrap">
+<div class="sog-add-menu-info"></div>
+<div>
+<input class="sog-add" type="submit" value="Add source">
+</div>
+</div>
+</div>
+
+</div>
 </div>
 
 <div id="concept-dialog-template" class="concept-dialog">
@@ -27,6 +47,14 @@
 <p>Arguments type:<br/>
 {{ args_type }}
 </p>
+</form>
+</div>
+
+<div id="sog-type-dialog-template" class="sog-type-dialog">
+<form id="sog-type-form" method="POST">
+<label><input type="radio" name="sog_type" value="0" /> Declaration</label><br/>
+<label><input type="radio" name="sog_type" value="1" /> Definition</label><br/>
+<label><input type="radio" name="sog_type" value="2" /> Others</label>
 </form>
 </div>
 

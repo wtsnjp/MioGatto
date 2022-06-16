@@ -18,7 +18,7 @@ def main():
         new_sog_ls = []
 
         for tp in old_sog_ls:
-            new_sog_ls.append({'begin': tp[0], 'end': tp[1], 'type': None})
+            new_sog_ls.append({'start': tp[0], 'stop': tp[1], 'type': 0})
 
         mi['sog'] = new_sog_ls
 

@@ -24,7 +24,7 @@ class MiAnno:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
-        if data.get('anno_version', '') != '0.2':
+        if data.get('anno_version', '') != '0.3':
             logger.warning('%s: Annotation data version is incompatible', file)
 
         self.file = file
