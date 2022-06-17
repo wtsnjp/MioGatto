@@ -74,10 +74,10 @@
 <input class="tab-title" id="tab_miogatto" type="checkbox" name="tabs">
 <label class="tab-title" for="tab_miogatto">MioGatto v{{ version }}</label>
 <div class="tab-content">
-  <p>Revision: <span style="font-family: monospace;">{{ git_revision }}</span></p>
-  <p>Paper ID: <span style="font-family: monospace;">{{ paper_id }}</span></p>
-  <p>Annotator: {{ annotator }}</p>
-  <p>Links: <a href="https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide" target="_blank">help</a>, <a href="https://github.com/wtsnjp/MioGatto/issues" target="_blank">bug reports</a></p>
+  <p>Revision: <span style="font-family: monospace;">{{ git_revision }}</span><br/>
+  Paper ID: <span style="font-family: monospace;">{{ paper_id }}</span><br/>
+  Annotator: {{ annotator }}<br/>
+  Links: <a href="https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide" target="_blank">help</a>, <a href="https://github.com/wtsnjp/MioGatto/issues" target="_blank">bug reports</a></p>
 </div>
 </div>
 
@@ -89,6 +89,10 @@
     <label for="option-limited-highlight">
       <input type="checkbox" id="option-limited-highlight">
       Highlight only relevant SoGs
+    </label><br/>
+    <label for="option-show-definition">
+      <input type="checkbox" id="option-show-definition">
+      Underline definitions
     </label>
   </p>
 </div>
@@ -98,8 +102,8 @@
 <input class="tab-title" id="tab_progress" type="checkbox" name="tabs">
 <label class="tab-title" for="tab_progress">Progress</label>
 <div class="tab-content">
-  <p>Concepts: {{ p_concept }}</p>
-  <p>Sources: {{ nof_sog }}</p>
+  <p>Concepts: {{ p_concept }}<br/>
+  Sources: {{ nof_sog }}</p>
 </div>
 </div>
 

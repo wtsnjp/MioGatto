@@ -46,25 +46,51 @@ function hex2rgb(hex) {
 // --------------------------
 // Options
 // --------------------------
+let miogatto_options = {
+    limited_highlight: false,
+    show_definition: false,
+};
 $(function () {
     let input_opt_hl = $('#option-limited-highlight');
+    let input_opt_def = $('#option-show-definition');
     // first time check
     if (localStorage['option-limited-highlight'] == 'true') {
         input_opt_hl.prop('checked', true);
-        give_sog_highlight(true);
+        miogatto_options.limited_highlight = true;
     }
     else {
-        give_sog_highlight(false);
+        miogatto_options.limited_highlight = false;
     }
+    if (localStorage['option-show-definition'] == 'true') {
+        input_opt_def.prop('checked', true);
+        miogatto_options.show_definition = true;
+    }
+    else {
+        miogatto_options.show_definition = false;
+    }
+    give_sog_highlight();
+    // toggle
     input_opt_hl.on('click', function () {
         if ($(this).prop('checked')) {
             localStorage['option-limited-highlight'] = 'true';
-            give_sog_highlight(true);
+            miogatto_options.limited_highlight = true;
         }
         else {
             localStorage['option-limited-highlight'] = 'false';
-            give_sog_highlight(false);
+            miogatto_options.limited_highlight = false;
         }
+        give_sog_highlight();
+    });
+    input_opt_def.on('click', function () {
+        if ($(this).prop('checked')) {
+            localStorage['option-show-definition'] = 'true';
+            miogatto_options.show_definition = true;
+        }
+        else {
+            localStorage['option-show-definition'] = 'false';
+            miogatto_options.show_definition = false;
+        }
+        give_sog_highlight();
     });
 });
 // --------------------------
@@ -159,16 +185,18 @@ $.ajax({
     }
 });
 function apply_highlight(sog_nodes, idf, sog) {
+    remove_highlight(sog_nodes);
     let concept = get_concept(idf);
     if (concept == undefined || concept.color == undefined) {
         // red underline if concept is unassigned
-        sog_nodes.css('text-decoration', 'underline');
-        sog_nodes.css('text-decoration-color', '#FF0000');
-        sog_nodes.css('text-decoration-thickness', '2px');
+        sog_nodes.css('border-bottom', 'solid 2px #FF0000');
     }
     else {
         // highlight it!
         sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+        if (miogatto_options.show_definition && sog.type == 1) {
+            sog_nodes.css('border-bottom', 'solid 3px');
+        }
     }
     // embed SoG information for removing
     sog_nodes.attr({
@@ -179,12 +207,10 @@ function apply_highlight(sog_nodes, idf, sog) {
     });
 }
 function remove_highlight(sog_nodes) {
-    sog_nodes.css('text-decoration', '');
-    sog_nodes.css('text-decoration-color', '');
-    sog_nodes.css('text-decoration-thickness', '');
+    sog_nodes.css('border-bottom', '');
     sog_nodes.css('background-color', '');
 }
-function give_sog_highlight(option_hl) {
+function give_sog_highlight() {
     // remove highlight
     for (let s of sog.sog) {
         // get SoG nodes
@@ -199,7 +225,7 @@ function give_sog_highlight(option_hl) {
             sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
         }
         let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
-        if (option_hl && sessionStorage['mi_id'] != undefined) {
+        if (miogatto_options.limited_highlight && sessionStorage['mi_id'] != undefined) {
             let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
             let cur_idf = get_idf(cur_mi);
             if (!(cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var)) {
@@ -221,7 +247,7 @@ function give_sog_highlight(option_hl) {
             sog_nodes = start_node.nextUntil('#' + escape_selector(s.stop_id)).addBack().add(stop_node);
         }
         let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
-        if (option_hl && sessionStorage['mi_id'] != undefined) {
+        if (miogatto_options.limited_highlight && sessionStorage['mi_id'] != undefined) {
             let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
             let cur_idf = get_idf(cur_mi);
             if (cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var) {
@@ -427,7 +453,10 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
         // show the annotation box
         show_anno_box($(this));
         // also update SoG highlight
-        give_sog_highlight(localStorage['option-limited-highlight'] == 'true');
+        if (localStorage['option-limited-highlight'] == 'true') {
+            miogatto_options.limited_highlight = true;
+        }
+        give_sog_highlight();
     });
     // keep position and sidebar content after submiting the form
     // This '$(window).scrollTop' seems redundant but somehow fixes the page position problems...
