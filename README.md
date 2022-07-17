@@ -116,7 +116,7 @@ To compile the client source `client/index.ts`, execute the following in the
 client directory:
 
 ```shell
-npx tsc
+npm run build
 ```
 
 ## Publications
