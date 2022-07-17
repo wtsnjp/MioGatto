@@ -15,7 +15,7 @@ python -m pip install -r requirements.txt
 ```
 
 In case you don't want to install the dependencies into your system, please
-consider utilizing [venv](https://docs.python.org/3/library/venv.html).
+consider using [venv](https://docs.python.org/3/library/venv.html).
 
 ## Project structure
 
