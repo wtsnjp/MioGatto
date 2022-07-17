@@ -121,6 +121,8 @@ npm run build
 
 ## Publications
 
+* Takuto Asakura, Yusuke Miyao, Akiko Aizawa. **Building Dataset for Grounding of Formulae — Annotating Coreference Relations Among Math Identifiers**. In [13th Conference on Language Resources and Evaluation (LREC 2022)](https://lrec2022.lrec-conf.org).  
+  [paper] [[slides](https://speakerdeck.com/wtsnjp/lrec2022)] [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
 * Takuto Asakura, Yusuke Miyao, Akiko Aizawa, Michael Kohlhase. **MioGatto: A Math Identifier-oriented Grounding Annotation Tool**. In 13th MathUI Workshop at 14th Conference on Intelligent Computer Mathematics (MathUI 2021).  
   [[preprint](https://easychair.org/publications/preprint/FSSk)] [paper] [[slides](https://speakerdeck.com/wtsnjp/mathui2021)]
 * Takuto Asakura, André Greiner-Petter, Akiko Aizawa, Yusuke Miyao. **Towards Grounding of Formulae**. In Proceedings of [First Workshop on Scholarly Document Processing (SDP 2020)](https://ornlcda.github.io/SDProc/). pp. 138―147, 2020.  
