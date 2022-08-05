@@ -61,6 +61,7 @@ Version: 2021-10-31
 
 .sidebar-tab .tab-content {
     overflow: hidden;
+    word-break: break-word;
     max-height: 0;
     -webkit-transition: max-height 0.35s;
     transition: max-height 0.35s;
@@ -115,7 +116,7 @@ Version: 2021-10-31
 
 .container {
     margin: 0 auto;
-    width: 1010px;
+    width: 1060px;
     display: -webkit-flex;
     display: flex;
 }
