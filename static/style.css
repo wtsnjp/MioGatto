@@ -137,3 +137,12 @@ Version: 2021-10-31
     color: white;
     background: red;
 }
+
+table[class*="ltx_eqn_table"]  {
+    display: block;
+    overflow-x: scroll;
+}
+
+table[class*="ltx_eqn_table"] td  {
+    padding-bottom: 12px;
+}
