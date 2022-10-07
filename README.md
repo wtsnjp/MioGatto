@@ -121,10 +121,10 @@ npm run build
 
 ## Publications
 
-* Takuto Asakura, Yusuke Miyao, Akiko Aizawa. **Building Dataset for Grounding of Formulae — Annotating Coreference Relations Among Math Identifiers**. In [13th Conference on Language Resources and Evaluation (LREC 2022)](https://lrec2022.lrec-conf.org).  
-  [paper] [[slides](https://speakerdeck.com/wtsnjp/lrec2022)] [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
-* Takuto Asakura, Yusuke Miyao, Akiko Aizawa, Michael Kohlhase. **MioGatto: A Math Identifier-oriented Grounding Annotation Tool**. In 13th MathUI Workshop at 14th Conference on Intelligent Computer Mathematics (MathUI 2021).  
-  [[preprint](https://easychair.org/publications/preprint/FSSk)] [paper] [[slides](https://speakerdeck.com/wtsnjp/mathui2021)]
+* Takuto Asakura, Yusuke Miyao, Akiko Aizawa. **Building Dataset for Grounding of Formulae — Annotating Coreference Relations Among Math Identifiers**. In Proceedings of [13th Conference on Language Resources and Evaluation (LREC 2022)](https://lrec2022.lrec-conf.org). pp. 4851―4858, 2022.  
+  [[paper](https://aclanthology.org/2022.lrec-1.519/)] [[bib](http://www.lrec-conf.org/proceedings/lrec2022/bib/2022.lrec-1.519.bib)] [[slides](https://speakerdeck.com/wtsnjp/lrec2022)] [[video](http://www.lrec-conf.org/proceedings/lrec2022/media/sessions/935.mp4)] [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
+* Takuto Asakura, Yusuke Miyao, Akiko Aizawa, Michael Kohlhase. **MioGatto: A Math Identifier-oriented Grounding Annotation Tool**. In [13th MathUI Workshop at 14th Conference on Intelligent Computer Mathematics (MathUI 2021)](https://cicm-conference.org/2021/cicm.php?event=MathUI).  
+  [[preprint](https://easychair.org/publications/preprint/FSSk)] [[paper](https://kwarc.info/teaching/CICM21WS/mathui5.pdf)] [[slides](https://speakerdeck.com/wtsnjp/mathui2021)] [[code](https://github.com/wtsnjp/MioGatto)]
 * Takuto Asakura, André Greiner-Petter, Akiko Aizawa, Yusuke Miyao. **Towards Grounding of Formulae**. In Proceedings of [First Workshop on Scholarly Document Processing (SDP 2020)](https://ornlcda.github.io/SDProc/). pp. 138―147, 2020.  
 	[[paper](https://www.aclweb.org/anthology/2020.sdp-1.16/)] [[bib](https://www.aclweb.org/anthology/2020.sdp-1.16.bib)] [[poster](https://wtsnjp.com/posters/sdp2020-asakura-poster.pdf)]  [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
 * Takuto Asakura, André Greiner-Petter, Akiko Aizawa, Yusuke Miyao. **Dataset Creation for Grounding of Formulae**. In [SCIDOCA 2020](http://research.nii.ac.jp/SCIDOCA2020/).  
