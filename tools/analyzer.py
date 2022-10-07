@@ -138,7 +138,9 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
     candidates = [0] * nof_items[0]
     occurences = []
     for mi_id, anno in mi_anno.occr.items():
-        mi = mi_info[mi_id]
+        mi = mi_info.get(mi_id, None)
+        if mi is None:
+            continue
         idf_hex, idf_var = mi['idf_hex'], mi['idf_var']
 
         nof_sog += len(anno.get('sog', []))
