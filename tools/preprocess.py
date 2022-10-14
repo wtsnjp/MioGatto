@@ -153,7 +153,7 @@ def preprocess_html(tree, paper_id, embed_floats):
         embed_word_span_tags(e, parent_id)
 
     # paragraphs in inline blocks
-    for e in root.xpath('//span[contains(@class,"ltx_inline-block")]/span[contains(@class, "ltx_p")]'):
+    for e in root.xpath('//span[contains(@class,"ltx_inline-block")]//span[contains(@class, "ltx_p")]'):
         parent_id = e.attrib['id']
         embed_word_span_tags(e, parent_id)
 
