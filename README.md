@@ -130,6 +130,10 @@ npm run build
 * Takuto Asakura, André Greiner-Petter, Akiko Aizawa, Yusuke Miyao. **Dataset Creation for Grounding of Formulae**. In [SCIDOCA 2020](http://research.nii.ac.jp/SCIDOCA2020/).  
 	[[slides](https://speakerdeck.com/wtsnjp/scidoca2020)] [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
 
+## Acknowledgements
+
+This project has been supported by JST, ACT-X Grant Number JPMJAX2002, Japan.
+
 ## License
 
 Copyright 2021 Takuto ASAKURA ([wtsnjp](https://wtsnjp.com))
