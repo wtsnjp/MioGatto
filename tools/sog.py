@@ -106,6 +106,7 @@ def main():
     print('Mean: {:.1f}'.format(np.mean(nof_sogs)))
     print('Variance: {:.1f}'.format(np.var(nof_sogs)))
     print('Standard deviation: {:.1f}'.format(np.std(nof_sogs)))
+    print('#zeros: {}'.format(nof_sogs.count(0)))
     print()
 
     if not args['--show-sog']:
