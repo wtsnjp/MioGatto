@@ -5,11 +5,12 @@ def get_mi2idf(tree):
     mi2idf = dict()
 
     # dirty settings
-    ellipsises = [
+    non_identifiers = [
         'e280a6',  # HORIZONTAL ELLIPSIS (…)
         'e28baf',  # MIDLINE HORIZONTAL ELLIPSIS (⋯)
         'e28bae',  # VERTICAL ELLIPSIS (⋮)
         'e28bb1',  # DOWN RIGHT DIAGONAL ELLIPSIS (⋱)
+        'e296a1',  # QED BOX (□)
     ]
 
     # loop mi in the tree
@@ -23,8 +24,8 @@ def get_mi2idf(tree):
         # get idf hex
         idf_hex = e.text.encode().hex()
 
-        # None if ellipsises
-        if idf_hex in ellipsises:
+        # None if non-identifiers 
+        if idf_hex in non_identifiers:
             mi2idf[mi_id] = None
             continue
 
