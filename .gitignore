@@ -101,6 +101,7 @@ static/img
 sources
 
 # local stuff
+local/
 .local.vimrc
 static/img/
 results/
