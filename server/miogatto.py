@@ -34,18 +34,18 @@ def make_concept(res) -> Optional[MathConcept]:
         flash('Description must be filled.')
         return None
 
-    # get args_type
-    args_type = []
+    # get affixes
+    affixes = []
     for i in range(10):
-        t_i = res.get('args_type{}'.format(i))
+        t_i = res.get('affixes{}'.format(i))
         if t_i != '':
-            args_type.append(t_i)
+            affixes.append(t_i)
 
-    return MathConcept(description, arity, args_type)
+    return MathConcept(description, arity, affixes)
 
 
-def args_type_pulldowns():
-    select_tag = '''<li><select name="args_type{}">
+def affixes_pulldowns():
+    select_tag = '''<li><select name="affixes{}">
 <option value="">-----</option>
 <option value="subscript">Subscript</option>
 <option value="superscript">Superscript</option>
@@ -128,8 +128,8 @@ def preprocess_mcdict(concepts):
                 process_desc(c.description),
                 'arity':
                 c.arity,
-                'args_type':
-                c.args_type
+                'affixes':
+                c.affixes
             } for c in cls]
 
     return mcdict
@@ -187,7 +187,7 @@ class MioGattoServer:
                                annotator=self.mi_anno.annotator,
                                p_concept=p_concept,
                                nof_sog=nof_sog,
-                               args_type=Markup(args_type_pulldowns()),
+                               affixes=Markup(affixes_pulldowns()),
                                main_content=Markup(main_content))
 
     def assign_concept(self):

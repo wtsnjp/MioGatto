@@ -12,7 +12,7 @@ interface Identifier {
 }
 
 interface Concept {
-  args_type: string[];
+  affixes: string[];
   arity: number;
   description: string;
   color?: string;
@@ -331,8 +331,8 @@ $(function() {
       let concept = get_concept(idf);
       if(concept != undefined) {
         let args_info = 'NONE';
-        if(concept.args_type.length > 0) {
-          args_info = concept.args_type.join(', ');
+        if(concept.affixes.length > 0) {
+          args_info = concept.affixes.join(', ');
         }
         return `${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>`;
       } else {
@@ -365,8 +365,8 @@ $(function() {
       let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" ${check} />`;
 
       let args_info = 'NONE';
-      if(concept.args_type.length > 0) {
-        args_info = concept.args_type.join(', ');
+      if(concept.affixes.length > 0) {
+        args_info = concept.affixes.join(', ');
       }
 
       let item = `${input}<span class="keep"><label for="c${concept_id}">
@@ -500,8 +500,8 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     let concept = mcdict[idf.hex][idf.var][concept_id];
     form.find('textarea').text(concept.description);
     form.find('input[name="arity"]').attr('value', concept.arity);
-    concept.args_type.forEach(function(value, idx) {
-      form.find(`select[name="args_type${idx}"]`).find(
+    concept.affixes.forEach(function(value, idx) {
+      form.find(`select[name="affixes${idx}"]`).find(
         `option[value="${value}"]`).prop('selected', true);
     })
 
