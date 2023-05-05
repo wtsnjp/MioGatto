@@ -14,9 +14,29 @@
 
 <main class="main">
 <!-- hidden by default -->
-<div class="select-menu">
-<input class="sog-add" type="submit" value="Add source">
+<div class="sog-menu">
+<div class="sog-menu-wrap">
+
+<div class="sog-mod-menu">
+<div class="sog-menu-wrap">
+<div class="sog-mod-menu-info"></div>
+<div>
+<input class="sog-type" type="submit" value="Change type">
 <input class="sog-del" type="submit" value="Delete source">
+</div>
+</div>
+</div>
+
+<div class="sog-add-menu">
+<div class="sog-menu-wrap">
+<div class="sog-add-menu-info"></div>
+<div>
+<input class="sog-add" type="submit" value="Add source">
+</div>
+</div>
+</div>
+
+</div>
 </div>
 
 <div id="concept-dialog-template" class="concept-dialog">
@@ -27,6 +47,14 @@
 <p>Affixes:<br/>
 {{ affixes }}
 </p>
+</form>
+</div>
+
+<div id="sog-type-dialog-template" class="sog-type-dialog">
+<form id="sog-type-form" method="POST">
+<label><input type="radio" name="sog_type" value="0" /> Declaration</label><br/>
+<label><input type="radio" name="sog_type" value="1" /> Definition</label><br/>
+<label><input type="radio" name="sog_type" value="2" /> Others</label>
 </form>
 </div>
 
@@ -46,10 +74,10 @@
 <input class="tab-title" id="tab_miogatto" type="checkbox" name="tabs">
 <label class="tab-title" for="tab_miogatto">MioGatto v{{ version }}</label>
 <div class="tab-content">
-  <p>Revision: <span style="font-family: monospace;">{{ git_revision }}</span></p>
-  <p>Paper ID: <span style="font-family: monospace;">{{ paper_id }}</span></p>
-  <p>Annotator: {{ annotator }}</p>
-  <p>Links: <a href="https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide" target="_blank">help</a>, <a href="https://github.com/wtsnjp/MioGatto/issues" target="_blank">bug reports</a></p>
+  <p>Revision: <span style="font-family: monospace;">{{ git_revision }}</span><br/>
+  Paper ID: <span style="font-family: monospace;">{{ paper_id }}</span><br/>
+  Annotator: {{ annotator }}<br/>
+  Links: <a href="https://github.com/wtsnjp/MioGatto/wiki/Annotator's-Guide" target="_blank">help</a>, <a href="https://github.com/wtsnjp/MioGatto/issues" target="_blank">bug reports</a></p>
 </div>
 </div>
 
@@ -61,6 +89,10 @@
     <label for="option-limited-highlight">
       <input type="checkbox" id="option-limited-highlight">
       Highlight only relevant SoGs
+    </label><br/>
+    <label for="option-show-definition">
+      <input type="checkbox" id="option-show-definition">
+      Underline definitions
     </label>
   </p>
 </div>
@@ -70,8 +102,8 @@
 <input class="tab-title" id="tab_progress" type="checkbox" name="tabs">
 <label class="tab-title" for="tab_progress">Progress</label>
 <div class="tab-content">
-  <p>Concepts: {{ p_concept }}</p>
-  <p>Sources: {{ nof_sog }}</p>
+  <p>Concepts: {{ p_concept }}<br/>
+  Sources: {{ nof_sog }}</p>
 </div>
 </div>
 

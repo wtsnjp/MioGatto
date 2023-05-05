@@ -64,6 +64,10 @@ def routing_functions(server):
     def action_delete_sog():
         return server.delete_sog()
 
+    @app.route('/_change_sog_type', methods=['POST'])
+    def action_change_sog_type():
+        return server.change_sog_type()
+
     @app.route('/mcdict.json', methods=['GET'])
     def mcdict_json():
         return server.gen_mcdict_json()
