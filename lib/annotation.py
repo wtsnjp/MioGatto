@@ -24,20 +24,20 @@ class MiAnno:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
-        if data.get('anno_version', '') != '0.2':
+        if data.get('_anno_version', '') != '1.0':
             logger.warning('%s: Annotation data version is incompatible', file)
 
         self.file = file
-        self.anno_version: str = data.get('anno_version', 'unknown')
-        self.annotator: str = data.get('annotator', 'unknown')
+        self.anno_version: str = data.get('_anno_version', 'unknown')
+        self.annotator: str = data.get('_annotator', 'unknown')
         self.occr: dict = data['mi_anno']
 
     def dump(self) -> None:
         with open(self.file, 'w') as f:
             dump_json(
                 {
-                    'anno_version': self.anno_version,
-                    'annotator': self.annotator,
+                    '_anno_version': self.anno_version,
+                    '_annotator': self.annotator,
                     'mi_anno': self.occr,
                 }, f)
 
@@ -49,18 +49,18 @@ class McDict:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
-        if data.get('mcdict_version', '') != '0.2':
+        if data.get('_mcdict_version', '') != '1.0':
             logger.warning('%s: Math concept dict version is incompatible',
                            file)
 
         self.file = file
-        self.mcdict_version: str = data.get('mcdict_version', 'unknown')
-        self.author: str = data.get('annotator', 'unknown')
+        self.author: str = data.get('_author', 'unknown')
+        self.mcdict_version: str = data.get('_mcdict_version', 'unknown')
 
         concepts, surfaces = dict(), dict()
         for idf_hex, obj in data['concepts'].items():
             concepts[idf_hex] = dict()
-            surfaces[idf_hex] = obj['surface']
+            surfaces[idf_hex] = obj['_surface']
 
             for idf_var, cls in obj['identifiers'].items():
                 concepts[idf_hex][idf_var] = [MathConcept(**c) for c in cls]
@@ -72,7 +72,7 @@ class McDict:
         concepts = dict()
         for idf_hex, s in self.surfaces.items():
             concepts[idf_hex] = {
-                'surface': s,
+                '_surface': s,
                 'identifiers': dict(),
             }
 
@@ -83,7 +83,7 @@ class McDict:
 
         with open(self.file, 'w') as f:
             dump_json({
-                'annotator': self.author,
-                'mcdict_version': self.mcdict_version,
+                '_author': self.author,
+                '_mcdict_version': self.mcdict_version,
                 'concepts': concepts,
             }, f)

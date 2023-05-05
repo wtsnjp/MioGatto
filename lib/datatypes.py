@@ -14,4 +14,4 @@ class MathConcept:
     """A single Math Concept"""
     description: str
     arity: int
-    args_type: list[str]
+    affixes: list[str]
