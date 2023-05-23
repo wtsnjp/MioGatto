@@ -209,7 +209,7 @@ def idf2mc(idf_set):
     # construct a list of grounding functions
     return {
         idf[0]: {
-            'surface': hex2surface(idf[0]),
+            '_surface': hex2surface(idf[0]),
             'identifiers': {v: []
                             for v in idf[1]}
         }
@@ -278,8 +278,8 @@ def main():
     with open(anno_json, 'w') as f:
         dump_json(
             {
-                'anno_version': '0.2',
-                'annotator': 'YOUR NAME',
+                '_anno_version': '1.0',
+                '_annotator': 'YOUR NAME',
                 'mi_anno': mi_anno,
             }, f)
 
@@ -287,8 +287,8 @@ def main():
     with open(mcdict_json, 'w') as f:
         dump_json(
             {
-                'mcdict_version': '0.2',
-                'annotator': 'YOUR NAME',
+                '_author': 'YOUR NAME',
+                '_mcdict_version': '1.0',
                 'concepts': idf2mc(identifiers),
             }, f)
 

@@ -104,7 +104,7 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info,
             concept_gold = concept_list[concept_id_gold]
             concept_target = concept_list[concept_id_target]
 
-            if concept_gold.args_type == concept_target.args_type:
+            if concept_gold.affixes == concept_target.affixes:
                 pattern_agreed = True
             else:
                 pt_miss += 1

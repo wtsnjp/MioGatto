@@ -34,18 +34,18 @@ def make_concept(res) -> Optional[MathConcept]:
         flash('Description must be filled.')
         return None
 
-    # get args_type
-    args_type = []
+    # get affixes
+    affixes = []
     for i in range(10):
-        t_i = res.get('args_type{}'.format(i))
+        t_i = res.get('affixes{}'.format(i))
         if t_i != '':
-            args_type.append(t_i)
+            affixes.append(t_i)
 
-    return MathConcept(description, arity, args_type)
+    return MathConcept(description, arity, affixes)
 
 
-def args_type_pulldowns():
-    select_tag = '''<li><select name="args_type{}">
+def affixes_pulldowns():
+    select_tag = '''<li><select name="affixes{}">
 <option value="">-----</option>
 <option value="subscript">Subscript</option>
 <option value="superscript">Superscript</option>
@@ -131,8 +131,8 @@ def preprocess_mcdict(concepts):
                 process_desc(c.description),
                 'arity':
                 c.arity,
-                'args_type':
-                c.args_type
+                'affixes':
+                c.affixes
             } for c in cls]
 
     return mcdict
@@ -190,7 +190,7 @@ class MioGattoServer:
                                annotator=self.mi_anno.annotator,
                                p_concept=p_concept,
                                nof_sog=nof_sog,
-                               args_type=Markup(args_type_pulldowns()),
+                               affixes=Markup(affixes_pulldowns()),
                                main_content=Markup(main_content))
 
     def assign_concept(self):
@@ -257,8 +257,14 @@ class MioGattoServer:
         start_id, stop_id = res['start_id'], res['stop_id']
 
         # TODO: validate the span range
-        if [start_id, stop_id] not in self.mi_anno.occr[mi_id]['sog']:
-            self.mi_anno.occr[mi_id]['sog'].append([start_id, stop_id])
+        existing_sog_pos = [(s['start'], s['stop'])
+                            for s in self.mi_anno.occr[mi_id]['sog']]
+        if (start_id, stop_id) not in existing_sog_pos:
+            self.mi_anno.occr[mi_id]['sog'].append({
+                'start': start_id,
+                'stop': stop_id,
+                'type': 0
+            })
             self.mi_anno.dump()
 
         return redirect('/')
@@ -269,8 +275,14 @@ class MioGattoServer:
         mi_id = res['mi_id']
         start_id, stop_id = res['start_id'], res['stop_id']
 
-        if [start_id, stop_id] in self.mi_anno.occr[mi_id]['sog']:
-            self.mi_anno.occr[mi_id]['sog'].remove([start_id, stop_id])
+        delete_idx = None
+        for idx, sog in enumerate(self.mi_anno.occr[mi_id]['sog']):
+            if sog['start'] == start_id and sog['stop'] == stop_id:
+                delete_idx = idx
+                break
+
+        if delete_idx is not None:
+            del self.mi_anno.occr[mi_id]['sog'][delete_idx]
             self.mi_anno.dump()
 
         return redirect('/')
@@ -291,8 +303,9 @@ class MioGattoServer:
             for sog in anno['sog']:
                 data['sog'].append({
                     'mi_id': mi_id,
-                    'start_id': sog[0],
-                    'stop_id': sog[1]
+                    'start_id': sog['start'],
+                    'stop_id': sog['stop'],
+                    'type': sog['type']
                 })
 
         return json.dumps(data,

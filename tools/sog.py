@@ -56,7 +56,7 @@ def analyze_sog(tree, mi_anno: MiAnno, mcdict: McDict) -> dict:
     # get actual text
     for mi_id, anno in mi_anno.occr.items():
         for sog in anno['sog']:
-            w_ids = wl[wl.index(sog[0]):wl.index(sog[1]) + 1]
+            w_ids = wl[wl.index(sog['start']):wl.index(sog['stop']) + 1]
             idf, c_id = mi2idf[mi_id], anno['concept_id']
             idf_hex, idf_var = idf['idf_hex'], idf['idf_var']
             sog_by_concept[idf_hex][idf_var][c_id].append(' '.join([
