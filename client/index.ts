@@ -81,25 +81,53 @@ function hex2rgb(hex: string) {
 // Options
 // --------------------------
 
+let miogatto_options: { [name: string]: boolean } = {
+  limited_highlight: false,
+  show_definition: false,
+}
+
 $(function() {
   let input_opt_hl = $('#option-limited-highlight');
+  let input_opt_def = $('#option-show-definition');
 
   // first time check
   if(localStorage['option-limited-highlight'] == 'true') {
     input_opt_hl.prop('checked', true);
-    give_sog_highlight(true);
+    miogatto_options.limited_highlight = true
   } else {
-    give_sog_highlight(false);
+    miogatto_options.limited_highlight = false
   }
 
+  if(localStorage['option-show-definition'] == 'true') {
+    input_opt_def.prop('checked', true);
+    miogatto_options.show_definition = true
+  } else {
+    miogatto_options.show_definition = false
+  }
+
+  give_sog_highlight();
+
+  // toggle
   input_opt_hl.on('click', function() {
     if($(this).prop('checked')) {
       localStorage['option-limited-highlight'] = 'true';
-      give_sog_highlight(true);
+      miogatto_options.limited_highlight = true
     } else {
       localStorage['option-limited-highlight'] = 'false';
-      give_sog_highlight(false);
+      miogatto_options.limited_highlight = false
     }
+    give_sog_highlight();
+  });
+
+  input_opt_def.on('click', function() {
+    if($(this).prop('checked')) {
+      localStorage['option-show-definition'] = 'true';
+      miogatto_options.show_definition = true
+    } else {
+      localStorage['option-show-definition'] = 'false';
+      miogatto_options.show_definition = false
+    }
+    give_sog_highlight();
   });
 });
 
@@ -207,33 +235,35 @@ $.ajax({
 });
 
 function apply_highlight(sog_nodes: JQuery, idf: Identifier, sog: Source) {
+  remove_highlight(sog_nodes);
+
   let concept = get_concept(idf);
   if (concept == undefined || concept.color == undefined) {
     // red underline if concept is unassigned
-    sog_nodes.css('text-decoration', 'underline');
-    sog_nodes.css('text-decoration-color', '#FF0000');
-    sog_nodes.css('text-decoration-thickness', '2px');
+    sog_nodes.css('border-bottom', 'solid 2px #FF0000');
   } else {
     // highlight it!
     sog_nodes.css('background-color', `rgba(${hex2rgb(concept.color).join()},0.3)`);
+    if(miogatto_options.show_definition && sog.type == 1) {
+      sog_nodes.css('border-bottom', 'solid 3px');
+    }
   }
 
   // embed SoG information for removing
   sog_nodes.attr({
     'data-sog-mi': sog.mi_id,
+    'data-sog-type': sog.type,
     'data-sog-start': sog.start_id,
     'data-sog-stop': sog.stop_id,
   });
 }
 
 function remove_highlight(sog_nodes: JQuery) {
-  sog_nodes.css('text-decoration', '');
-  sog_nodes.css('text-decoration-color', '');
-  sog_nodes.css('text-decoration-thickness', '');
+  sog_nodes.css('border-bottom', '');
   sog_nodes.css('background-color', '');
 }
 
-function give_sog_highlight(option_hl: boolean) {
+function give_sog_highlight() {
   // remove highlight
   for(let s of sog.sog) {
     // get SoG nodes
@@ -250,7 +280,7 @@ function give_sog_highlight(option_hl: boolean) {
 
     let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
 
-    if(option_hl && sessionStorage['mi_id'] != undefined) {
+    if(miogatto_options.limited_highlight && sessionStorage['mi_id'] != undefined) {
       let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
       let cur_idf = get_idf(cur_mi);
       if(!(cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var)) {
@@ -274,7 +304,7 @@ function give_sog_highlight(option_hl: boolean) {
 
     let sog_idf = get_idf($('#' + escape_selector(s.mi_id)));
 
-    if(option_hl && sessionStorage['mi_id'] != undefined) {
+    if(miogatto_options.limited_highlight && sessionStorage['mi_id'] != undefined) {
       let cur_mi = $('#' + escape_selector(sessionStorage['mi_id']));
       let cur_idf = get_idf(cur_mi);
       if(cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var) {
@@ -508,7 +538,10 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     show_anno_box($(this));
 
     // also update SoG highlight
-    give_sog_highlight(localStorage['option-limited-highlight'] == 'true');
+    if(localStorage['option-limited-highlight'] == 'true') {
+      miogatto_options.limited_highlight = true;
+    }
+    give_sog_highlight();
   });
 
   // keep position and sidebar content after submiting the form
@@ -589,11 +622,14 @@ $(function() {
     page_x = e.pageX;
     page_y = e.pageY;
   
-    $('.select-menu').css('display', 'none');
+    $('.sog-menu').css('display', 'none');
     let [start_id, stop_id, parent] = get_selection();
 
     if(parent == undefined)
       return;
+
+    // use jquery-ui
+    $('.sog-menu input[type=submit]').button();
 
     // ----- Action SoG add -----
     let mi_id = sessionStorage['mi_id'];
@@ -603,21 +639,23 @@ $(function() {
       let idf = get_idf($('#' + escape_selector(mi_id)));
       let concept = get_concept(idf);
       if(concept != undefined) {
-        $('.select-menu').css({
-          'left': page_x - 60,
-          'top' : page_y - 50
+        $('.sog-menu').css({
+          'left': page_x,
+          'top' : page_y - 20
         }).fadeIn(200).css('display', 'flex');
       }
     }
 
-    // use jquery-ui
-    $('.select-menu input[type=submit]').button();
+    // show the current target
+    let id_span = `<span style="font-family: monospace;">${mi_id}</span>`;
+    let add_menu_info = `<p>Selected mi: ${id_span}</p>`;
+    $('.sog-add-menu-info').html(add_menu_info);
 
     // the add function
-    $('.select-menu .sog-add').off('click');
-    $('.select-menu .sog-add').on('click',
+    $('.sog-menu .sog-add').off('click');
+    $('.sog-menu .sog-add').on('click',
     function() {
-      $('.select-menu').css('display', 'none');
+      $('.sog-menu').css('display', 'none');
 
       // post the data
       let post_data = {
@@ -637,18 +675,78 @@ $(function() {
       });
     });
 
-    // ----- Action SoG delete -----
+    // ----- SoG menu -----
     // show it only if SoG is selected
     if(parent?.getAttribute('data-sog-mi') != undefined) {
-      $('.select-menu .sog-del').css('display', 'inherit');
+      $('.sog-mod-menu').css('display', 'inherit');
     } else {
-      $('.select-menu .sog-del').css('display', 'none');
+      $('.sog-mod-menu').css('display', 'none');
     }
 
-    $('.select-menu .sog-del').off('click');
-    $('.select-menu .sog-del').on('click',
+    let sog_mi_id = parent.getAttribute('data-sog-mi');
+    let sog_type_int = Number(parent.getAttribute('data-sog-type'));
+    let sog_start_id = parent.getAttribute('data-sog-start');
+    let sog_stop_id = parent.getAttribute('data-sog-stop');
+
+    let sog_type = 'unknown';
+    if(sog_type_int == 0) {
+      sog_type = 'declaration';
+    } else if(sog_type_int == 1) {
+      sog_type = 'definition';
+    } else if(sog_type_int == 2) {
+      sog_type = 'others';
+    }
+    let id_span_for_sog = `<span style="font-family: monospace;">${sog_mi_id}</span>`;
+    let mod_menu_info = `<p>SoG for ${id_span_for_sog}<br/>Type: ${sog_type}</p>`;
+    $('.sog-mod-menu-info').html(mod_menu_info);
+
+    // ----- Action SoG change type -----
+    $('.sog-menu .sog-type').off('click');
+    $('.sog-menu .sog-type').on('click',
     function() {
-      $('.select-menu').css('display', 'none');
+      $('.sog-menu').css('display', 'none');
+
+      // make sure parent exists
+      // Note: the button is shown only if it exists
+      if(parent == undefined)
+        return;
+
+      let sog_type_dialog = $('#sog-type-dialog-template').clone();
+      sog_type_dialog.attr('id', 'sog-type-dialog');
+      sog_type_dialog.removeClass('sog-type-dialog');
+
+      let form = sog_type_dialog.find('#sog-type-form');
+      form.attr('action', '/_change_sog_type');
+
+      sog_type_dialog.find(`input[value="${sog_type_int}"]`).prop('checked', true);
+
+      sog_type_dialog.dialog({
+        modal: true,
+        title: 'Change SoG Type',
+        width: 200,
+        buttons: {
+          'OK': function() {
+            localStorage['scroll_top'] = $(window).scrollTop();
+            form.append(`<input type="hidden" name="mi_id" value="${sog_mi_id}" />`);
+            form.append(`<input type="hidden" name="start_id" value="${sog_start_id}" />`);
+            form.append(`<input type="hidden" name="stop_id" value="${sog_stop_id}" />`);
+            form.trigger("submit");
+          },
+          'Cancel': function() {
+            $(this).dialog('close');
+          }
+        },
+        close: function() {
+          $(this).remove();
+        }
+      });
+    });
+
+    // ----- Action SoG delete -----
+    $('.sog-menu .sog-del').off('click');
+    $('.sog-menu .sog-del').on('click',
+    function() {
+      $('.sog-menu').css('display', 'none');
 
       // make sure parent exists
       // Note: the button is shown only if it exists

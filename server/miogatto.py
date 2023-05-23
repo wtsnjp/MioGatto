@@ -287,6 +287,21 @@ class MioGattoServer:
 
         return redirect('/')
 
+    def change_sog_type(self):
+        res = request.form
+
+        mi_id = res['mi_id']
+        start_id, stop_id = res['start_id'], res['stop_id']
+        sog_type = res['sog_type']
+
+        for sog in self.mi_anno.occr[mi_id]['sog']:
+            if sog['start'] == start_id and sog['stop'] == stop_id:
+                sog['type'] = sog_type
+                self.mi_anno.dump()
+                break
+
+        return redirect('/')
+
     def gen_mcdict_json(self):
         data = preprocess_mcdict(self.mcdict.concepts)
 
