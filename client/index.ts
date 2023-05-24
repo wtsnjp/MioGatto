@@ -840,6 +840,135 @@ $(function() {
   }
 });
 
+// --------------------------
+// Utilities 
+// --------------------------
+
+// get next/previous mi by depth-first search
+function get_next_unannotated_mi_node(cur_node: JQuery<any>): JQuery {
+  // The current node may be an mi.
+  // So, first check if a child is an mi.
+
+  console.log("cur_node: ", cur_node);
+
+  if(cur_node.children().length > 0) {
+    let next_child = cur_node.children(":first-child");
+
+    // Check if next_child is an unannotated mi.
+    if(next_child.is('mi') && (get_concept(get_idf(next_child)) == undefined)){
+      // Found the next mi!!
+      return next_child;
+    } else {
+      // If the next child is not an mi, just proceed searching.
+      return get_next_unannotated_mi_node(next_child);
+    }
+
+  } else {
+    // If the current node has no child, move to the next unexplored sibling of current node/parent/grand parent...
+    while(cur_node.next().length == 0){
+      if(cur_node.parent().length != 0){
+        // Move back to the parent.
+        cur_node = cur_node.parent();
+      } else {
+        // Stop searching and return empty JQuery object.
+        return $();
+      }
+    }
+    // Found the next node to explorer.
+    let to_explorer_next = cur_node.next()
+
+    // Check if to_explorer_next is an unannotated mi.
+    if(to_explorer_next.is("mi") && get_concept(get_idf(to_explorer_next)) == undefined){
+      // Found the next mi!!
+      return to_explorer_next;
+    } else {
+      // If the to_explorer_next is not an mi, just proceed searching.
+      return get_next_unannotated_mi_node(to_explorer_next);
+    }
+
+  }
+}
+
+function get_prev_unannotated_mi_node(cur_node: JQuery<any>): JQuery {
+  // The current node may be an mi.
+  // So, first check if a child is an mi.
+
+  if(cur_node.children().length > 0) {
+    let prev_child = cur_node.children(":last-child");
+
+    // Check if prev_child is an unannotated mi.
+    if(prev_child.is('mi') && get_concept(get_idf(prev_child)) == undefined){
+      // Found the prev mi!!
+      return prev_child;
+    } else {
+      // If the prev child is not an mi, just proceed searching.
+      return get_prev_unannotated_mi_node(prev_child);
+    }
+
+  } else {
+    // If the current node has no child, move to the prev unexplored sibling of current node/parent/grand parent...
+    while(cur_node.prev().length == 0){
+      if(cur_node.parent().length != 0){
+        // Move back to the parent.
+        cur_node = cur_node.parent();
+      } else {
+        // Stop searching and return empty JQuery object.
+        return $();
+      }
+    }
+    // Found the prev node to explorer.
+    let to_explorer_prev = cur_node.prev()
+
+    // Check if to_explorer_prev is an unannotated mi.
+    if(to_explorer_prev.is("mi") && get_concept(get_idf(to_explorer_prev)) == undefined){
+      // Found the prev mi!!
+      return to_explorer_prev;
+    } else {
+      // If the to_explorer_prev is not an mi, just proceed searching.
+      return get_prev_unannotated_mi_node(to_explorer_prev);
+    }
+
+  }
+}
+
+$(function() {
+  $('button#jump-to-next-unannotated-mi').on('click', function() {
+    let cur_mi_node = $('#' + escape_selector(sessionStorage['mi_id']));
+    // sessionStorage maybe empty. 
+    if(cur_mi_node.length != 0){
+      let next_unannotated_mi = get_next_unannotated_mi_node(cur_mi_node);
+
+      let jump_dest = next_unannotated_mi?.offset()?.top;
+      let window_height = $(window).height();
+      if(jump_dest != undefined && window_height != undefined){
+        $(window).scrollTop(jump_dest - (window_height / 2));
+
+        // Click the next mi.
+        next_unannotated_mi.trigger('click');
+
+      }
+    }
+  });
+
+  $('button#jump-to-prev-unannotated-mi').on('click', function() {
+    let cur_mi_node = $('#' + escape_selector(sessionStorage['mi_id']));
+    // sessionStorage maybe empty. 
+    if(cur_mi_node.length != 0){
+      let prev_unannotated_mi = get_prev_unannotated_mi_node(cur_mi_node);
+
+      let jump_dest = prev_unannotated_mi?.offset()?.top;
+      let window_height = $(window).height();
+      if(jump_dest != undefined && window_height != undefined){
+        $(window).scrollTop(jump_dest - (window_height / 2));
+
+        // Click the prev mi.
+        prev_unannotated_mi.trigger('click');
+
+      }
+    }
+  });
+});
+
 // Set page position at the last
 $(function() {
   $(window).scrollTop(localStorage['scroll_top']);
