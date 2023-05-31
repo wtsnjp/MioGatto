@@ -1,22 +1,22 @@
 {
   "name": "MioGatto-client",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
   },
   "keywords": [],
-  "author": "Takuto ASAKURA",
+  "author": "Takuto Asakura",
   "license": "MIT",
   "description": "",
   "devDependencies": {
-    "@types/jquery": "^3.5.5",
-    "@types/jqueryui": "^1.12.15",
-    "jquery-ui": "^1.12.1",
-    "ts-loader": "^9.3.1",
-    "typescript": "^4.2.4",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^4.10.0"
+    "@types/jquery": "^3.5.16",
+    "@types/jqueryui": "^1.12.17",
+    "jquery-ui": "^1.13.2",
+    "ts-loader": "^9.4.3",
+    "typescript": "^5.0.4",
+    "webpack": "^5.84.1",
+    "webpack-cli": "^5.1.1"
   }
 }

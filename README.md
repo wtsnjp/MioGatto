@@ -136,7 +136,7 @@ This project has been supported by JST, ACT-X Grant Number JPMJAX2002, Japan.
 
 ## License
 
-Copyright 2021 Takuto ASAKURA ([wtsnjp](https://wtsnjp.com))
+Copyright 2021 Takuto Asakura ([wtsnjp](https://wtsnjp.com))
 
 This software is licensed under [the MIT license](./LICENSE).
 
@@ -147,4 +147,4 @@ This software is licensed under [the MIT license](./LICENSE).
 
 ---
 
-Takuto ASAKURA ([wtsnjp](https://wtsnjp.com))
+Takuto Asakura ([wtsnjp](https://wtsnjp.com))
