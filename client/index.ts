@@ -386,8 +386,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     let id_span = `ID: <span style="font-family: monospace;">${mi_id}</span>`
     let anno_box_content = `<p>${id_span}<hr color="#FFF">${form_str}</p>`
 
-    // for debug
-    //console.log(anno_box_content);
+    //console.debug(anno_box_content);
 
     // write the content
     let anno_box = $('#anno-box')
@@ -849,7 +848,7 @@ function get_next_unannotated_mi_node(cur_node: JQuery<any>): JQuery {
   // The current node may be an mi.
   // So, first check if a child is an mi.
 
-  console.log("cur_node: ", cur_node);
+  //console.debug("cur_node: ", cur_node);
 
   if(cur_node.children().length > 0) {
     let next_child = cur_node.children(":first-child");
