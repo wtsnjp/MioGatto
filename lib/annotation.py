@@ -8,12 +8,7 @@ from lib.datatypes import MathConcept
 
 
 def dump_json(data, fp):
-    json.dump(data,
-              fp,
-              ensure_ascii=False,
-              indent=4,
-              sort_keys=True,
-              separators=(',', ': '))
+    json.dump(data, fp, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
     fp.write('\n')
 
 
@@ -39,7 +34,9 @@ class MiAnno:
                     '_anno_version': self.anno_version,
                     '_annotator': self.annotator,
                     'mi_anno': self.occr,
-                }, f)
+                },
+                f,
+            )
 
 
 class McDict:
@@ -50,8 +47,7 @@ class McDict:
             data = json.load(f)
 
         if data.get('_mcdict_version', '') != '1.0':
-            logger.warning('%s: Math concept dict version is incompatible',
-                           file)
+            logger.warning('%s: Math concept dict version is incompatible', file)
 
         self.file = file
         self.author: str = data.get('_author', 'unknown')
@@ -77,13 +73,14 @@ class McDict:
             }
 
             for idf_var, cls in self.concepts[idf_hex].items():
-                concepts[idf_hex]['identifiers'][idf_var] = [
-                    asdict(c) for c in cls
-                ]
+                concepts[idf_hex]['identifiers'][idf_var] = [asdict(c) for c in cls]
 
         with open(self.file, 'w') as f:
-            dump_json({
-                '_author': self.author,
-                '_mcdict_version': self.mcdict_version,
-                'concepts': concepts,
-            }, f)
+            dump_json(
+                {
+                    '_author': self.author,
+                    '_mcdict_version': self.mcdict_version,
+                    'concepts': concepts,
+                },
+                f,
+            )

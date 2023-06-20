@@ -6,12 +6,7 @@ from pathlib import Path
 
 def write_json(fp, content):
     with open(fp, mode='w') as f:
-        json.dump(content,
-                  f,
-                  ensure_ascii=False,
-                  indent=4,
-                  sort_keys=True,
-                  separators=(',', ': '))
+        json.dump(content, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
 
 def process_anno(original_file, new_data_dir):

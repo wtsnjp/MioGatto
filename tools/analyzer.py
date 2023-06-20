@@ -29,7 +29,9 @@ Options:
 
     -h, --help          Show this screen and exit
     -V, --version       Show version
-""".format(p=PROG_NAME)
+""".format(
+    p=PROG_NAME
+)
 
 logger = get_logger(PROG_NAME)
 
@@ -52,16 +54,14 @@ def extract_info(tree, mi2idf):
             continue
 
         # position info
-        pos = html_str.find(
-            lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
+        pos = html_str.find(lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
         mi_info[mi_id]['pos'] = pos
 
     # extract section info
     sec_info = dict()
     for e in root.xpath('//section'):
         sec_id = e.attrib.get('id')
-        pos = html_str.find(
-            lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
+        pos = html_str.find(lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
         sec_info[sec_id] = pos
 
     logger.debug('sec_info: %s', sec_info)
@@ -98,11 +98,15 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
     print()
 
     # analyse items
-    items = sorted([(mcdict.surfaces[idf_hex]['text'], idf_var, len(idf))
-                    for idf_hex, v in concepts.items()
-                    for idf_var, idf in v.items()],
-                   key=lambda x: x[2],
-                   reverse=True)
+    items = sorted(
+        [
+            (mcdict.surfaces[idf_hex]['text'], idf_var, len(idf))
+            for idf_hex, v in concepts.items()
+            for idf_var, idf in v.items()
+        ],
+        key=lambda x: x[2],
+        reverse=True,
+    )
     logger.debug('items: %s', items)
     nof_items = np.array([i[2] for i in items])
 
@@ -128,10 +132,7 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
         concept_dict[idf_hex] = dict()
         for idf_var, idf in v.items():
             concept_dict[idf_hex][idf_var] = [
-                {
-                    'sid': next(cnt_iter),  # unique ID
-                    'count': 0  # number of occurences
-                } for _ in idf
+                {'sid': next(cnt_iter), 'count': 0} for _ in idf  # unique ID  # number of occurences
             ]
 
     nof_annotated, total_nof_candidates, nof_sog = 0, 0, 0
@@ -160,10 +161,8 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
     print('* Annotation')
     nof_occurences = len(mi_anno.occr)
     progress_rate = nof_annotated / nof_occurences * 100
-    print('Progress rate: {:.2f}% ({}/{})'.format(progress_rate, nof_annotated,
-                                                  nof_occurences))
-    print('Average #candidates: {:.1f}'.format(total_nof_candidates /
-                                               nof_occurences))
+    print('Progress rate: {:.2f}% ({}/{})'.format(progress_rate, nof_annotated, nof_occurences))
+    print('Average #candidates: {:.1f}'.format(total_nof_candidates / nof_occurences))
     print('#SoG: {}'.format(nof_sog))
     print()
 
@@ -194,8 +193,7 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
             idf_hex, idf_var, cid = tp
             surface = mcdict.surfaces[idf_hex]['text']
             desc = concepts[idf_hex][idf_var][cid].description
-            logger.warning('    %s > %s > %d (%s)', surface, idf_var, cid,
-                           desc)
+            logger.warning('    %s > %s > %d (%s)', surface, idf_var, cid, desc)
 
     # output for debugging
     logger.debug('concept_dict: %s', concept_dict)
@@ -205,8 +203,7 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
     return items, concept_dict, occurences
 
 
-def export_graphs(paper_id, items, concept_dict, occurences, sec_info,
-                  out_dir):
+def export_graphs(paper_id, items, concept_dict, occurences, sec_info, out_dir):
     out_dir.mkdir(parents=True, exist_ok=True)
     tex_paper_id = paper_id.replace('.', '_')
 
@@ -232,8 +229,7 @@ def export_graphs(paper_id, items, concept_dict, occurences, sec_info,
             f.write('{}  {}\n'.format(p[0] + 0.5, p[1]))
 
     sections_tex = out_dir / '{}_sections.tex'.format(tex_paper_id)
-    s0 = r'\addplot [domain=-2:106, dashed] {{{}}} ' \
-         r'node [pos=0, left] {{\S{}}};'
+    s0 = r'\addplot [domain=-2:106, dashed] {{{}}} ' r'node [pos=0, left] {{\S{}}};'
     with open(sections_tex, 'w') as f:
         for sec, pos in sec_info.items():
             f.write(s0.format(pos, sec.replace('S', '')) + '\r')
@@ -282,14 +278,12 @@ def main():
     mi2idf = get_mi2idf(tree)
     mi_info, sec_info = extract_info(tree, mi2idf)
 
-    items, concept_dict, occurences = analyze_annotation(
-        paper_id, tree, mi_anno, mcdict, mi_info, mi2idf)
+    items, concept_dict, occurences = analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf)
 
     # supplementary graphs
     if args['--out'] is not None:
         out_dir = Path(args['--out'])
-        export_graphs(paper_id, items, concept_dict, occurences, sec_info,
-                      out_dir)
+        export_graphs(paper_id, items, concept_dict, occurences, sec_info, out_dir)
 
 
 if __name__ == '__main__':

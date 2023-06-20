@@ -27,7 +27,9 @@ Options:
 
     -h, --help          Show this screen and exit
     -V, --version       Show version
-""".format(p=PROG_NAME)
+""".format(
+    p=PROG_NAME
+)
 
 
 # the web app

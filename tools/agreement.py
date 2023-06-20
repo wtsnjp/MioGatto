@@ -29,7 +29,9 @@ Options:
 
     -h, --help      Show this screen and exit
     -V, --version   Show version
-""".format(p=PROG_NAME)
+""".format(
+    p=PROG_NAME
+)
 
 logger = get_logger(PROG_NAME)
 
@@ -56,8 +58,7 @@ def extract_info(tree):
             continue
 
         # position info
-        pos = html_str.find(
-            lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
+        pos = html_str.find(lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
         mi_info[mi_id]['pos'] = pos
 
     # make word list
@@ -66,8 +67,7 @@ def extract_info(tree):
     return mi_info, wl
 
 
-def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info,
-                    show_mismatch):
+def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info, show_mismatch):
     pos, neg, pt_miss, unannotated = 0, 0, 0, 0
     labels = dict()
 
@@ -111,10 +111,16 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info,
                 pattern_agreed = False
 
             if show_mismatch:
-                print('{}\t{} ({})\t{} ({})\t{}'.format(
-                    mi_id, concept_id_gold, concept_gold.description,
-                    concept_id_target, concept_target.description,
-                    pattern_agreed))
+                print(
+                    '{}\t{} ({})\t{} ({})\t{}'.format(
+                        mi_id,
+                        concept_id_gold,
+                        concept_gold.description,
+                        concept_id_target,
+                        concept_target.description,
+                        pattern_agreed,
+                    )
+                )
             neg += 1
 
     # warn if annotation is incompleted
@@ -125,13 +131,16 @@ def calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info,
 
 
 def sog_match(ref_mi_anno, target_mi_anno, word_list):
-    ref_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
-                 anno['concept_id']) for anno in ref_mi_anno.occr.values()
-                for sog in anno['sog']]
-    target_sogs = [((word_list.index(sog[0]), word_list.index(sog[1])),
-                    anno['concept_id'])
-                   for anno in target_mi_anno.occr.values()
-                   for sog in anno['sog']]
+    ref_sogs = [
+        ((word_list.index(sog[0]), word_list.index(sog[1])), anno['concept_id'])
+        for anno in ref_mi_anno.occr.values()
+        for sog in anno['sog']
+    ]
+    target_sogs = [
+        ((word_list.index(sog[0]), word_list.index(sog[1])), anno['concept_id'])
+        for anno in target_mi_anno.occr.values()
+        for sog in anno['sog']
+    ]
 
     pos_sog_match = 0
     neg_sog_match = 0
@@ -144,8 +153,7 @@ def sog_match(ref_mi_anno, target_mi_anno, word_list):
             target_s, target_e = target_sog_tp[0]
             target_concept = target_sog_tp[1]
 
-            if not (ref_e < target_s and ref_s < target_e) and not (
-                    ref_e > target_s and ref_s > target_e):
+            if not (ref_e < target_s and ref_s < target_e) and not (ref_e > target_s and ref_s > target_e):
                 if ref_concept == target_concept:
                     pos_sog_match += 1
                 else:
@@ -189,20 +197,17 @@ def main():
     tree = lxml.html.parse(str(source_html))
     mi_info, word_list = extract_info(tree)
 
-    pos, neg, pt_miss, labels = calc_agreements(ref_mi_anno, target_mi_anno,
-                                                ref_mcdict, mi_info,
-                                                show_mismatch)
+    pos, neg, pt_miss, labels = calc_agreements(ref_mi_anno, target_mi_anno, ref_mcdict, mi_info, show_mismatch)
 
-    nof_ref_sogs, nof_target_sogs, pos_sog_match, neg_sog_match = sog_match(
-        ref_mi_anno, target_mi_anno, word_list)
+    nof_ref_sogs, nof_target_sogs, pos_sog_match, neg_sog_match = sog_match(ref_mi_anno, target_mi_anno, word_list)
 
     # show results
     total = pos + neg
     print('* Summary')
-    print('Reference data: Annotation by {}, Math concept dict by {}'.format(
-        ref_mi_anno.annotator, ref_mcdict.author))
-    print('Target data: Annotation by {}, Math concept dict by {}'.format(
-        target_mi_anno.annotator, target_mcdict.author))
+    print('Reference data: Annotation by {}, Math concept dict by {}'.format(ref_mi_anno.annotator, ref_mcdict.author))
+    print(
+        'Target data: Annotation by {}, Math concept dict by {}'.format(target_mi_anno.annotator, target_mcdict.author)
+    )
     print('Agreement: {}/{} = {:.2f}%'.format(pos, total, pos / total * 100))
     if neg > 0:
         rate = pt_miss / neg * 100
@@ -225,11 +230,7 @@ def main():
     w_sum, w_cnt = 0, 0
     print('symbol\tvariation\tKappa\tcount')
     for res in sorted(kappas, key=lambda x: x[3], reverse=True):
-        print(bytes.fromhex(res[0]).decode(),
-              res[1],
-              '{:.3f}'.format(res[2]),
-              res[3],
-              sep='\t')
+        print(bytes.fromhex(res[0]).decode(), res[1], '{:.3f}'.format(res[2]), res[3], sep='\t')
         if not np.isnan(res[2]):
             w_cnt += res[3]
             w_sum += res[2] * res[3]

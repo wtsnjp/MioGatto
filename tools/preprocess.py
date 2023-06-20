@@ -28,7 +28,9 @@ Options:
 
     -h, --help          Show this screen and exit
     -V, --version       Show version
-""".format(p=PROG_NAME)
+""".format(
+    p=PROG_NAME
+)
 
 logger = get_logger(PROG_NAME)
 
@@ -74,10 +76,7 @@ def embed_word_span_tags(e, parent_id):
         texts.append(c.tail)
         c.tail = None
 
-    spans = [
-        split_words_into_span_tags(t, parent_id, i) if t else None
-        for i, t in enumerate(texts)
-    ]
+    spans = [split_words_into_span_tags(t, parent_id, i) if t else None for i, t in enumerate(texts)]
 
     for i in range(len(spans) - 1, -1, -1):
         if not spans[i] is None:
@@ -88,6 +87,7 @@ def embed_word_span_tags(e, parent_id):
 def remove_embed_floats(root, paper_id):
     # remove embed float
     from lxml.html.builder import IMG
+
     for e in root.xpath('//figure[@class="ltx_figure"]'):
         # remove embed figures
         for c in e:
@@ -97,8 +97,7 @@ def remove_embed_floats(root, paper_id):
         # add <img>
         if [c.tag for c in e] == ['figcaption']:
             img = IMG()
-            src = '/static/img/{}/{}.png'.format(
-                paper_id, e.attrib['id'].replace('.', '_'))
+            src = '/static/img/{}/{}.png'.format(paper_id, e.attrib['id'].replace('.', '_'))
             img.attrib['src'] = src
             img.attrib['alt'] = src
             e.insert(0, img)
@@ -111,8 +110,7 @@ def remove_embed_floats(root, paper_id):
 
         # add <img>
         img = IMG()
-        src = '/static/img/{}/{}.png'.format(paper_id,
-                                             e.attrib['id'].replace('.', '_'))
+        src = '/static/img/{}/{}.png'.format(paper_id, e.attrib['id'].replace('.', '_'))
         img.attrib['src'] = src
         img.attrib['alt'] = src
         e.insert(0, img)
@@ -212,14 +210,7 @@ def idf2mc(idf_set):
     idf_sorted = sorted(idf_dict.items(), key=lambda x: x[0])
 
     # construct a list of grounding functions
-    return {
-        idf[0]: {
-            '_surface': hex2surface(idf[0]),
-            'identifiers': {v: []
-                            for v in idf[1]}
-        }
-        for idf in idf_sorted
-    }
+    return {idf[0]: {'_surface': hex2surface(idf[0]), 'identifiers': {v: [] for v in idf[1]}} for idf in idf_sorted}
 
 
 def main():
@@ -247,13 +238,11 @@ def main():
     # prevent unintentional overwriting
     if args['--overwrite'] is not True:
         if html_out.exists():
-            logger.error('Source file %s exists. Use --overwrite to force',
-                         html_out)
+            logger.error('Source file %s exists. Use --overwrite to force', html_out)
             exit(1)
 
         if anno_json.exists() or mcdict_json.exists():
-            logger.error('Data files exist in %s. Use --overwrite to force',
-                         data_dir)
+            logger.error('Data files exist in %s. Use --overwrite to force', data_dir)
             exit(1)
 
     # load the HTML and modify the DOM tree
@@ -286,7 +275,9 @@ def main():
                 '_anno_version': '1.0',
                 '_annotator': 'YOUR NAME',
                 'mi_anno': mi_anno,
-            }, f)
+            },
+            f,
+        )
 
     logger.info('Writing initialized mcdict template to %s', mcdict_json)
     with open(mcdict_json, 'w') as f:
@@ -295,7 +286,9 @@ def main():
                 '_author': 'YOUR NAME',
                 '_mcdict_version': '1.0',
                 'concepts': idf2mc(identifiers),
-            }, f)
+            },
+            f,
+        )
 
 
 if __name__ == '__main__':

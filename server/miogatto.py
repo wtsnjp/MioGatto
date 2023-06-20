@@ -14,8 +14,7 @@ from lib.datatypes import MathConcept
 
 # get git revision
 try:
-    GIT_REVISON = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD']).strip().decode('ascii')
+    GIT_REVISON = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('ascii')
 except OSError:
     GIT_REVISON = 'Unknown'
 
@@ -98,9 +97,10 @@ def preprocess_mcdict(concepts):
         math = re.sub(r'(@\d+)', r'<mi>\1</mi>', math)
 
         # expand \gf
-        rls = [(construct_mi(m.group(1), m.group(2),
-                             int(m.group(3))), m.span())
-               for m in re.finditer(r'\\gf{(.*?)}{(.*?)}{(\d*?)}', math)]
+        rls = [
+            (construct_mi(m.group(1), m.group(2), int(m.group(3))), m.span())
+            for m in re.finditer(r'\\gf{(.*?)}{(.*?)}{(\d*?)}', math)
+        ]
         for r in reversed(rls):
             s, e = r[1]
             math = math[:s] + r[0] + math[e:]
@@ -113,8 +113,7 @@ def preprocess_mcdict(concepts):
 
         # process maths
         it = desc.split('$')
-        desc_new = ''.join(
-            [a + process_math(b) for a, b in zip(it[::2], it[1::2])])
+        desc_new = ''.join([a + process_math(b) for a, b in zip(it[::2], it[1::2])])
         if len(it) % 2 != 0:
             desc_new += it[-1]
 
@@ -126,21 +125,15 @@ def preprocess_mcdict(concepts):
     for idf_hex, idf in concepts.items():
         mcdict[idf_hex] = dict()
         for idf_var, cls in idf.items():
-            mcdict[idf_hex][idf_var] = [{
-                'description':
-                process_desc(c.description),
-                'arity':
-                c.arity,
-                'affixes':
-                c.affixes
-            } for c in cls]
+            mcdict[idf_hex][idf_var] = [
+                {'description': process_desc(c.description), 'arity': c.arity, 'affixes': c.affixes} for c in cls
+            ]
 
     return mcdict
 
 
 class MioGattoServer:
-    def __init__(self, paper_id: str, tree, mi_anno: MiAnno, mcdict: McDict,
-                 logger: Logger):
+    def __init__(self, paper_id: str, tree, mi_anno: MiAnno, mcdict: McDict, logger: Logger):
         self.paper_id = paper_id
         self.tree = tree
         self.mi_anno = mi_anno
@@ -158,8 +151,7 @@ class MioGattoServer:
             if mi_id is None:
                 continue
 
-            concept_id = self.mi_anno.occr.get(mi_id,
-                                               dict()).get('concept_id', None)
+            concept_id = self.mi_anno.occr.get(mi_id, dict()).get('concept_id', None)
             if concept_id is None:
                 continue
 
@@ -167,10 +159,8 @@ class MioGattoServer:
 
         # progress info
         nof_anno = len(self.mi_anno.occr)
-        nof_done = sum(1 for v in self.mi_anno.occr.values()
-                       if not v['concept_id'] is None)
-        p_concept = '{}/{} ({:.2f}%)'.format(nof_done, nof_anno,
-                                             nof_done / nof_anno * 100)
+        nof_done = sum(1 for v in self.mi_anno.occr.values() if not v['concept_id'] is None)
+        p_concept = '{}/{} ({:.2f}%)'.format(nof_done, nof_anno, nof_done / nof_anno * 100)
 
         nof_sog = 0
         for anno in self.mi_anno.occr.values():
@@ -182,16 +172,18 @@ class MioGattoServer:
         body = root.xpath('body')[0]
         main_content = etree.tostring(body, method='html', encoding=str)
 
-        return render_template('index.html',
-                               title=title,
-                               version=VERSION,
-                               git_revision=GIT_REVISON,
-                               paper_id=self.paper_id,
-                               annotator=self.mi_anno.annotator,
-                               p_concept=p_concept,
-                               nof_sog=nof_sog,
-                               affixes=Markup(affixes_pulldowns()),
-                               main_content=Markup(main_content))
+        return render_template(
+            'index.html',
+            title=title,
+            version=VERSION,
+            git_revision=GIT_REVISON,
+            paper_id=self.paper_id,
+            annotator=self.mi_anno.annotator,
+            p_concept=p_concept,
+            nof_sog=nof_sog,
+            affixes=Markup(affixes_pulldowns()),
+            main_content=Markup(main_content),
+        )
 
     def assign_concept(self):
         res = request.form
@@ -257,14 +249,9 @@ class MioGattoServer:
         start_id, stop_id = res['start_id'], res['stop_id']
 
         # TODO: validate the span range
-        existing_sog_pos = [(s['start'], s['stop'])
-                            for s in self.mi_anno.occr[mi_id]['sog']]
+        existing_sog_pos = [(s['start'], s['stop']) for s in self.mi_anno.occr[mi_id]['sog']]
         if (start_id, stop_id) not in existing_sog_pos:
-            self.mi_anno.occr[mi_id]['sog'].append({
-                'start': start_id,
-                'stop': stop_id,
-                'type': 0
-            })
+            self.mi_anno.occr[mi_id]['sog'].append({'start': start_id, 'stop': stop_id, 'type': 0})
             self.mi_anno.dump()
 
         return redirect('/')
@@ -305,26 +292,15 @@ class MioGattoServer:
     def gen_mcdict_json(self):
         data = preprocess_mcdict(self.mcdict.concepts)
 
-        return json.dumps(data,
-                          ensure_ascii=False,
-                          indent=4,
-                          sort_keys=True,
-                          separators=(',', ': '))
+        return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
     def gen_sog_json(self):
         data = {'sog': []}
 
         for mi_id, anno in self.mi_anno.occr.items():
             for sog in anno['sog']:
-                data['sog'].append({
-                    'mi_id': mi_id,
-                    'start_id': sog['start'],
-                    'stop_id': sog['stop'],
-                    'type': sog['type']
-                })
+                data['sog'].append(
+                    {'mi_id': mi_id, 'start_id': sog['start'], 'stop_id': sog['stop'], 'type': sog['type']}
+                )
 
-        return json.dumps(data,
-                          ensure_ascii=False,
-                          indent=4,
-                          sort_keys=True,
-                          separators=(',', ': '))
+        return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))

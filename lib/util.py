@@ -1,5 +1,6 @@
 # Common utilities
 
+
 def get_mi2idf(tree):
     root = tree.getroot()
     mi2idf = dict()
@@ -24,7 +25,7 @@ def get_mi2idf(tree):
         # get idf hex
         idf_hex = e.text.encode().hex()
 
-        # None if non-identifiers 
+        # None if non-identifiers
         if idf_hex in non_identifiers:
             mi2idf[mi_id] = None
             continue

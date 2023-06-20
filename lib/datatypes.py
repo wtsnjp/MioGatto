@@ -5,6 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class MathIdentifier:
     """A type of Math identifier"""
+
     hexcode: str
     var: str
 
@@ -12,6 +13,7 @@ class MathIdentifier:
 @dataclass
 class MathConcept:
     """A single Math Concept"""
+
     description: str
     arity: int
     affixes: list[str]
