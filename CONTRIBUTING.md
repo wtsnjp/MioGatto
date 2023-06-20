@@ -14,7 +14,7 @@ Thanks for considering contributing to MioGatto: feedback, fixes, and ideas are 
 
 We use `flake8` for linter and `black` for code formatting.
 
-Our settings for `flake8` is in `.flake8`, so you can simply run:
+Our settings for `flake8` is in [`.flake8`](.flake8), so you can simply run:
 
 ```shell
 flake8 <target file>
@@ -26,6 +26,6 @@ For formatting python codes, some options should be specified:
 black --line-length 119 --skip-magic-trailing-comma --skip-string-normalization <target file>
 ```
 
-### Type Script
+### TypeScript
 
-Currently we don't have particular coding rules for Type Script.
+Currently we don't have particular coding rules for TypeScript.
