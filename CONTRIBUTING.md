@@ -4,7 +4,7 @@ Thanks for considering contributing to MioGatto: feedback, fixes, and ideas are 
 
 ## Creating pull request
 
-* At least one approve from a reviewer except yourself before merging a pull request
+* Before merging your code into the main branch, it must be approved by at least one reviewer other than yourself
 * A branch name should be `<category>/<name>` (e.g., `feature/sog_labeling`)
     * `<category>` is one of `feature`, `fix`, `hotfix`
 
@@ -12,7 +12,7 @@ Thanks for considering contributing to MioGatto: feedback, fixes, and ideas are 
 
 ### Python
 
-We use `flake8` for linter and `black` for code formatting.
+We use `flake8` for a linter and `black` for a code formatter.
 
 Our settings for `flake8` is in [`.flake8`](.flake8), so you can simply run:
 
