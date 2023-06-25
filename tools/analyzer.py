@@ -132,7 +132,7 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
         concept_dict[idf_hex] = dict()
         for idf_var, idf in v.items():
             concept_dict[idf_hex][idf_var] = [
-                {'sid': next(cnt_iter), 'count': 0} for _ in idf  # unique ID  # number of occurences
+                {'sid': next(cnt_iter), 'count': 0} for _ in idf  # unique ID, number of occurences
             ]
 
     nof_annotated, total_nof_candidates, nof_sog = 0, 0, 0
