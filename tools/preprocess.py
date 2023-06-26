@@ -20,7 +20,7 @@ Options:
     --embed-floats      Preserve embed figure/table codes
     --overwrite         Overwrite output files if already exist
 
-    -d DIR, --data=DIR  Dir for data outputs [default: ./data]
+    -d DIR, --data=DIR  Dir for data outputs [default: ./templates]
     --sources=DIR       Dir for HTML outputs [default: ./sources]
 
     -D, --debug         Show debug messages
