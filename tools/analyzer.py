@@ -64,7 +64,7 @@ def extract_info(tree, mi2idf):
         pos = html_str.find(lxml.html.tostring(e, encoding='utf-8').decode('utf-8'))
         sec_info[sec_id] = pos
 
-    logger.debug('sec_info: %s', sec_info)
+    logger.debug('{sec_info=}')
 
     return mi_info, sec_info
 
@@ -107,7 +107,7 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
         key=lambda x: x[2],
         reverse=True,
     )
-    logger.debug('items: %s', items)
+    logger.debug(f'{items=}')
     nof_items = np.array([i[2] for i in items])
 
     print('* Math concept dictionary')
@@ -196,9 +196,9 @@ def analyze_annotation(paper_id, tree, mi_anno, mcdict, mi_info, mi2idf):
             logger.warning('    %s > %s > %d (%s)', surface, idf_var, cid, desc)
 
     # output for debugging
-    logger.debug('concept_dict: %s', concept_dict)
-    logger.debug('occurences: %s', occurences)
-    logger.debug('candidates: %s', candidates)
+    logger.debug(f'{concept_dict=}')
+    logger.debug(f'{occurences=}')
+    logger.debug(f'{candidates=}')
 
     return items, concept_dict, occurences
 
