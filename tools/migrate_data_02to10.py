@@ -14,8 +14,8 @@ def process_anno(original_file, new_data_dir):
         data = json.load(f)
 
     if data.get('anno_version') != '0.2':
-        print('Anno version is not 0.2', file=sys.stderr)
-        exit(1)
+        print(f'Anno version of "{original_file}" is not 0.2, skipping', file=sys.stderr)
+        return
 
     # metadata
     annotator = data['annotator']
@@ -44,8 +44,8 @@ def process_mcdict(original_file, new_data_dir):
         data = json.load(f)
 
     if data.get('mcdict_version') != '0.2':
-        print('mcdict version is not 0.2', file=sys.stderr)
-        exit(1)
+        print(f'Anno version of "{original_file}" is not 0.2, skipping', file=sys.stderr)
+        return
 
     # metadata
     author = data['annotator']
