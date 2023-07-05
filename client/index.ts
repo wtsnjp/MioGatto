@@ -820,6 +820,14 @@ $(document).on('keydown', function(event) {
   }
 });
 
+$(document).on('keydown', function(event) {
+  if(event.key == 'j') {
+    $('button#jump-to-next-unannotated-mi').trigger('click');
+  } else if (event.key == 'k') {
+    $('button#jump-to-prev-unannotated-mi').trigger('click');
+  }
+});
+
 // --------------------------
 // Error from the server
 // --------------------------
@@ -849,7 +857,8 @@ function dfs_mis(cur_node: JQuery<any>): JQuery<any>[] {
   let obtained_mis: JQuery<any>[] = [];
 
   // Add current node if its mi.
-  if(cur_node.is('mi')){
+  // Only consider the mis in mcdict.
+  if((cur_node.is('mi')) && (get_concept_cand(get_idf(cur_node)) != undefined)){
     obtained_mis =  [cur_node];
   }
 
@@ -878,15 +887,15 @@ $(function() {
     if (mi_id != undefined) {
       mi_id2index[mi_id] = i;
     } else {
-      console.log('mi_id undefiend!');
-      console.log(i);
-      console.log(mi_list[i]);
+      console.error('mi_id undefiend!');
+      console.error(i);
+      console.error(mi_list[i]);
     }
   }
 });
 
 // Search the next unannotated mi starting from start_index.
-function get_next_unannotated_mi_index(start_index: number): number {
+function get_next_unannotated_mi_index(start_index: number): number | undefined {
   // Loop over mi_list at most once.
   for (let count = 0; count < mi_list.length; count++) {
     let index: number = (start_index + count) % mi_list.length;
@@ -898,14 +907,14 @@ function get_next_unannotated_mi_index(start_index: number): number {
       return index;
     }
   }
-  // Return the start_index if there is no unannotated mi.
-  return start_index;
+  // Return undefined if there is no unannotated mi.
+  return undefined;
 }
 
 // Search the next unannotated mi starting from start_index.
-function get_prev_unannotated_mi_index(start_index: number): number {
+function get_prev_unannotated_mi_index(start_index: number): number | undefined {
   // Loop over mi_list at most once.
-  for (let count = mi_list.length-1; count >= 0; count--) {
+  for (let count = mi_list.length; count > 0; count--) {
     let index: number = (start_index + count) % mi_list.length;
 
     let mi: JQuery<any> = mi_list[index];
@@ -915,59 +924,68 @@ function get_prev_unannotated_mi_index(start_index: number): number {
       return index;
     }
   }
-  // Return the start_index if there is no unannotated mi.
-  return start_index;
+  // Return undefined if there is no unannotated mi.
+  return undefined;
 }
 
-
 $(function() {
+  $('button#jump-to-next-unannotated-mi').button();
   $('button#jump-to-next-unannotated-mi').on('click', function() {
     // First set this value so that the next mi is the first unannotated mi when mi_id is not stored.
     let current_index: number = mi_list.length - 1
 
     // Use the stored mi_id if there is.
-    if (sessionStorage['mi_id'] != undefined) {
+    if ((sessionStorage['mi_id'] != undefined) && (sessionStorage['mi_id'] in mi_id2index)) {
       current_index = mi_id2index[sessionStorage['mi_id']];
     }
 
     // Start searching the next unannotated mi from start_index.
     let start_index: number = (current_index + 1) % mi_list.length
 
-    let next_unannotated_mi = mi_list[get_next_unannotated_mi_index(start_index)]
+    let next_index: number | undefined = get_next_unannotated_mi_index(start_index);
 
-    let jump_dest = next_unannotated_mi?.offset()?.top;
-    let window_height = $(window).height();
-    if(jump_dest != undefined && window_height != undefined){
-      $(window).scrollTop(jump_dest - (window_height / 2));
+    // Do nothing if there is no unannotated mi.
+    if (next_index != undefined) {
+      let next_unannotated_mi = mi_list[next_index]
 
-      // Click the next mi.
-      next_unannotated_mi.trigger('click');
+      let jump_dest = next_unannotated_mi?.offset()?.top;
+      let window_height = $(window).height();
+      if(jump_dest != undefined && window_height != undefined){
+        $(window).scrollTop(jump_dest - (window_height / 2));
 
+        // Click the next mi.
+        next_unannotated_mi.trigger('click');
+      }
     }
   });
 
+  $('button#jump-to-prev-unannotated-mi').button();
   $('button#jump-to-prev-unannotated-mi').on('click', function() {
     // First set this value so that the prev mi is the last unannotated mi when mi_id is not stored.
     let current_index: number = 0
 
     // Use the stored mi_id if there is.
-    if (sessionStorage['mi_id'] != undefined) {
+    if ((sessionStorage['mi_id'] != undefined) && (sessionStorage['mi_id'] in mi_id2index)) {
       current_index = mi_id2index[sessionStorage['mi_id']];
     }
 
     // Start searching the prev unannotated mi from start_index.
     let start_index: number = (current_index + mi_list.length - 1) % mi_list.length
 
-    let prev_unannotated_mi = mi_list[get_prev_unannotated_mi_index(start_index)]
+    let prev_index: number | undefined = get_prev_unannotated_mi_index(start_index);
 
-    let jump_dest = prev_unannotated_mi?.offset()?.top;
-    let window_height = $(window).height();
-    if(jump_dest != undefined && window_height != undefined){
-      $(window).scrollTop(jump_dest - (window_height / 2));
+    // Do nothing if there is no unannotated mi.
+    if (prev_index != undefined) {
+      let prev_unannotated_mi = mi_list[prev_index]
 
-      // Click the prev mi.
-      prev_unannotated_mi.trigger('click');
+      let jump_dest = prev_unannotated_mi?.offset()?.top;
+      let window_height = $(window).height();
+      if(jump_dest != undefined && window_height != undefined){
+        $(window).scrollTop(jump_dest - (window_height / 2));
 
+        // Click the prev mi.
+        prev_unannotated_mi.trigger('click');
+      }
     }
   });
 
