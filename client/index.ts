@@ -879,7 +879,7 @@ $(function() {
   // Load mi_list.
   mi_list = dfs_mis($(":root"));
 
-  console.log(mi_list);
+  //console.log(mi_list);
 
   for (let i = 0; i < mi_list.length; i++) {
     let mi_id = mi_list[i].attr('id');
