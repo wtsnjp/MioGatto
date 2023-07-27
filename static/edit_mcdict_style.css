@@ -1,0 +1,32 @@
+/*
+
+Style for MioGatto
+
+Author: Takuto ASAKURA <takuto at is.s.u-tokyo.ac.jp>
+Version: 2021-10-31
+
+*/
+
+.main {
+    display: block;
+    width: 1000px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.container {
+    margin: 0 auto;
+    width: 1060px;
+    display: -webkit-flex;
+    display: flex;
+}
+
+.concept-dialog, .error-dialog {
+    display: none;
+    list-style: none;
+}
+
+.error-dialog .ui-dialog-titlebar {
+    color: white;
+    background: red;
+}

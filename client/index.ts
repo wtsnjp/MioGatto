@@ -157,13 +157,16 @@ $(function() {
 // --------------------------
 
 // load from the external json file
+let mcdict_edit_id: number = 0;
 let mcdict = {} as {[key: string]: {[key: string]: Concept[]}};
 $.ajax({
   url: '/mcdict.json',
   dataType: 'json',
   async: false,
   success: function(data) {
-    mcdict = data;
+    // Data is extended to include mcdict version.
+    mcdict_edit_id = data[0];
+    mcdict = data[1];
   }
 });
 
@@ -399,6 +402,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
       if($(`#form-${escape_selector(mi_id)} input:checked`).length > 0) {
         localStorage['scroll_top'] = $(window).scrollTop();
         form.attr('action', '/_concept');
+        form.append(`<input type="hidden" name="mcdict_edit_id" value="${mcdict_edit_id}" />`)
         form.trigger("submit");
       } else {
         alert('Please select a concept.');
@@ -411,6 +415,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
     $('button#remove-concept').on('click', function() {
       let form = anno_box.find(`#form-${escape_selector(mi_id)}`);
       form.attr('action', '/_remove_concept');
+      form.append(`<input type="hidden" name="mcdict_edit_id" value="${mcdict_edit_id}" />`)
       form.trigger("submit");
     });
 
@@ -474,6 +479,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
         buttons: {
           'OK': function() {
             localStorage['scroll_top'] = $(window).scrollTop();
+            form.append(`<input type="hidden" name="mcdict_edit_id" value="${mcdict_edit_id}" />`)
             form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`);
             form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`);
             form.trigger("submit");
@@ -511,6 +517,7 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
       buttons: {
         'OK': function() {
           localStorage['scroll_top'] = $(window).scrollTop();
+          form.append(`<input type="hidden" name="mcdict_edit_id" value="${mcdict_edit_id}" />`)
           form.append(`<input type="hidden" name="idf_hex" value="${idf.hex}" />`)
           form.append(`<input type="hidden" name="idf_var" value="${idf.var}" />`)
           form.append(`<input type="hidden" name="concept_id" value="${concept_id}" />`)
@@ -658,6 +665,7 @@ $(function() {
 
       // post the data
       let post_data = {
+        'mcdict_edit_id': mcdict_edit_id,
         'mi_id': mi_id,
         'start_id': start_id,
         'stop_id': stop_id
@@ -726,6 +734,7 @@ $(function() {
         buttons: {
           'OK': function() {
             localStorage['scroll_top'] = $(window).scrollTop();
+            form.append(`<input type="hidden" name="mcdict_edit_id" value="${mcdict_edit_id}" />`)
             form.append(`<input type="hidden" name="mi_id" value="${sog_mi_id}" />`);
             form.append(`<input type="hidden" name="start_id" value="${sog_start_id}" />`);
             form.append(`<input type="hidden" name="stop_id" value="${sog_stop_id}" />`);
@@ -754,6 +763,7 @@ $(function() {
 
       // post the data
       let post_data = {
+        'mcdict_edit_id': mcdict_edit_id,
         'mi_id': parent.getAttribute('data-sog-mi'),
         'start_id': parent.getAttribute('data-sog-start'),
         'stop_id': parent.getAttribute('data-sog-stop'),
