@@ -128,6 +128,9 @@ function hex_decode(str: string) {
 $(function () {
 
   let all_idf_content = '';
+  //let table_header = '<tr><th>Identifier</th><th>Description</th><th>Affix</th><th>Arity</th><th>#Occurence</th><th>#Sog</th><th>Edit</th></tr>';
+  let table_header = '<tr><th>Identifier</th><th>Description</th><th>Affix</th><th>Arity</th><th>Edit</th></tr>';
+  let table_content = '';
 
   for (let idf_hex in mcdict) {
     for (let idf_var in mcdict[idf_hex]) {
@@ -145,13 +148,15 @@ $(function () {
 
       // Retrive concepts.
 
-      let candidate_content = ``;
+      let candidate_rows = ``;
 
       if (mcdict[idf_hex][idf_var].length == 0) {
         // If there is no candidate concepts.
-        candidate_content = `No candidate concepts`;
+        candidate_rows = `<tr><td align="center">${idf_elem}</td><td colspan="4">No candidate concepts</td></tr>`;
 
       } else {
+        let cand_i = 0;
+
         for (let concept_id in mcdict[idf_hex][idf_var]) {
           let concept: Concept = mcdict[idf_hex][idf_var][concept_id];
 
@@ -162,38 +167,32 @@ $(function () {
               args_info = concept.affixes.join(', ');
             }
 
-            //let input = `<input type="radio" name="concept" id="c${concept_id}" value="${concept_id}" />`;
+            let idf_column = '';
+            if (cand_i == 0){
+              idf_column = `<td  align="center" rowspan="${mcdict[idf_hex][idf_var].length}">${idf_elem}</td>`;
+            }
 
-            //let item = `${input}<span class="keep"><label for="c${concept_id}">
+            let concept_row = `<tr>${idf_column}<td>${concept.description}</td><td><span style="color: #808080;">[${args_info}]</span></td><td><span style="color: #808080;">${concept.arity}</span></td><td><a class="edit-concept-mcdict" data-idf-hex="${idf_hex}" data-idf-var="${idf_var}" data-concept="${concept_id}" href="javascript:void(0);">edit</a></td></tr>`;
 
-            let item = `<span class="keep"><label for="c${concept_id}">
-${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>
-(<a class="edit-concept-mcdict" data-idf-hex="${idf_hex}" data-idf-var="${idf_var}" data-concept="${concept_id}" href="javascript:void(0);">edit</a>)
-</label></span>`;
+//            let item = `<span class="keep"><label for="c${concept_id}">
+//${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>
+//(<a class="edit-concept-mcdict" data-idf-hex="${idf_hex}" data-idf-var="${idf_var}" data-concept="${concept_id}" href="javascript:void(0);">edit</a>)
+//</label></span>`;
 
-            //candidate_content += item
-            candidate_content += `<li>${item}</li>` 
+            candidate_rows += concept_row;
+
+            cand_i += 1;
 
           }
         }
-        candidate_content = `<ul>${candidate_content}</ul>`;
       }
 
-      let idf_content = `${idf_elem}<br>${candidate_content}`
-      all_idf_content += idf_content
+      table_content += candidate_rows
 
-
-
-      //for(let concept in mcdict[idf_hex][idf_var]) {
-      //  if(mcdict[idf_hex][idf_var][concept].description != undefined) {
-      //    mcdict[idf_hex][idf_var][concept].color = colors[cnt % colors.length];
-      //    cnt++;
-      //  }
-      //}
     }
   }
 
-  let content = `${all_idf_content}`;
+  let content = `<table border="1">${table_header}${table_content}</table>`;
 
   let mcdict_edit_box = $('#edit-mcdict-box');
   mcdict_edit_box.html(content)
@@ -201,7 +200,6 @@ ${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${co
 
   // enable concept dialogs
   $('a.edit-concept-mcdict').on('click', function() {
-    //let mi_id = $(this).attr('data-mi');
     let idf_hex = $(this).attr('data-idf-hex');
     let idf_var = $(this).attr('data-idf-var');
     let concept_id = $(this).attr('data-concept');
