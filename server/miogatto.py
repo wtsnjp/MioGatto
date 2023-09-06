@@ -383,9 +383,9 @@ class MioGattoServer:
 
         return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
-    # TODO:
     def edit_mcdict(self):
         # Copy and paste of index.
+        # Need to add main_content to calculate statistics for identifiers and concepts.
 
         # avoid destroying the original tree
         copied_tree = deepcopy(self.tree)
