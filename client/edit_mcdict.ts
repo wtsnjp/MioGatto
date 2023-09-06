@@ -345,18 +345,11 @@ $(function () {
 
             // Calculate the number of occurences and sogs.
 
-            // TODO:
             let num_occur = count_occur(idf_hex, idf_var, Number(concept_id));
 
-            // TODO:
             let num_sogs = count_sog(idf_hex, idf_var, Number(concept_id));
 
             let concept_row = `<tr>${idf_column}<td>${concept.description}</td><td>${args_info}</td><td align="right">${concept.arity}</td><td align="right">${num_occur}</td><td align="right">${num_sogs}</td><td><a class="edit-concept-mcdict" data-idf-hex="${idf_hex}" data-idf-var="${idf_var}" data-concept="${concept_id}" href="javascript:void(0);">edit</a></td></tr>`;
-
-//            let item = `<span class="keep"><label for="c${concept_id}">
-//${concept.description} <span style="color: #808080;">[${args_info}] (arity: ${concept.arity})</span>
-//(<a class="edit-concept-mcdict" data-idf-hex="${idf_hex}" data-idf-var="${idf_var}" data-concept="${concept_id}" href="javascript:void(0);">edit</a>)
-//</label></span>`;
 
             candidate_rows += concept_row;
 
