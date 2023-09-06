@@ -364,7 +364,7 @@ $(function () {
     }
   }
 
-  let content = `<table border="1">${table_header}${table_content}</table>`;
+  let content = `<table border="1" cellpadding="5">${table_header}${table_content}</table>`;
 
   let mcdict_edit_box = $('#edit-mcdict-box');
   mcdict_edit_box.html(content)
