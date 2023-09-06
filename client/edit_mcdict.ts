@@ -160,6 +160,25 @@ function edit_concept(idf: Identifier, concept_id: number) {
 }
 
 // --------------------------
+// Error from the server
+// --------------------------
+
+$(function() {
+  if($('#error-message').text().length != 0) {
+    $('#error-dialog').dialog({
+      dialogClass: 'error-dialog',
+      modal: true,
+      title: 'Error',
+      buttons: {
+        "OK": function() {
+          $(this).dialog('close');
+        }
+      }
+    });
+  }
+});
+
+// --------------------------
 // Utilities 
 // --------------------------
 function dfs_mis(cur_node: JQuery<any>): JQuery<any>[] {
