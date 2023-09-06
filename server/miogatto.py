@@ -377,6 +377,27 @@ class MioGattoServer:
 
     # TODO:
     def edit_mcdict(self):
+        # Copy and paste of index.
+
+        # avoid destroying the original tree
+        copied_tree = deepcopy(self.tree)
+        root = copied_tree.getroot()
+
+        # add data-math-concept for each mi element
+        for mi in root.xpath('//mi'):
+            mi_id = mi.get('id', None)
+            if mi_id is None:
+                continue
+
+            concept_id = self.mi_anno.occr.get(mi_id, dict()).get('concept_id', None)
+            if concept_id is None:
+                continue
+
+            mi.attrib['data-math-concept'] = str(concept_id)
+
+        # construction
+        body = root.xpath('body')[0]
+        main_content = etree.tostring(body, method='html', encoding=str)
         return render_template(
             'edit_mcdict.html',
             version=VERSION,
@@ -384,6 +405,7 @@ class MioGattoServer:
             paper_id=self.paper_id,
             annotator=self.mi_anno.annotator,
             affixes=Markup(affixes_pulldowns()),
+            main_content=Markup(main_content),
         )
 
     def update_mcdict_edit_id(self):
