@@ -62,6 +62,8 @@ def affixes_pulldowns():
 <option value="over left arrow">Over left arrow</option>
 <option value="dot">Dot</option>
 <option value="double dot">Double dot</option>
+<option value="dagger">Dagger</option>
+<option value="double dagger">Double dagger</option>
 <option value="open parenthesis">Open parenthesis</option>
 <option value="close parenthesis">Close parenthesis</option>
 <option value="open bracket">Open bracket</option>
