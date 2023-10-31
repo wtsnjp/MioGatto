@@ -1019,6 +1019,16 @@ $(function() {
 
 });
 
+$(function() {
+  $('button#edit-mcdict').button();
+  $('button#edit-mcdict').on('click', function() {
+    let form = $('#edit-mcdict-form');
+    form.attr('action', '/edit_mcdict');
+    form.trigger("submit");
+  });
+
+});
+
 // Set page position at the last
 $(function() {
   $(window).scrollTop(localStorage['scroll_top']);
