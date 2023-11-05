@@ -58,6 +58,10 @@ def routing_functions(server):
     def action_update_concept():
         return server.update_concept()
 
+    @app.route('/_update_concept_for_edit_mcdict', methods=['POST'])
+    def action_update_concept_for_edit_mcdict():
+        return server.update_concept_for_edit_mcdict()
+
     @app.route('/_add_sog', methods=['POST'])
     def action_add_sog():
         return server.add_sog()
@@ -77,6 +81,10 @@ def routing_functions(server):
     @app.route('/sog.json', methods=['GET'])
     def sog_json():
         return server.gen_sog_json()
+
+    @app.route('/edit_mcdict', methods=['GET'])
+    def edit_mcdict():
+        return server.edit_mcdict()
 
 
 def main():

@@ -1,5 +1,5 @@
 # The server implementation for MioGatto
-from flask import request, redirect, flash, render_template, Markup
+from flask import request, redirect, flash, render_template, Markup, flash
 from typing import Optional
 from logging import Logger
 from copy import deepcopy
@@ -142,6 +142,9 @@ class MioGattoServer:
         self.mcdict = mcdict
         self.logger = logger
 
+        # Start with 0 (can be considered as the number of times the mcdict is edited)
+        self.mcdict_edit_id = 0
+
     def index(self):
         # avoid destroying the original tree
         copied_tree = deepcopy(self.tree)
@@ -190,6 +193,12 @@ class MioGattoServer:
     def assign_concept(self):
         res = request.form
 
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
+
         mi_id = res['mi_id']
         concept_id = int(res['concept'])
 
@@ -203,6 +212,12 @@ class MioGattoServer:
     def remove_concept(self):
         res = request.form
 
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
+
         mi_id = res['mi_id']
         self.mi_anno.occr[mi_id]['concept_id'] = None
         self.mi_anno.dump()
@@ -211,6 +226,12 @@ class MioGattoServer:
 
     def new_concept(self):
         res = request.form
+
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
 
         idf_hex = res.get('idf_hex')
         idf_var = res.get('idf_var')
@@ -224,11 +245,19 @@ class MioGattoServer:
         self.mcdict.concepts[idf_hex][idf_var].append(concept)
         self.mcdict.dump()
 
+        self.update_mcdict_edit_id()
+
         return redirect('/')
 
     def update_concept(self):
         # register and save data_anno
         res = request.form
+
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
 
         idf_hex = res.get('idf_hex')
         idf_var = res.get('idf_var')
@@ -242,10 +271,45 @@ class MioGattoServer:
         self.mcdict.concepts[idf_hex][idf_var][concept_id] = concept
         self.mcdict.dump()
 
+        self.update_mcdict_edit_id()
+
         return redirect('/')
+
+    # Naive.
+    def update_concept_for_edit_mcdict(self):
+        # register and save data_anno
+        res = request.form
+
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/edit_mcdict')
+
+        idf_hex = res.get('idf_hex')
+        idf_var = res.get('idf_var')
+        concept_id = int(res.get('concept_id'))
+
+        # make concept with checking
+        concept = make_concept(res)
+        if concept is None:
+            return redirect('/edit_mcdict')
+
+        self.mcdict.concepts[idf_hex][idf_var][concept_id] = concept
+        self.mcdict.dump()
+
+        self.update_mcdict_edit_id()
+
+        return redirect('/edit_mcdict')
 
     def add_sog(self):
         res = request.form
+
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
 
         mi_id = res['mi_id']
         start_id, stop_id = res['start_id'], res['stop_id']
@@ -260,6 +324,12 @@ class MioGattoServer:
 
     def delete_sog(self):
         res = request.form
+
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
 
         mi_id = res['mi_id']
         start_id, stop_id = res['start_id'], res['stop_id']
@@ -279,6 +349,12 @@ class MioGattoServer:
     def change_sog_type(self):
         res = request.form
 
+        # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
+        edit_id_in_request = res.get('mcdict_edit_id')
+        if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
+            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            return redirect('/')
+
         mi_id = res['mi_id']
         start_id, stop_id = res['start_id'], res['stop_id']
         sog_type = res['sog_type']
@@ -294,7 +370,9 @@ class MioGattoServer:
     def gen_mcdict_json(self):
         data = preprocess_mcdict(self.mcdict.concepts)
 
-        return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+        extended_data = [str(self.mcdict_edit_id), data]
+
+        return json.dumps(extended_data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
     def gen_sog_json(self):
         data = {'sog': []}
@@ -306,3 +384,39 @@ class MioGattoServer:
                 )
 
         return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+
+    def edit_mcdict(self):
+        # Copy and paste of index.
+        # Need to add main_content to calculate statistics for identifiers and concepts.
+
+        # avoid destroying the original tree
+        copied_tree = deepcopy(self.tree)
+        root = copied_tree.getroot()
+
+        # add data-math-concept for each mi element
+        for mi in root.xpath('//mi'):
+            mi_id = mi.get('id', None)
+            if mi_id is None:
+                continue
+
+            concept_id = self.mi_anno.occr.get(mi_id, dict()).get('concept_id', None)
+            if concept_id is None:
+                continue
+
+            mi.attrib['data-math-concept'] = str(concept_id)
+
+        # construction
+        body = root.xpath('body')[0]
+        main_content = etree.tostring(body, method='html', encoding=str)
+        return render_template(
+            'edit_mcdict.html',
+            version=VERSION,
+            git_revision=GIT_REVISON,
+            paper_id=self.paper_id,
+            annotator=self.mi_anno.annotator,
+            affixes=Markup(affixes_pulldowns()),
+            main_content=Markup(main_content),
+        )
+
+    def update_mcdict_edit_id(self):
+        self.mcdict_edit_id += 1

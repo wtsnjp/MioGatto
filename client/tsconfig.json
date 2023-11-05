@@ -5,5 +5,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["./index.ts"]
+  //"include": ["./index.ts", "./edit_mcdict.ts"]
 }

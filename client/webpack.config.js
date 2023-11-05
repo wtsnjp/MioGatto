@@ -1,8 +1,11 @@
 module.exports = {
   mode: 'production',
-  entry: './index.ts',
+  entry: {
+    'index': './index.ts',
+    'edit_mcdict': './edit_mcdict.ts',
+  },
   output: {
-    filename: 'index.js',
+    filename: '[name].js',
   },
   module: {
     rules: [
