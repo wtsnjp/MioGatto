@@ -1,5 +1,5 @@
 # The server implementation for MioGatto
-from flask import request, redirect, flash, render_template, Markup, flash
+from flask import request, redirect, flash, render_template, Markup
 from typing import Optional
 from logging import Logger
 from copy import deepcopy
@@ -196,7 +196,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         mi_id = res['mi_id']
@@ -215,7 +215,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         mi_id = res['mi_id']
@@ -230,7 +230,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         idf_hex = res.get('idf_hex')
@@ -256,7 +256,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         idf_hex = res.get('idf_hex')
@@ -283,7 +283,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/edit_mcdict')
 
         idf_hex = res.get('idf_hex')
@@ -308,7 +308,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         mi_id = res['mi_id']
@@ -328,7 +328,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         mi_id = res['mi_id']
@@ -352,7 +352,7 @@ class MioGattoServer:
         # If the mcdict used in the request differs from the latest, then redirect (i.e., reload the page).
         edit_id_in_request = res.get('mcdict_edit_id')
         if edit_id_in_request is None or str(self.mcdict_edit_id) != edit_id_in_request:
-            flash("Invalid Action!!! Reloading the page since the mcdict has been modified.")
+            flash('Invalid Action!!! Reloading the page since the mcdict has been modified.')
             return redirect('/')
 
         mi_id = res['mi_id']
