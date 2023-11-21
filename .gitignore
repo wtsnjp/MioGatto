@@ -103,9 +103,10 @@ sources
 
 # local stuff
 local/
+notebooks
 .local.vimrc
 static/img/
 results/
 extra
 libextra
-templates
+/templates

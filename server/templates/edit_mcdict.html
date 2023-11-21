@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="/static/vendor/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/edit_mcdict_style.css">
+<script type="text/javascript" src="/static/edit_mcdict.js"></script>
+</head>
+
+<body>
+<div class="container">
+
+<main class="main">
+
+<div id="edit-mcdict-box" class="tab-content">
+<p>Edit mcdict!!!!!!!!!!!!</p>
+</div>
+
+<div id="concept-dialog-template" class="concept-dialog">
+<form id="concept-form" method="POST">
+<p>Description:<br/>
+<textarea name="description" rows="3" cols="40"></textarea></p>
+<p>Arity: <input type="number" name="arity" value="0"/></p>
+<p>Affixes:<br/>
+{{ affixes }}
+</p>
+</form>
+</div>
+
+<div id="error-dialog" class="error-dialog">
+<p id="error-message">{% for message in get_flashed_messages() %}
+  {{ message }}
+{% endfor %}</p>
+</div>
+
+</main>
+
+<!-- Just as the reference to the source. -->
+<div hidden>{{ main_content }}</div>
+
+</div>
+</body>
+</html>

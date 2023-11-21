@@ -829,6 +829,34 @@ $(function() {
 
 });
 
+$(function() {
+  $('button#back-to-selected-mi').button();
+  $('button#back-to-selected-mi').on('click', function() {
+    // Do nothing if no mi is stored.
+    if (sessionStorage['mi_id'] != undefined) {
+      let selected_mi = $('#' + escape_selector(sessionStorage['mi_id']))
+
+      let jump_dest = selected_mi?.offset()?.top;
+      let window_height = $(window).height();
+      if(jump_dest != undefined && window_height != undefined){
+        $(window).scrollTop(jump_dest - (window_height / 2));
+      }
+    }
+
+  });
+
+});
+
+$(function() {
+  $('button#edit-mcdict').button();
+  $('button#edit-mcdict').on('click', function() {
+    let form = $('#edit-mcdict-form');
+    form.attr('action', '/edit_mcdict');
+    form.trigger("submit");
+  });
+
+});
+
 // Set page position at the last
 $(function() {
   $(window).scrollTop(localStorage['scroll_top']);
