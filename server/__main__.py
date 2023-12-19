@@ -24,6 +24,7 @@ Options:
 
     -D, --debug         Run in the debug mode
     -p, --port=NUM      Port number [default: 4100]
+    --host=HOST         Host name [default: localhost]
 
     -h, --help          Show this screen and exit
     -V, --version       Show version
@@ -112,7 +113,7 @@ def main():
     server = MioGattoServer(paper_id, tree, mi_anno, mcdict, app.logger)
     routing_functions(server)
 
-    app.run(host='localhost', port=args['--port'])
+    app.run(host=args['--host'], port=args['--port'])
 
 
 if __name__ == '__main__':
