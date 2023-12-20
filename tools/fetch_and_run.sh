@@ -9,6 +9,8 @@ arxmliv_dir="./arxmliv"
 template_dir="./templates"
 source_dir="./sources"
 
+arxmliv_filename=${arxmliv_dir}/${paper_id}.html
+
 # Exit when error occurs and show the commands to execute.
 set -e -x
 
@@ -21,8 +23,6 @@ python -m tools.fetch_html --arxmliv-dir ${arxmliv_dir} ${arxiv_id}
 ################
 ## Preprocess ##
 ################
-
-arxmliv_filename=${arxmliv_dir}/${paper_id}.html
 
 python -m tools.preprocess --data=${template_dir} --sources=${source_dir} ${arxmliv_filename}
 
