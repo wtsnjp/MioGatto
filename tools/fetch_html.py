@@ -51,16 +51,37 @@ def get_html_tree(arxiv_id: str):
 def has_error(tree) -> bool:
     root: lxml.html.HtmlElement = tree.getroot()
 
-    oks = root.xpath('//a[contains(@class, "ar5iv-severity-ok")]')
-    fatals = root.xpath('//a[contains(@class, "ar5iv-severity-fatal")]')
+    severities = root.xpath('//a[contains(@class, "ar5iv-severity")]')
 
-    # Ad hoc.
-    if len(oks) == 1 and len(fatals) == 0:
-        # No error.
-        return False
-    elif len(oks) == 0 and len(fatals) == 1:
-        # There should have been an error in LaTeXML process.
-        return True
+    if len(severities) == 1:
+        severity_str: str = severities[0].attrib['class']
+
+        if "ar5iv-severity-ok" in severity_str:
+            # No error.
+            return False
+
+        elif "ar5iv-severity-warning" in severity_str:
+            # Probably no critical error for annotation.
+            logger.warning(
+                "Warning occurred during LaTeXML process. But, probably, this won't be a critical problem for annottation."
+            )
+            return False
+
+        elif "ar5iv-severity-error" in severity_str:
+            # Probably no critical error for annotation.
+            logger.warning(
+                "Error occurred during LaTeXML process. But, probably, this won't be a critical problem for annottation."
+            )
+            return False
+
+        elif "ar5iv-severity-fatal" in severity_str:
+            # There should be a critical error for annotation.
+            return True
+
+        else:
+            # Something not expected, e.g., specification change, occurred.
+            logger.error("Something unexpected has occurred.")
+            exit(1)
     else:
         # Something not expected, e.g., specification change, occurred.
         logger.error("Something unexpected has occurred.")
