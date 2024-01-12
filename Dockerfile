@@ -8,10 +8,9 @@ WORKDIR /MioGatto
 COPY .. /MioGatto/
 
 # アプリケーションに必要なパッケージをインストール
-RUN apt-get update
-RUN apt-get install -y python3-pip
-RUN chmod a+x startup.sh
-RUN pip install -r requirements.txt
+RUN apt-get update\
+ && apt-get install -y python3-pip\
+ && pip install -r requirements.txt
 
 # アプリケーションを実行
-ENTRYPOINT ["./startup.sh"]
+ENTRYPOINT ["bash","./startup.sh"]
