@@ -13,4 +13,4 @@ RUN apt-get update\
  && pip install -r requirements.txt
 
 # アプリケーションを実行
-ENTRYPOINT ["bash","./startup.sh"]
+ENTRYPOINT ["python", "-m", "server", "--host", "0.0.0.0"]
