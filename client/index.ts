@@ -567,7 +567,7 @@ $(function() {
       }
     }
 
-    // show it only if SoG is selected
+    // show it only if SoG is selected and highlighted.
     if(parent?.getAttribute('data-sog-mi') != undefined && is_sog_highlighted) {
       $('.sog-mod-menu').css('display', 'inherit');
     } else {
