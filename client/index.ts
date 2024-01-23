@@ -548,17 +548,31 @@ $(function() {
     });
 
     // ----- SoG menu -----
-    // show it only if SoG is selected
-    if(parent?.getAttribute('data-sog-mi') != undefined) {
-      $('.sog-mod-menu').css('display', 'inherit');
-    } else {
-      $('.sog-mod-menu').css('display', 'none');
-    }
 
     let sog_mi_id = parent.getAttribute('data-sog-mi');
     let sog_type_int = Number(parent.getAttribute('data-sog-type'));
     let sog_start_id = parent.getAttribute('data-sog-start');
     let sog_stop_id = parent.getAttribute('data-sog-stop');
+
+    // Do not show sog-mod-menu when the sog is not highlighted.
+    let is_sog_highlighted = true;
+    if(miogatto_options.limited_highlight && mi_id != undefined && sog_mi_id != undefined) {
+      let cur_mi = $('#' + escape_selector(mi_id));
+      let cur_idf = get_idf(cur_mi);
+
+      let sog_idf = get_idf($('#' + escape_selector(sog_mi_id)));
+
+      if(!(cur_idf.hex == sog_idf.hex && cur_idf.var == sog_idf.var)) {
+        is_sog_highlighted = false;
+      }
+    }
+
+    // show it only if SoG is selected and highlighted.
+    if(parent?.getAttribute('data-sog-mi') != undefined && is_sog_highlighted) {
+      $('.sog-mod-menu').css('display', 'inherit');
+    } else {
+      $('.sog-mod-menu').css('display', 'none');
+    }
 
     let sog_type = 'unknown';
     if(sog_type_int == 0) {
