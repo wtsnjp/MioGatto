@@ -220,3 +220,14 @@ $(function () {
   });
 
 });
+
+
+$(function() {
+  $('button#back-to-index').button();
+  $('button#back-to-index').on('click', function() {
+    let form = $('#back-to-index-form');
+    form.attr('action', '/');
+    form.trigger("submit");
+  });
+
+});
