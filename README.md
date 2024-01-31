@@ -38,6 +38,7 @@ Please consider joining [SIGMathLing](https://sigmathling.kwarc.info/member/)
 to acquire the dataset.
 
 * `arxmliv/` contains the original documents from the arXMLiv dataset
+* `templates/` contains the empty annotation data
 * `data/` contains the annotation data
 * `sources/` contains the preprocessed documents
 
