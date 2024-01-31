@@ -42,6 +42,38 @@ to acquire the dataset.
 * `data/` contains the annotation data
 * `sources/` contains the preprocessed documents
 
+## Quick start with Docker
+
+Here's how to quickly start MioGatto without preparing the local environment:
+
+```shell
+(in local env)$ docker build ./ -t miogatto
+(in local env)$ docker run -it --rm -p 4100:4100 -v ${path to arxmliv dir}:/MioGatto/arxmliv -v ${path to templates dir}:/MioGatto/templates -v ${path to data dir}:/MioGatto/data -v ${path to sources dir}:/MioGatto/sources miogatto
+```
+
+The scond command above launches an interactive bash terminal in the container, and you can use MioGatto in it. Note that you need to prepare `arxmliv`, `templates`, `data`, `sources` directories beforehand and pass them to `docker run` to mount. Otherwise some scripts do not run with the default settings.
+
+### Run MioGatto on existing annotation data files
+
+```shell
+(in container)$ python -m server --host 0.0.0.0 ${paper id}
+```
+
+Note that you need to set the host address to `0.0.0.0` to access the server from outside the container.
+
+### Run MioGatto on papers whose annotation data files do not exists
+
+The following command prepare necessary annotation files via [ar5iv](https://ar5iv.labs.arxiv.org/) and directly lauches the MioGatto server.
+
+```shell
+(in container)$ bash ./tools/fetch_and_run.sh ${arxiv id}
+```
+
+Note that arxiv id might be different from paper id, e.g., arxiv id: `math/0303074` and paper id: `math0303074`. For more information about arxiv id, please refer to [the official page](https://info.arxiv.org/help/arxiv_identifier.html).
+Also note that, the `tools/fetch_and_run.sh` script fails when there are existing annotation data files. Please directly launch the MioGatto server when you want to continue the annotation (see the previous section).
+
+Importantly, the `tools/fetch_and_run.sh` script does not apply paper-specific preprocess, and the obtained annotation files might be different from the released ones.
+
 ## Annotator's guide
 
 For the guide with GIF animation, please refer to our Wiki:
