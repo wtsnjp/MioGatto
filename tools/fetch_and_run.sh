@@ -35,4 +35,4 @@ cp ${template_dir}/${paper_id}_mcdict.json ${data_dir}/
 ## Run MioGatto Server ##
 #########################
 
-python -m server --data=${data_dir} --sources=${source_dir} ${paper_id}
+python -m server --host 0.0.0.0 --data=${data_dir} --sources=${source_dir} ${paper_id}
