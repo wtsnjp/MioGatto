@@ -33,7 +33,7 @@ Options:
     p=PROG_NAME
 )
 
-logger = get_logger(PROG_NAME)
+logger = get_logger('MioGatto.' + PROG_NAME)
 
 
 def extract_info(tree, mi2idf):
@@ -257,7 +257,8 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    logger.set_logger(args['--quiet'], args['--debug'])
+    logger_MioGatto = get_logger('MioGatto')
+    logger_MioGatto.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
 
     # dirs and files
@@ -270,8 +271,8 @@ def main():
     mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
     # load the data
-    mi_anno = MiAnno(anno_json, logger)
-    mcdict = McDict(mcdict_json, logger)
+    mi_anno = MiAnno(anno_json)
+    mcdict = McDict(mcdict_json)
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
