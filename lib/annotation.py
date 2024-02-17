@@ -12,29 +12,17 @@ def dump_json(data, fp):
     json.dump(data, fp, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
     fp.write('\n')
 
-logger_c = get_logger('MioGatto.annotation')
+logger = get_logger('MioGatto.annotation')
 
 class MiAnno:
     """Math identifier annotation"""
-
-    def __init__(self, file: Path, logger: Logger) -> None:
-        with open(file, encoding='utf-8') as f:
-            data = json.load(f)
-
-        if data.get('_anno_version', '') != '1.0':
-            logger.warning('%s: Annotation data version is incompatible', file)
-
-        self.file = file
-        self.anno_version: str = data.get('_anno_version', 'unknown')
-        self.annotator: str = data.get('_annotator', 'unknown')
-        self.occr: dict = data['mi_anno']
 
     def __init__(self, file: Path) -> None:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
         if data.get('_anno_version', '') != '1.0':
-            logger_c.warning('%s: Annotation data version is incompatible', file)
+            logger.warning('%s: Annotation data version is incompatible', file)
 
         self.file = file
         self.anno_version: str = data.get('_anno_version', 'unknown')
@@ -57,34 +45,12 @@ class MiAnno:
 class McDict:
     """Math concept dictionariy"""
 
-    def __init__(self, file: Path, logger: Logger) -> None:
-        with open(file, encoding='utf-8') as f:
-            data = json.load(f)
-
-        if data.get('_mcdict_version', '') != '1.0':
-            logger.warning('%s: Math concept dict version is incompatible', file)
-
-        self.file = file
-        self.author: str = data.get('_author', 'unknown')
-        self.mcdict_version: str = data.get('_mcdict_version', 'unknown')
-
-        concepts, surfaces = dict(), dict()
-        for idf_hex, obj in data['concepts'].items():
-            concepts[idf_hex] = dict()
-            surfaces[idf_hex] = obj['_surface']
-
-            for idf_var, cls in obj['identifiers'].items():
-                concepts[idf_hex][idf_var] = [MathConcept(**c) for c in cls]
-
-        self.concepts = concepts
-        self.surfaces = surfaces
-
     def __init__(self, file: Path) -> None:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
         if data.get('_mcdict_version', '') != '1.0':
-            logger_c.warning('%s: Math concept dict version is incompatible', file)
+            logger.warning('%s: Math concept dict version is incompatible', file)
 
         self.file = file
         self.author: str = data.get('_author', 'unknown')
