@@ -6,13 +6,13 @@ from dataclasses import asdict
 
 from lib.datatypes import MathConcept
 
-from lib.logger import get_logger
+from lib.logger import get_logger, main_logger
 
 def dump_json(data, fp):
     json.dump(data, fp, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
     fp.write('\n')
 
-logger = get_logger('MioGatto.annotation')
+logger = main_logger.getChild('annotation')
 
 class MiAnno:
     """Math identifier annotation"""
