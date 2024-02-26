@@ -6,7 +6,7 @@ from dataclasses import asdict
 
 from lib.datatypes import MathConcept
 
-from lib.logger import get_logger, main_logger
+from lib.logger import main_logger
 
 def dump_json(data, fp):
     json.dump(data, fp, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))

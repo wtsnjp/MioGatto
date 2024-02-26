@@ -8,7 +8,7 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.logger import get_logger, main_logger
+from lib.logger import main_logger
 from lib.util import get_mi2idf
 from lib.annotation import MiAnno, McDict
 
