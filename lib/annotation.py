@@ -6,16 +6,18 @@ from dataclasses import asdict
 
 from lib.datatypes import MathConcept
 
+from lib.logger import main_logger
 
 def dump_json(data, fp):
     json.dump(data, fp, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
     fp.write('\n')
 
+logger = main_logger.getChild('annotation')
 
 class MiAnno:
     """Math identifier annotation"""
 
-    def __init__(self, file: Path, logger: Logger) -> None:
+    def __init__(self, file: Path) -> None:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 
@@ -26,6 +28,7 @@ class MiAnno:
         self.anno_version: str = data.get('_anno_version', 'unknown')
         self.annotator: str = data.get('_annotator', 'unknown')
         self.occr: dict = data['mi_anno']
+
 
     def dump(self) -> None:
         with open(self.file, 'w') as f:
@@ -42,7 +45,7 @@ class MiAnno:
 class McDict:
     """Math concept dictionariy"""
 
-    def __init__(self, file: Path, logger: Logger) -> None:
+    def __init__(self, file: Path) -> None:
         with open(file, encoding='utf-8') as f:
             data = json.load(f)
 

@@ -8,7 +8,7 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.logger import get_logger
+from lib.logger import main_logger
 from lib.util import get_mi2idf
 from lib.annotation import MiAnno, McDict
 
@@ -33,7 +33,7 @@ Options:
     p=PROG_NAME
 )
 
-logger = get_logger(PROG_NAME)
+logger = main_logger.getChild(PROG_NAME)
 
 
 def extract_info(tree, mi2idf):
@@ -257,7 +257,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    logger.set_logger(args['--quiet'], args['--debug'])
+    main_logger.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
 
     # dirs and files
@@ -270,8 +270,8 @@ def main():
     mcdict_json = data_dir / '{}_mcdict.json'.format(paper_id)
 
     # load the data
-    mi_anno = MiAnno(anno_json, logger)
-    mcdict = McDict(mcdict_json, logger)
+    mi_anno = MiAnno(anno_json)
+    mcdict = McDict(mcdict_json)
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))

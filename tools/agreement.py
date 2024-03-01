@@ -6,7 +6,7 @@ from pathlib import Path
 from sklearn.metrics import cohen_kappa_score
 
 from lib.version import VERSION
-from lib.logger import get_logger
+from lib.logger import main_logger
 from lib.util import get_mi2idf
 from lib.annotation import MiAnno, McDict
 
@@ -33,7 +33,7 @@ Options:
     p=PROG_NAME
 )
 
-logger = get_logger(PROG_NAME)
+logger = main_logger.getChild(PROG_NAME)
 
 # dirty hack: suspend warning
 np.seterr(divide='ignore', invalid='ignore')
@@ -166,7 +166,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    logger.set_logger(args['--quiet'], args['--debug'])
+    main_logger.set_logger(args['--quiet'], args['--debug'])
     paper_id = args['ID']
     show_mismatch = args['--show-mismatch']
 
@@ -186,12 +186,12 @@ def main():
     source_html = sources_dir / '{}.html'.format(paper_id)
 
     # load the target data
-    target_mi_anno = MiAnno(target_anno_json, logger)
-    target_mcdict = McDict(target_mcdict_json, logger)
+    target_mi_anno = MiAnno(target_anno_json)
+    target_mcdict = McDict(target_mcdict_json)
 
     # load the reference data
-    ref_mi_anno = MiAnno(ref_anno_json, logger)
-    ref_mcdict = McDict(ref_mcdict_json, logger)
+    ref_mi_anno = MiAnno(ref_anno_json)
+    ref_mcdict = McDict(ref_mcdict_json)
 
     # load the source HTML and extract information
     tree = lxml.html.parse(str(source_html))
