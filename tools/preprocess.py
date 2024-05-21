@@ -5,7 +5,7 @@ from docopt import docopt
 from pathlib import Path
 
 from lib.version import VERSION
-from lib.logger import get_logger
+from lib.logger import main_logger
 from lib.util import get_mi2idf
 from lib.annotation import dump_json
 
@@ -32,7 +32,7 @@ Options:
     p=PROG_NAME
 )
 
-logger = get_logger(PROG_NAME)
+logger = main_logger.getChild(PROG_NAME)
 
 
 def hex2surface(idf_hex):
@@ -217,7 +217,7 @@ def main():
     # parse options
     args = docopt(HELP, version=VERSION)
 
-    logger.set_logger(args['--quiet'], args['--debug'])
+    main_logger.set_logger(args['--quiet'], args['--debug'])
     embed_floats = args['--embed-floats']
 
     # dirs and files

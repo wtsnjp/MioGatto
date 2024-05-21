@@ -103,8 +103,8 @@ def main():
     source_html = sources_dir / '{}.html'.format(paper_id)
 
     # load the data
-    mi_anno = MiAnno(anno_json, app.logger)
-    mcdict = McDict(mcdict_json, app.logger)
+    mi_anno = MiAnno(anno_json)
+    mcdict = McDict(mcdict_json)
     tree = lxml.html.parse(str(source_html))
 
     # run the app
