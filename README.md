@@ -121,6 +121,10 @@ npm run build
 
 ## Publications
 
+* Takuto Asakura, Yusuke Miyao. **What Is Needed for Intra-document Disambiguation of Math Identifiers?**. In Proceedings of [The 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING 2024)](https://lrec-coling-2024.org).  
+  [[paper](https://aclanthology.org/2024.lrec-main.1522/)] [[bib](https://aclanthology.org/2024.lrec-main.1522.bib)] [[poster](https://wtsnjp.com/posters/lrec-coling2024-asakura-poster.pdf)]
+* Aamin Dev, Takuto Asakura, Rune Sætre. **An Approach to Co-reference Resolution and Formula Grounding for Mathematical Identifiers using Large Language Models**. In Proceedings of [The 2nd Workshop on Mathematical Natural Language Processing (MathNLP 2024)](https://sites.google.com/view/2nd-mathnlp).  
+  [[paper](https://aclanthology.org/2024.mathnlp-1.1/)] [[bib](https://aclanthology.org/2024.mathnlp-1.1.bib)]
 * Takuto Asakura, Yusuke Miyao, Akiko Aizawa. **Building Dataset for Grounding of Formulae — Annotating Coreference Relations Among Math Identifiers**. In Proceedings of [13th Conference on Language Resources and Evaluation (LREC 2022)](https://lrec2022.lrec-conf.org). pp. 4851―4858, 2022.  
   [[paper](https://aclanthology.org/2022.lrec-1.519/)] [[bib](http://www.lrec-conf.org/proceedings/lrec2022/bib/2022.lrec-1.519.bib)] [[slides](https://speakerdeck.com/wtsnjp/lrec2022)] [[video](http://www.lrec-conf.org/proceedings/lrec2022/media/sessions/935.mp4)] [[resource](https://sigmathling.kwarc.info/resources/grounding-dataset/)]
 * Takuto Asakura, Yusuke Miyao, Akiko Aizawa, Michael Kohlhase. **MioGatto: A Math Identifier-oriented Grounding Annotation Tool**. In [13th MathUI Workshop at 14th Conference on Intelligent Computer Mathematics (MathUI 2021)](https://cicm-conference.org/2021/cicm.php?event=MathUI).  
